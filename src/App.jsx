@@ -1,12 +1,43 @@
 import React from 'react'
 
 export default function App() {
-  const [selectedWheel, setSelectedWheel] = React.useState('T598')
-  const [selectedClass, setSelectedClass] = React.useState('Gr.3')
-  const [selectedCar, setSelectedCar] = React.useState('BMW M6 GT3')
-  const [selectedTrack, setSelectedTrack] = React.useState('Watkins Glen')
-  const [selectedPreset, setSelectedPreset] = React.useState('Balanced')
+  const STORAGE_KEY = 'r79-adaptive-selections'
+  const defaultSelections = {
+    selectedWheel: 'T598',
+    selectedClass: 'Gr.3',
+    selectedCar: 'BMW M6 GT3',
+    selectedTrack: 'Watkins Glen',
+    selectedPreset: 'Balanced',
+  }
+
+  const readSelection = (key, fallback) => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}')
+      return saved[key] ?? fallback
+    } catch {
+      return fallback
+    }
+  }
+
+  const [selectedWheel, setSelectedWheel] = React.useState(() => readSelection('selectedWheel', defaultSelections.selectedWheel))
+  const [selectedClass, setSelectedClass] = React.useState(() => readSelection('selectedClass', defaultSelections.selectedClass))
+  const [selectedCar, setSelectedCar] = React.useState(() => readSelection('selectedCar', defaultSelections.selectedCar))
+  const [selectedTrack, setSelectedTrack] = React.useState(() => readSelection('selectedTrack', defaultSelections.selectedTrack))
+  const [selectedPreset, setSelectedPreset] = React.useState(() => readSelection('selectedPreset', defaultSelections.selectedPreset))
   const [generated, setGenerated] = React.useState(false)
+
+  React.useEffect(() => {
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        selectedWheel,
+        selectedClass,
+        selectedCar,
+        selectedTrack,
+        selectedPreset,
+      }),
+    )
+  }, [selectedWheel, selectedClass, selectedCar, selectedTrack, selectedPreset])
 
   const wheelBases = ['T598', 'Fanatec DD Pro', 'Logitech G Pro', 'Logitech G923']
 
@@ -38,6 +69,12 @@ export default function App() {
     return 'Balanced control'
   }, [selectedPreset])
 
+  const snapshotSummary = React.useMemo(() => [
+    `${selectedPreset} preset`,
+    `${selectedTrack} circuit`,
+    `${selectedCar} setup`,
+  ], [selectedPreset, selectedTrack, selectedCar])
+
   const bar = (value) => (
     <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
       <div
@@ -57,6 +94,13 @@ export default function App() {
           <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1">{selectedPreset}</span>
           <span className="rounded-full border border-purple-400/30 bg-purple-400/10 px-3 py-1">{selectedTrack}</span>
           <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1">{presetTone}</span>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {snapshotSummary.map((item) => (
+            <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-900/90 p-3 text-sm text-zinc-200">
+              {item}
+            </div>
+          ))}
         </div>
       </header>
 
@@ -111,12 +155,27 @@ export default function App() {
         </div>
       </Section>
 
-      <button
-        onClick={() => setGenerated(true)}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-purple-500 text-black font-black mt-3 shadow-lg shadow-cyan-500/20 transition hover:scale-[1.01]"
-      >
-        Generate Adaptive Setup
-      </button>
+      <div className="mt-3 flex flex-wrap gap-3">
+        <button
+          onClick={() => setGenerated(true)}
+          className="flex-1 min-w-[220px] py-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-purple-500 text-black font-black shadow-lg shadow-cyan-500/20 transition hover:scale-[1.01]"
+        >
+          Generate Adaptive Setup
+        </button>
+        <button
+          onClick={() => {
+            setSelectedWheel(defaultSelections.selectedWheel)
+            setSelectedClass(defaultSelections.selectedClass)
+            setSelectedCar(defaultSelections.selectedCar)
+            setSelectedTrack(defaultSelections.selectedTrack)
+            setSelectedPreset(defaultSelections.selectedPreset)
+            setGenerated(false)
+          }}
+          className="rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-4 text-zinc-100 font-semibold transition hover:border-cyan-400/60 hover:text-cyan-100"
+        >
+          Reset Profile
+        </button>
+      </div>
 
       {generated && (
         <div className="mt-6 rounded-3xl bg-zinc-950 border border-cyan-400/30 p-5 space-y-5">
