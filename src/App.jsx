@@ -1,250 +1,251 @@
-import React from 'react'
+import React, { useMemo, useState } from "react";
+
+const WHEELS = {
+  T598: ["FFB", "MASTER", "MODE", "INERTIA", "FRICTION", "BOOST LOW", "BOOST HIGH", "SPEED", "DAMPER", "DAMPER GAIN", "SPRING", "GEAR JOLT", "END STOP"],
+  "Fanatec DD Pro": ["SEN", "FFB", "FFS", "NDP", "NFR", "NIN", "INT", "FEI", "FOR", "SPR", "DPR"],
+  "Fanatec ClubSport DD": ["SEN", "FFB", "FFS", "NDP", "NFR", "NIN", "INT", "FEI", "FOR", "SPR", "DPR"],
+  "Logitech G Pro": ["FFB STRENGTH", "TRUEFORCE", "DAMPING", "FILTER", "ANGLE", "BRAKE FORCE"],
+  "Logitech G923": ["FFB MAX TORQUE", "FFB SENSITIVITY", "VIBRATION", "ANGLE", "DAMPING"],
+};
+
+const CARS = {
+  "Gr.1": ["Toyota GR010", "Mazda LM55", "Porsche 919 Hybrid", "Audi R18", "Peugeot 908"],
+  "Gr.2": ["Honda NSX Concept-GT", "Lexus RC F GT500", "Nissan GT-R GT500", "Honda NSX GT500", "Toyota Supra GT500"],
+  "Gr.3": ["BMW M6 GT3 Sprint", "Aston Martin V12 Vantage GT3 '12", "Porsche 911 RSR", "Mercedes AMG GT3", "Audi R8 LMS", "Genesis X GR3", "Lexus RC F GT3", "Nissan GT-R Nismo GT3"],
+  "Gr.4": ["Mazda Atenza Gr.4", "Toyota GR Supra Gr.4", "McLaren 650S Gr.4", "Citroën GT Gr.4", "Porsche Cayman GT4", "Lamborghini Huracán Gr.4"],
+};
+
+const TRACKS = ["Watkins Glen", "Circuit Gilles Villeneuve", "Road Atlanta", "Spa", "Suzuka", "Daytona", "Fuji", "Dragon Trail - Seaside", "Brands Hatch", "Nürburgring GP", "Lago Maggiore", "Blue Moon Bay", "Monza", "Laguna Seca"];
+const TYRES = ["Racing Soft", "Racing Medium", "Racing Hard", "Intermediate", "Wet"];
+
+const LEARN = {
+  FFB: "Main force feedback strength. Higher gives stronger weight, lower gives lighter steering and less fatigue.",
+  MASTER: "Overall wheel output strength. Higher gives more force, lower keeps the wheel smoother.",
+  MODE: "Wheel response style. Sharper modes help qualifying, calmer modes help race consistency.",
+  INERTIA: "Adds steering weight. Higher feels planted, lower feels quicker and more reactive.",
+  FRICTION: "Adds constant resistance. Lower keeps steering cleaner, higher can add stability.",
+  "BOOST LOW": "Boosts smaller forces and grip detail. Useful for catching subtle tyre load changes.",
+  "BOOST HIGH": "Boosts heavy forces. Helps high-speed load feel but can become harsh if too high.",
+  SPEED: "Controls response speed. Higher feels sharper, lower feels calmer.",
+  DAMPER: "Controls movement resistance. Higher calms unstable cars, lower gives quicker steering.",
+  "DAMPER GAIN": "How strongly damping is applied. Higher is stable, lower gives more detail.",
+  SPRING: "Centering force. Higher recentres harder, lower feels more natural.",
+  "GEAR JOLT": "Gear shift kick feel. Lower keeps shifts smoother.",
+  "END STOP": "Resistance at steering lock. Higher feels firmer at full lock.",
+};
+
+function makeSetup(wheel, carClass, tyre, bop, laps) {
+  const soft = tyre === "Racing Soft";
+  const hard = tyre === "Racing Hard" || Number(laps) >= 20;
+  const stable = bop === "BOP ON" || hard;
+
+  if (wheel === "T598") {
+    return {
+      FFB: soft ? "3" : "2",
+      MASTER: "75%",
+      MODE: soft ? "S" : "B",
+      INERTIA: stable ? "HIGH" : "MEDIUM",
+      FRICTION: "LOW",
+      "BOOST LOW": soft ? "+1" : "0",
+      "BOOST HIGH": soft ? "+2" : "+1",
+      SPEED: carClass === "Gr.1" || carClass === "Gr.2" ? "EXTREME" : "HIGH",
+      DAMPER: stable ? "30%" : "20%",
+      "DAMPER GAIN": stable ? "HIGH" : "MEDIUM",
+      SPRING: stable ? "20%" : "15%",
+      "GEAR JOLT": "LOW",
+      "END STOP": "MEDIUM",
+    };
+  }
+
+  if (wheel.includes("Fanatec")) {
+    return {
+      SEN: "AUTO",
+      FFB: stable ? "70" : "75",
+      FFS: "PEAK",
+      NDP: stable ? "25" : "18",
+      NFR: "5",
+      NIN: stable ? "8" : "5",
+      INT: soft ? "2" : "3",
+      FEI: soft ? "90" : "80",
+      FOR: "100",
+      SPR: "100",
+      DPR: "100",
+    };
+  }
+
+  if (wheel === "Logitech G Pro") {
+    return {
+      "FFB STRENGTH": stable ? "8.0 Nm" : "8.5 Nm",
+      TRUEFORCE: soft ? "55" : "45",
+      DAMPING: stable ? "25" : "18",
+      FILTER: "8",
+      ANGLE: "1080",
+      "BRAKE FORCE": stable ? "65" : "70",
+    };
+  }
+
+  return {
+    "FFB MAX TORQUE": stable ? "6" : "7",
+    "FFB SENSITIVITY": soft ? "8" : "6",
+    VIBRATION: "ON",
+    ANGLE: "900",
+    DAMPING: stable ? "MEDIUM" : "LOW",
+  };
+}
+
+function makeNotes(track, tyre, bop) {
+  const notes = [
+    "Recommended baseline, adjust after first 5 clean laps.",
+    tyre.includes("Soft") ? "Soft tyres support sharper response, but avoid sliding the rear." : "Prioritise consistency and tyre load management.",
+    bop === "BOP ON" ? "Under BOP, wheel settings sharpen feel without changing car balance." : "No BOP may feel more car-dependent, expect stronger handling differences.",
+  ];
+
+  if (track.includes("Watkins")) notes.push("Bus Stop kerbs can be attacked, but keep the wheel settled on exit.");
+  if (track.includes("Gilles")) notes.push("Chicanes need patience. Let the wheel recentre before full throttle.");
+  if (track.includes("Road Atlanta")) notes.push("Keep the car stable through the esses and prioritise final corner exit.");
+  if (track.includes("Suzuka")) notes.push("Sector 1 rewards smooth steering more than aggressive rotation.");
+  if (track.includes("Spa")) notes.push("Keep high-speed confidence through Eau Rouge and avoid overloading tyres in sector 2.");
+
+  return notes;
+}
 
 export default function App() {
-  const STORAGE_KEY = 'r79-adaptive-selections'
-  const defaultSelections = {
-    selectedWheel: 'T598',
-    selectedClass: 'Gr.3',
-    selectedCar: 'BMW M6 GT3',
-    selectedTrack: 'Watkins Glen',
-    selectedPreset: 'Balanced',
+  const [wheel, setWheel] = useState("T598");
+  const [carClass, setCarClass] = useState("Gr.3");
+  const [car, setCar] = useState("BMW M6 GT3 Sprint");
+  const [track, setTrack] = useState("Watkins Glen");
+  const [tyre, setTyre] = useState("Racing Medium");
+  const [bop, setBop] = useState("BOP ON");
+  const [laps, setLaps] = useState("20");
+  const [generated, setGenerated] = useState(false);
+  const [learn, setLearn] = useState(null);
+  const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("r79-setups") || "[]"));
+
+  const settings = useMemo(() => makeSetup(wheel, carClass, tyre, bop, laps), [wheel, carClass, tyre, bop, laps]);
+  const notes = useMemo(() => makeNotes(track, tyre, bop), [track, tyre, bop]);
+
+  function changeClass(value) {
+    setCarClass(value);
+    setCar(CARS[value][0]);
   }
 
-  const readSelection = (key, fallback) => {
-    try {
-      const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || '{}')
-      return saved[key] ?? fallback
-    } catch {
-      return fallback
-    }
+  function saveSetup() {
+    const item = { wheel, carClass, car, track, tyre, bop, laps, settings, notes, date: new Date().toLocaleString() };
+    const next = [item, ...saved].slice(0, 20);
+    setSaved(next);
+    localStorage.setItem("r79-setups", JSON.stringify(next));
   }
-
-  const [selectedWheel, setSelectedWheel] = React.useState(() => readSelection('selectedWheel', defaultSelections.selectedWheel))
-  const [selectedClass, setSelectedClass] = React.useState(() => readSelection('selectedClass', defaultSelections.selectedClass))
-  const [selectedCar, setSelectedCar] = React.useState(() => readSelection('selectedCar', defaultSelections.selectedCar))
-  const [selectedTrack, setSelectedTrack] = React.useState(() => readSelection('selectedTrack', defaultSelections.selectedTrack))
-  const [selectedPreset, setSelectedPreset] = React.useState(() => readSelection('selectedPreset', defaultSelections.selectedPreset))
-  const [generated, setGenerated] = React.useState(false)
-
-  React.useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        selectedWheel,
-        selectedClass,
-        selectedCar,
-        selectedTrack,
-        selectedPreset,
-      }),
-    )
-  }, [selectedWheel, selectedClass, selectedCar, selectedTrack, selectedPreset])
-
-  const wheelBases = ['T598', 'Fanatec DD Pro', 'Logitech G Pro', 'Logitech G923']
-
-  const cars = {
-    'Gr.1': ['Toyota GR010', 'Mazda LM55', 'Porsche 919 Hybrid'],
-    'Gr.2': ['Honda NSX Concept-GT', 'Lexus RC F GT500', 'Nissan GT-R GT500'],
-    'Gr.3': ['BMW M6 GT3', 'Porsche 911 RSR', 'Mercedes AMG GT3', 'Audi R8 LMS'],
-    'Gr.4': ['Toyota GR Supra Gr.4', 'Mazda Atenza Gr.4', 'McLaren 650S Gr.4'],
-  }
-
-  const tracks = ['Watkins Glen', 'Suzuka', 'Spa', 'Daytona', 'Brands Hatch']
-  const presets = ['Balanced', 'Aggressive', 'Tyre Saver', 'Qualifying', 'Race']
-
-  const profile = React.useMemo(() => {
-    if (selectedPreset === 'Aggressive' || selectedPreset === 'Qualifying') {
-      return { rotation: 86, stability: 68, traction: 76, tyre: 62, front: '+2', rear: '-1', brake: '-2' }
-    }
-    if (selectedPreset === 'Tyre Saver' || selectedPreset === 'Race') {
-      return { rotation: 64, stability: 88, traction: 86, tyre: 92, front: '0', rear: '+2', brake: '+1' }
-    }
-    return { rotation: 72, stability: 82, traction: 84, tyre: 78, front: '+1', rear: '+1', brake: '0' }
-  }, [selectedPreset])
-
-  const presetTone = React.useMemo(() => {
-    if (selectedPreset === 'Aggressive') return 'High-speed bite'
-    if (selectedPreset === 'Tyre Saver') return 'Long-run stability'
-    if (selectedPreset === 'Qualifying') return 'Maximum rotation'
-    if (selectedPreset === 'Race') return 'Race-day durability'
-    return 'Balanced control'
-  }, [selectedPreset])
-
-  const snapshotSummary = React.useMemo(() => [
-    `${selectedPreset} preset`,
-    `${selectedTrack} circuit`,
-    `${selectedCar} setup`,
-  ], [selectedPreset, selectedTrack, selectedCar])
-
-  const bar = (value) => (
-    <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
-      <div
-        className="h-full bg-gradient-to-r from-cyan-400 to-purple-500"
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  )
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#111827_0%,_#020617_45%,_#000000_100%)] text-white p-5 max-w-5xl mx-auto font-sans">
-      <header className="rounded-3xl border border-cyan-400/20 bg-zinc-950/90 p-5 mb-5 shadow-2xl shadow-cyan-500/10">
-        <p className="text-xs uppercase tracking-[0.35em] text-cyan-300/80">R79 Adaptive</p>
-        <h1 className="text-4xl font-black text-cyan-300 mt-2">Motorsport Setup Lab</h1>
-        <p className="text-zinc-400 mt-2">Tune your wheel, car, and track profile with an adaptive setup snapshot.</p>
-        <div className="mt-4 flex flex-wrap gap-2 text-xs text-zinc-200">
-          <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1">{selectedPreset}</span>
-          <span className="rounded-full border border-purple-400/30 bg-purple-400/10 px-3 py-1">{selectedTrack}</span>
-          <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1">{presetTone}</span>
-        </div>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {snapshotSummary.map((item) => (
-            <div key={item} className="rounded-2xl border border-zinc-800 bg-zinc-900/90 p-3 text-sm text-zinc-200">
-              {item}
+    <div className="min-h-screen bg-black text-white">
+      <div className="max-w-md mx-auto p-5 pb-20">
+        <header className="mb-6">
+          <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">R79</h1>
+          <p className="text-zinc-400 text-sm tracking-widest uppercase">Adaptive Wheel Setup Engineer</p>
+        </header>
+
+        <Card title="Build Setup">
+          <Select label="Game" value="Gran Turismo 7" options={["Gran Turismo 7"]} onChange={() => {}} />
+          <Select label="Wheel Base" value={wheel} options={Object.keys(WHEELS)} onChange={setWheel} />
+          <Select label="Class" value={carClass} options={Object.keys(CARS)} onChange={changeClass} />
+          <Select label="Car" value={car} options={CARS[carClass]} onChange={setCar} />
+          <Select label="Track" value={track} options={TRACKS} onChange={setTrack} />
+          <Select label="Tyres" value={tyre} options={TYRES} onChange={setTyre} />
+          <Select label="BOP" value={bop} options={["BOP ON", "BOP OFF"]} onChange={setBop} />
+
+          <label className="block text-sm text-zinc-400 mt-4 mb-1">Race Length / Laps</label>
+          <input value={laps} onChange={(e) => setLaps(e.target.value)} className="w-full rounded-xl bg-zinc-900 border border-zinc-700 p-3" />
+
+          <button onClick={() => setGenerated(true)} className="w-full mt-5 py-4 rounded-2xl bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-black">
+            Generate Setup
+          </button>
+        </Card>
+
+        {generated && (
+          <>
+            <Card title="R79 Setup Sheet">
+              <p className="text-sm text-zinc-400 mb-4">{wheel} • {car} • {track} • {tyre} • {bop} • {laps} laps</p>
+
+              <div className="space-y-2">
+                {Object.entries(settings).map(([key, value]) => (
+                  <div key={key} className="rounded-xl bg-zinc-900 border border-zinc-800 px-4 py-3">
+                    <div className="flex justify-between items-center gap-3">
+                      <span className="text-zinc-300 font-bold">{key}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="text-cyan-300 font-black">{value}</span>
+                        <button onClick={() => setLearn(key)} className="text-xs px-2 py-1 rounded-lg border border-purple-400/40 text-purple-300">
+                          Learn
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button onClick={saveSetup} className="w-full mt-5 py-3 rounded-xl border border-cyan-400/40 bg-cyan-400/10 text-cyan-200 font-bold">
+                Save Setup
+              </button>
+            </Card>
+
+            <Card title="Track Notes">
+              <div className="space-y-3">
+                {notes.map((note) => (
+                  <div key={note} className="rounded-xl bg-zinc-900 border border-zinc-800 p-3 text-zinc-300">
+                    {note}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </>
+        )}
+
+        {saved.length > 0 && (
+          <Card title="Saved Setups">
+            <div className="space-y-3">
+              {saved.map((item, index) => (
+                <div key={index} className="rounded-xl bg-zinc-900 border border-zinc-800 p-3">
+                  <p className="text-cyan-300 font-bold">{item.car}</p>
+                  <p className="text-xs text-zinc-400">{item.wheel} • {item.track} • {item.tyre} • {item.bop}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </header>
+          </Card>
+        )}
 
-      <Section title="Wheel Base">
-        {wheelBases.map((wheel) => (
-          <Button key={wheel} active={selectedWheel === wheel} onClick={() => setSelectedWheel(wheel)}>
-            {wheel}
-          </Button>
-        ))}
-      </Section>
-
-      <Section title="Race Category">
-        <div className="grid grid-cols-2 gap-3">
-          {Object.keys(cars).map((cat) => (
-            <Button
-              key={cat}
-              active={selectedClass === cat}
-              onClick={() => {
-                setSelectedClass(cat)
-                setSelectedCar(cars[cat][0])
-              }}
-            >
-              {cat}
-            </Button>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Car">
-        {cars[selectedClass].map((car) => (
-          <Button key={car} active={selectedCar === car} onClick={() => setSelectedCar(car)}>
-            {car}
-          </Button>
-        ))}
-      </Section>
-
-      <Section title="Track">
-        {tracks.map((track) => (
-          <Button key={track} active={selectedTrack === track} onClick={() => setSelectedTrack(track)}>
-            {track}
-          </Button>
-        ))}
-      </Section>
-
-      <Section title="Preset">
-        <div className="grid grid-cols-2 gap-3">
-          {presets.map((preset) => (
-            <Button key={preset} active={selectedPreset === preset} onClick={() => setSelectedPreset(preset)}>
-              {preset}
-            </Button>
-          ))}
-        </div>
-      </Section>
-
-      <div className="mt-3 flex flex-wrap gap-3">
-        <button
-          onClick={() => setGenerated(true)}
-          className="flex-1 min-w-[220px] py-4 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-400 to-purple-500 text-black font-black shadow-lg shadow-cyan-500/20 transition hover:scale-[1.01]"
-        >
-          Generate Adaptive Setup
-        </button>
-        <button
-          onClick={() => {
-            setSelectedWheel(defaultSelections.selectedWheel)
-            setSelectedClass(defaultSelections.selectedClass)
-            setSelectedCar(defaultSelections.selectedCar)
-            setSelectedTrack(defaultSelections.selectedTrack)
-            setSelectedPreset(defaultSelections.selectedPreset)
-            setGenerated(false)
-          }}
-          className="rounded-2xl border border-zinc-700 bg-zinc-900 px-4 py-4 text-zinc-100 font-semibold transition hover:border-cyan-400/60 hover:text-cyan-100"
-        >
-          Reset Profile
-        </button>
+        {learn && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-5 z-50">
+            <div className="max-w-sm w-full rounded-3xl border border-cyan-400/30 bg-zinc-950 p-6 shadow-[0_0_30px_rgba(0,255,255,0.15)]">
+              <h2 className="text-2xl font-black text-cyan-300 mb-3">{learn}</h2>
+              <p className="text-zinc-300 leading-relaxed">
+                {LEARN[learn] || "Learning notes coming soon for this wheel-base setting."}
+              </p>
+              <button onClick={() => setLearn(null)} className="w-full mt-6 py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-purple-500 text-black font-black">
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-
-      {generated && (
-        <div className="mt-6 rounded-3xl bg-zinc-950 border border-cyan-400/30 p-5 space-y-5">
-          <div>
-            <h2 className="text-2xl font-black text-cyan-300">Setup Output</h2>
-            <p className="text-zinc-400 text-sm">
-              {selectedWheel} • {selectedCar} • {selectedTrack}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <Box label="Front" value={profile.front} />
-            <Box label="Rear" value={profile.rear} />
-            <Box label="Brake" value={profile.brake} />
-          </div>
-
-          <Metric label="Rotation" value={profile.rotation} bar={bar} />
-          <Metric label="Stability" value={profile.stability} bar={bar} />
-          <Metric label="Traction" value={profile.traction} bar={bar} />
-          <Metric label="Tyre Mgmt" value={profile.tyre} bar={bar} />
-
-          <div className="rounded-2xl bg-zinc-900 p-4 text-zinc-300">
-            Race Engineer Note: Setup tuned for {selectedPreset.toLowerCase()} behaviour on {selectedTrack}. {presetTone} is the current adaptive focus for this build.
-          </div>
-        </div>
-      )}
     </div>
-  )
+  );
 }
 
-function Section({ title, children }) {
+function Card({ title, children }) {
   return (
-    <section className="rounded-3xl border border-zinc-800 bg-zinc-950 p-5 mb-5">
-      <h2 className="text-lg font-bold text-cyan-300 mb-3">{title}</h2>
-      <div className="space-y-3">{children}</div>
-    </section>
-  )
-}
-
-function Button({ active, children, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full rounded-xl p-3 border text-left transition hover:-translate-y-0.5 hover:border-cyan-400/70 ${
-        active ? 'border-cyan-300 bg-cyan-500/20 text-cyan-100 shadow-inner shadow-cyan-500/10' : 'border-zinc-700 bg-zinc-900 text-zinc-300'
-      }`}
-    >
+    <section className="rounded-3xl border border-cyan-400/20 bg-zinc-950/90 p-5 mb-5 shadow-[0_0_20px_rgba(0,255,255,0.08)]">
+      <h2 className="text-xl font-black text-cyan-300 mb-4">{title}</h2>
       {children}
-    </button>
-  )
+    </section>
+  );
 }
 
-function Box({ label, value }) {
+function Select({ label, value, options, onChange }) {
   return (
-    <div className="bg-zinc-900 rounded-xl p-3 text-center">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="text-2xl font-black text-purple-300">{value}</p>
-    </div>
-  )
-}
-
-function Metric({ label, value, bar }) {
-  return (
-    <div>
-      <div className="flex justify-between mb-2 text-sm">
-        <span>{label}</span>
-        <span className="text-cyan-300">{value}%</span>
-      </div>
-      {bar(value)}
-    </div>
-  )
+    <label className="block mb-4">
+      <span className="block text-sm text-zinc-400 mb-1">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl bg-zinc-900 border border-zinc-700 p-3 text-white">
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
+      </select>
+    </label>
+  );
 }
