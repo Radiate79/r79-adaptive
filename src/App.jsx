@@ -23,7 +23,11 @@ const MULTIPLIERS = [
   "3x",
   "4x",
   "5x",
-  "10x"
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
 ];
 const LEARN = {
   FFB: "Main force feedback strength. Higher gives stronger weight, lower gives lighter steering and less fatigue.",
