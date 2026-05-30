@@ -160,7 +160,19 @@ export default function App() {
           <Select label="Track" value={track} options={TRACKS} onChange={setTrack} />
           <Select label="Tyres" value={tyre} options={TYRES} onChange={setTyre} />
           <Select label="BOP" value={bop} options={["BOP ON", "BOP OFF"]} onChange={setBop} />
+          <Select
+  label="Tyre Wear"
+  value={tyreWear}
+  options={MULTIPLIERS}
+  onChange={setTyreWear}
+/>
 
+<Select
+  label="Fuel Use"
+  value={fuelUse}
+  options={MULTIPLIERS}
+  onChange={setFuelUse}
+/>
           <label className="block text-sm text-zinc-400 mt-4 mb-1">Race Length / Laps</label>
           <input value={laps} onChange={(e) => setLaps(e.target.value)} className="w-full rounded-xl bg-zinc-900 border border-zinc-700 p-3" />
 
