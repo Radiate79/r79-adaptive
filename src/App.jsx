@@ -149,7 +149,7 @@ export default function App() {
       <div className="max-w-md mx-auto p-5 pb-20">
         <header className="mb-6">
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-300 to-purple-400 bg-clip-text text-transparent">R79</h1>
-          <p className="text-zinc-400 text-sm tracking-widest uppercase">Adaptive Wheel Setup Engineer</p>
+          <p className="text-zinc-400 text-sm tracking-widest uppercase">Adaptive Wheel Setup Engineer Test</p>
         </header>
 
         <Card title="Build Setup">
