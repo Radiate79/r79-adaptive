@@ -17,7 +17,14 @@ const CARS = {
 
 const TRACKS = ["Watkins Glen", "Circuit Gilles Villeneuve", "Road Atlanta", "Spa", "Suzuka", "Daytona", "Fuji", "Dragon Trail - Seaside", "Brands Hatch", "Nürburgring GP", "Lago Maggiore", "Blue Moon Bay", "Monza", "Laguna Seca"];
 const TYRES = ["Racing Soft", "Racing Medium", "Racing Hard", "Intermediate", "Wet"];
-
+const MULTIPLIERS = [
+  "1x",
+  "2x",
+  "3x",
+  "4x",
+  "5x",
+  "10x"
+];
 const LEARN = {
   FFB: "Main force feedback strength. Higher gives stronger weight, lower gives lighter steering and less fatigue.",
   MASTER: "Overall wheel output strength. Higher gives more force, lower keeps the wheel smoother.",
@@ -120,7 +127,8 @@ export default function App() {
   const [generated, setGenerated] = useState(false);
   const [learn, setLearn] = useState(null);
   const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("r79-setups") || "[]"));
-
+  const [tyreWear, setTyreWear] = useState("1x");
+  const [fuelUse, setFuelUse] = useState("1x");
   const settings = useMemo(() => makeSetup(wheel, carClass, tyre, bop, laps), [wheel, carClass, tyre, bop, laps]);
   const notes = useMemo(() => makeNotes(track, tyre, bop), [track, tyre, bop]);
 
