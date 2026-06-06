@@ -1,19 +1,24 @@
 import { useMemo, useState } from "react";
-import { tracks } from "../data/tracks.js";
+import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
+  analyzeCalendarDNA,
+  analyzeCarBestAndWeakestTracks,
   analyzeDrivetrainSuitability,
   rankCarsByChampionshipConsistency,
   recommendCarsForChampionship,
 } from "../engine/championshipEngine.js";
+import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
 
 export default function ChampionshipAdvisor() {
+  const { gameVersion, game } = useGameVersion();
+  const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const [selectedTrackIds, setSelectedTrackIds] = useState([]);
   const [carClass, setCarClass] = useState("Gr.3");
   const [fuelMultiplier, setFuelMultiplier] = useState(1);
   const [tyreMultiplier, setTyreMultiplier] = useState(1);
   const selectedTracks = useMemo(
     () => tracks.filter((track) => selectedTrackIds.includes(track.id)),
-    [selectedTrackIds],
+    [tracks, selectedTrackIds],
   );
 
   const championshipSummary = useMemo(() => {
@@ -74,22 +79,49 @@ export default function ChampionshipAdvisor() {
       return [];
     }
 
-    return recommendCarsForChampionship(selectedTrackIds, carClass, {
-      fuelMultiplier,
-      tyreMultiplier,
-    }).slice(0, 5);
-  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier]);
+    return recommendCarsForChampionship(
+      selectedTrackIds,
+      carClass,
+      {
+        fuelMultiplier,
+        tyreMultiplier,
+      },
+      gameVersion,
+    ).slice(0, 5);
+  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier, gameVersion]);
+
+  const recommendationsWithTrackAnalysis = useMemo(() => {
+    if (recommendations.length === 0 || selectedTracks.length === 0) {
+      return [];
+    }
+
+    const raceSettings = { fuelMultiplier, tyreMultiplier };
+
+    return recommendations.map((car) => ({
+      ...car,
+      trackAnalysis: analyzeCarBestAndWeakestTracks(
+        car,
+        selectedTracks,
+        raceSettings,
+      ),
+    }));
+  }, [recommendations, selectedTracks, fuelMultiplier, tyreMultiplier]);
 
   const consistencyRankings = useMemo(() => {
     if (selectedTrackIds.length === 0) {
       return [];
     }
 
-    return rankCarsByChampionshipConsistency(selectedTrackIds, carClass, {
-      fuelMultiplier,
-      tyreMultiplier,
-    }).slice(0, 5);
-  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier]);
+    return rankCarsByChampionshipConsistency(
+      selectedTrackIds,
+      carClass,
+      {
+        fuelMultiplier,
+        tyreMultiplier,
+      },
+      gameVersion,
+    ).slice(0, 5);
+  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier, gameVersion]);
 
   const calendarAnalysis = useMemo(() => {
     const metricConfig = [
@@ -121,6 +153,11 @@ export default function ChampionshipAdvisor() {
     });
   }, [selectedTracks]);
 
+  const calendarDNA = useMemo(
+    () => analyzeCalendarDNA(selectedTracks),
+    [selectedTracks],
+  );
+
   const toggleTrack = (trackId) => {
     setSelectedTrackIds((current) =>
       current.includes(trackId)
@@ -134,8 +171,15 @@ export default function ChampionshipAdvisor() {
       <div style={styles.header}>
         <h2 style={styles.title}>R79 Championship Advisor</h2>
         <p style={styles.subtitle}>
-          Select tracks and class to get the strongest championship car.
+          Select tracks and class to get the strongest championship car for{" "}
+          {game.shortLabel}.
         </p>
+        {!isGameDataReady(gameVersion) ? (
+          <p style={styles.gameNotice}>
+            {game.shortLabel} car and track data is not available yet. Populate{" "}
+            <code>src/data/gt8/</code> to enable recommendations.
+          </p>
+        ) : null}
       </div>
 
       <div style={styles.classRow}>
@@ -243,20 +287,68 @@ export default function ChampionshipAdvisor() {
         </div>
       </div>
 
+      {calendarDNA ? (
+        <div style={styles.dnaPanel}>
+          <h3 style={styles.dnaTitle}>Calendar DNA</h3>
+          <p style={styles.dnaType}>{calendarDNA.championshipType}</p>
+          <div style={styles.dnaGrid}>
+            <div style={styles.dnaRow}>
+              <span style={styles.dnaLabel}>High Speed</span>
+              <span style={styles.dnaValue}>{calendarDNA.highSpeed}%</span>
+            </div>
+            <div style={styles.dnaRow}>
+              <span style={styles.dnaLabel}>Technical</span>
+              <span style={styles.dnaValue}>{calendarDNA.technical}%</span>
+            </div>
+            <div style={styles.dnaRow}>
+              <span style={styles.dnaLabel}>Stability</span>
+              <span style={styles.dnaValue}>{calendarDNA.stability}%</span>
+            </div>
+            <div style={styles.dnaRow}>
+              <span style={styles.dnaLabel}>Tyre Sensitivity</span>
+              <span style={styles.dnaValue}>{calendarDNA.tyreSensitivity}%</span>
+            </div>
+            <div style={styles.dnaRow}>
+              <span style={styles.dnaLabel}>Fuel Importance</span>
+              <span style={styles.dnaValue}>{calendarDNA.fuelImportance}%</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div style={styles.resultsPanel}>
         <h3 style={styles.resultsTitle}>Top 5 Recommendations</h3>
-        {recommendations.length === 0 ? (
+        {recommendationsWithTrackAnalysis.length === 0 ? (
           <p style={styles.emptyState}>
-            Select one or more tracks to generate recommendations.
+            {tracks.length === 0
+              ? `No ${game.shortLabel} tracks available yet.`
+              : "Select one or more tracks to generate recommendations."}
           </p>
         ) : (
           <ol style={styles.resultsList}>
-            {recommendations.map((car) => (
+            {recommendationsWithTrackAnalysis.map((car) => (
               <li key={car.id} style={styles.resultItem}>
                 <div style={styles.resultHeader}>
                   <span style={styles.carName}>{car.name}</span>
-                  <span style={styles.score}>{car.score.toFixed(2)}</span>
+                  <span style={styles.score}>
+                    Overall Score: {car.score.toFixed(2)}
+                  </span>
                 </div>
+                {car.trackAnalysis ? (
+                  <div style={styles.trackAnalysisBlock}>
+                    <p style={styles.trackAnalysisRow}>
+                      <span style={styles.trackAnalysisLabel}>Best Track:</span>
+                      <span>{car.trackAnalysis.bestTrack.name}</span>
+                    </p>
+                    <p style={styles.trackAnalysisRow}>
+                      <span style={styles.trackAnalysisLabel}>Weakest Track:</span>
+                      <span>{car.trackAnalysis.weakestTrack.name}</span>
+                    </p>
+                    <p style={styles.trackAnalysisDiff}>
+                      Score difference: {car.trackAnalysis.scoreDifference.toFixed(2)}
+                    </p>
+                  </div>
+                ) : null}
                 <div style={styles.whyBlock}>
                   <p style={styles.whyTitle}>Why this car?</p>
                   <ul style={styles.reasonList}>
@@ -322,6 +414,12 @@ const styles = {
     margin: "6px 0 0",
     color: "rgba(220, 228, 255, 0.85)",
     fontSize: "0.95rem",
+  },
+  gameNotice: {
+    margin: "10px 0 0",
+    color: "#ffe6a8",
+    fontSize: "0.88rem",
+    lineHeight: 1.45,
   },
   classRow: {
     display: "flex",
@@ -489,6 +587,46 @@ const styles = {
     fontWeight: 700,
     fontVariantNumeric: "tabular-nums",
   },
+  dnaPanel: {
+    background: "rgba(10, 16, 28, 0.9)",
+    border: "1px solid rgba(136, 168, 236, 0.35)",
+    borderRadius: "12px",
+    marginBottom: "12px",
+    padding: "14px",
+  },
+  dnaTitle: {
+    margin: "0 0 6px",
+    fontSize: "1rem",
+    color: "#e8efff",
+  },
+  dnaType: {
+    margin: "0 0 12px",
+    color: "#9bc0ff",
+    fontSize: "0.95rem",
+    fontWeight: 700,
+  },
+  dnaGrid: {
+    display: "grid",
+    gap: "8px",
+  },
+  dnaRow: {
+    alignItems: "center",
+    background: "rgba(22, 34, 58, 0.5)",
+    border: "1px solid rgba(124, 156, 222, 0.2)",
+    borderRadius: "8px",
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "8px 10px",
+  },
+  dnaLabel: {
+    color: "#d6e4ff",
+    fontSize: "0.86rem",
+  },
+  dnaValue: {
+    color: "#9bc0ff",
+    fontWeight: 700,
+    fontVariantNumeric: "tabular-nums",
+  },
   resultsTitle: {
     margin: "0 0 10px",
     fontSize: "1rem",
@@ -523,6 +661,32 @@ const styles = {
     color: "#9bc0ff",
     fontWeight: 700,
     fontVariantNumeric: "tabular-nums",
+  },
+  trackAnalysisBlock: {
+    background: "rgba(16, 24, 42, 0.55)",
+    border: "1px solid rgba(113, 143, 209, 0.2)",
+    borderRadius: "8px",
+    padding: "8px 10px",
+    display: "grid",
+    gap: "4px",
+  },
+  trackAnalysisRow: {
+    margin: 0,
+    color: "#dce8ff",
+    fontSize: "0.84rem",
+    display: "flex",
+    gap: "6px",
+  },
+  trackAnalysisLabel: {
+    color: "#b8cdff",
+    fontWeight: 600,
+    minWidth: "108px",
+  },
+  trackAnalysisDiff: {
+    margin: "2px 0 0",
+    color: "#9bc0ff",
+    fontSize: "0.82rem",
+    fontWeight: 600,
   },
   whyBlock: {
     background: "rgba(18, 26, 45, 0.55)",

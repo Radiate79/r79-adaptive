@@ -1,0 +1,77 @@
+[
+  {
+    "id": "journal-2026-06-06",
+    "date": "2026-06-06",
+    "title": "R79 Finds Its Direction",
+    "text": "The destination was never the goal.\nThe understanding gained along the journey was always the reward.\n\nR79 began as a search for better wheel settings.\nIt evolved into a search for better racing.\nIt continues as a search for better understanding.\n\nToday the project moved beyond a setup app.\nIt is becoming a racing intelligence platform designed to help drivers learn, analyse and improve.",
+    "buildVersion": "v1.0.0",
+    "tags": ["origin", "direction"],
+    "snapshot": {
+      "carsIndexed": 0,
+      "tracksSupported": 0,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
+  },
+  {
+    "id": "journal-2026-06-06-vision",
+    "date": "2026-06-06",
+    "title": "The Vision Expands",
+    "text": "Today R79 took another step beyond its original purpose.\n\nWhat began as a search for better wheel settings has evolved into a racing intelligence platform.\n\nThe project is no longer simply collecting information. It is transforming information into understanding.\n\nEvery feature added now has one purpose:\nto help drivers make better decisions and continuously improve.\n\nThe journey continues.",
+    "buildVersion": "v1.0.0",
+    "tags": ["vision", "growth", "archive"],
+    "snapshot": {
+      "carsIndexed": 100,
+      "tracksSupported": 42,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
+  },
+  {
+    "id": "journal-2026-06-06-archive",
+    "date": "2026-06-06",
+    "title": "The Archive Was Completed",
+    "text": "Today R79 gained its memory.\n\nThe Archive has become the permanent record of the project's journey, preserving its ideas, philosophy and evolution.\n\nFrom this point forward, every milestone, every lesson and every breakthrough will be documented.\n\nThe software will evolve.\nThe data will grow.\nThe technology will change.\n\nBut the purpose remains unchanged:\n\nTo help another driver find another tenth.\n\nThe journey continues.",
+    "buildVersion": "v1.0.0",
+    "tags": ["archive", "legacy", "milestone"],
+    "snapshot": {
+      "carsIndexed": 100,
+      "tracksSupported": 42,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
+  },
+  {
+    "id": "journal-2026-06-06-ai-engineer",
+    "date": "2026-06-06",
+    "title": "AI Race Engineer Begins",
+    "text": "Today R79 began building its AI Race Engineer.\n\nThe goal is simple:\nto help drivers prepare smarter before they race.\n\nThe first version brings recommendations for cars, strategy, brake balance, wheel settings, pit windows and race-specific warnings.\n\nThis is the beginning of R79 becoming more than a database.\n\nIt is becoming a digital race engineer.\n\nLet's go.\nLet's do it.\nLet it be so.\n\nThe journey continues.",
+    "buildVersion": "v1.0.0",
+    "tags": ["ai", "race-engineer", "milestone"],
+    "snapshot": {
+      "carsIndexed": 100,
+      "tracksSupported": 42,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
+  },
+  {
+    "id": "journal-2026-06-06-platform",
+    "date": "2026-06-06",
+    "title": "A Platform Begins to Emerge",
+    "text": "Today R79 reached an important milestone.\n\nThe project now contains its own Archive, Captain's Log, Legacy, Labs, Development Mantra and the foundations of an AI Race Engineer.\n\nWhat started as a search for better wheel settings has become something much larger.\n\nIt is evolving into a racing intelligence platform designed to help drivers learn, improve and understand racing through data and AI-assisted insight.\n\nThe build completed successfully.\n\nAnother lap finished.\n\nAnother lesson learned.\n\nLet's go.\n\nLet's do it.\n\nLet it be so.\n\nThe journey continues.",
+    "buildVersion": "v1.0.0",
+    "tags": ["milestone", "platform", "vision"],
+    "snapshot": {
+      "carsIndexed": 100,
+      "tracksSupported": 42,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
+  }
+]

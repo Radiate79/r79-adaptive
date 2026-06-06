@@ -1,14 +1,23 @@
-import { cars } from "../data/cars.js";
-import { tracks } from "../data/tracks.js";
+import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 
 const SCORE_FIELDS = ["topSpeed", "traction", "fuel", "tyres", "stability"];
+const SCORING_FIELDS = [...SCORE_FIELDS, "rotation"];
 const DRIVETRAIN_TYPES = ["FR", "MR", "4WD", "FF"];
+const DEFAULT_ROTATION = {
+  MR: 9,
+  RR: 8,
+  FR: 7,
+  "4WD": 6,
+  FF: 5,
+};
 const ATTRIBUTE_REASON_MAP = {
   topSpeed: "Excellent top speed",
   traction: "Strong traction",
   fuel: "Good fuel economy",
   tyres: "Strong tyre management",
   stability: "Stable under braking",
+  rotation: "Strong rotation and agility",
 };
 
 function normalizeMultiplier(value) {
@@ -26,17 +35,101 @@ function getScoreWeights(raceSettings = {}) {
     fuel: normalizeMultiplier(raceSettings.fuelMultiplier),
     tyres: normalizeMultiplier(raceSettings.tyreMultiplier),
     stability: 1,
+    rotation: 1,
   };
 }
 
+function getCarAttribute(car, field) {
+  if (field === "rotation") {
+    return Number(car?.rotation ?? DEFAULT_ROTATION[car?.drivetrain] ?? 7);
+  }
+
+  return Number(car?.[field] ?? 0);
+}
+
+function getTrackDemandWeights(track, raceSettings = {}) {
+  const raceWeights = getScoreWeights(raceSettings);
+  const kerbDifficulty = Math.max(0, 8 - Number(track?.kerbs ?? 6));
+  const isHighSpeed = track.topSpeed >= 8;
+  const isTechnical = track.traction >= 8;
+  const isFuelHeavy = track.fuel >= 8;
+  const isTyreHeavy = track.tyres >= 7;
+  const isDifficult = track.stability >= 7 || kerbDifficulty >= 3;
+
+  return {
+    topSpeed:
+      (track.topSpeed / 10) * (isHighSpeed ? 2.2 : 1.1) * raceWeights.topSpeed,
+    traction:
+      (track.traction / 10) * (isTechnical ? 2.2 : 1.1) * raceWeights.traction,
+    fuel:
+      (track.fuel / 10) *
+      (isFuelHeavy ? (isHighSpeed ? 2.6 : 2.2) : 1.0) *
+      raceWeights.fuel,
+    tyres:
+      (track.tyres / 10) * (isTyreHeavy ? 2.0 : 1.0) * raceWeights.tyres,
+    stability:
+      (track.stability / 10) *
+      (isDifficult || isHighSpeed ? 1.8 : 1.0) *
+      raceWeights.stability,
+    rotation:
+      (track.traction / 10) *
+      (isTechnical ? 2.0 : 0.9) *
+      (track.topSpeed <= 7 ? 1.3 : 1.0) *
+      raceWeights.rotation,
+  };
+}
+
+function getDrivetrainTrackBonus(car, track) {
+  const drivetrain = car?.drivetrain;
+  let bonus = 0;
+
+  if (drivetrain === "MR" && track.traction >= 8) {
+    bonus += 4;
+  }
+
+  const isBalanced =
+    track.topSpeed >= 7 &&
+    track.topSpeed <= 9 &&
+    track.traction >= 6 &&
+    track.traction <= 8 &&
+    track.fuel < 8;
+
+  if (drivetrain === "FR" && isBalanced && track.stability >= 7) {
+    bonus += 2.5;
+  }
+
+  if (drivetrain === "4WD" && track.traction >= 7.5) {
+    bonus += 2;
+  }
+
+  if (drivetrain === "FF" && track.traction >= 8 && track.topSpeed <= 7) {
+    bonus += 2;
+  }
+
+  return bonus;
+}
+
+function getWeightedTrackScore(car, track, raceSettings = {}) {
+  const demands = getTrackDemandWeights(track, raceSettings);
+  let weightedTotal = 0;
+  let maxWeightedTotal = 0;
+
+  SCORING_FIELDS.forEach((field) => {
+    const demand = demands[field] ?? 0;
+    const carValue = getCarAttribute(car, field);
+    weightedTotal += carValue * demand;
+    maxWeightedTotal += 10 * demand;
+  });
+
+  const fitScore =
+    maxWeightedTotal > 0 ? (weightedTotal / maxWeightedTotal) * 100 : 0;
+  const drivetrainBonus = getDrivetrainTrackBonus(car, track);
+
+  return fitScore + drivetrainBonus;
+}
+
 export function scoreCarForTrack(car, track, raceSettings = {}) {
-  const weights = getScoreWeights(raceSettings);
-  return SCORE_FIELDS.reduce((total, field) => {
-    const carValue = Number(car?.[field] ?? 0);
-    const trackValue = Number(track?.[field] ?? 0);
-    const closeness = 10 - Math.abs(carValue - trackValue);
-    return total + Math.max(closeness, 0) * weights[field];
-  }, 0);
+  return Number(getWeightedTrackScore(car, track, raceSettings).toFixed(2));
 }
 
 export function scoreCarForChampionship(
@@ -55,47 +148,50 @@ export function scoreCarForChampionship(
   return Number((total / championshipTracks.length).toFixed(2));
 }
 
-function getAttributeMatchAverages(car, championshipTracks, raceSettings = {}) {
+function getCarStrengthContributions(car, championshipTracks, raceSettings = {}) {
   if (!Array.isArray(championshipTracks) || championshipTracks.length === 0) {
-    return SCORE_FIELDS.map((field) => ({
+    return SCORING_FIELDS.map((field) => ({
       field,
-      average: 0,
+      contribution: 0,
     }));
   }
 
-  const weights = getScoreWeights(raceSettings);
-
-  return SCORE_FIELDS.map((field) => {
-    const total = championshipTracks.reduce((sum, track) => {
-      const carValue = Number(car?.[field] ?? 0);
-      const trackValue = Number(track?.[field] ?? 0);
-      const closeness = 10 - Math.abs(carValue - trackValue);
-      return sum + Math.max(closeness, 0) * weights[field];
-    }, 0);
+  return SCORING_FIELDS.map((field) => {
+    const carValue = getCarAttribute(car, field);
+    const contribution =
+      championshipTracks.reduce((sum, track) => {
+        const demands = getTrackDemandWeights(track, raceSettings);
+        return sum + carValue * (demands[field] ?? 0);
+      }, 0) / championshipTracks.length;
 
     return {
       field,
-      average: total / championshipTracks.length,
+      contribution: contribution * (0.65 + carValue / 25),
     };
   });
 }
 
 function generateCarReasons(car, championshipTracks, raceSettings = {}, count = 3) {
-  const topAttributes = getAttributeMatchAverages(
+  const topAttributes = getCarStrengthContributions(
     car,
     championshipTracks,
     raceSettings,
   )
-    .sort((a, b) => b.average - a.average)
+    .sort((a, b) => b.contribution - a.contribution)
     .slice(0, count);
 
   return topAttributes.map(({ field }) => ATTRIBUTE_REASON_MAP[field] ?? field);
 }
 
-function resolveTracksByIds(selectedTrackIds) {
+function resolveTracksByIds(
+  selectedTrackIds,
+  gameVersion = DEFAULT_GAME_VERSION,
+) {
   if (!Array.isArray(selectedTrackIds)) {
     return [];
   }
+
+  const tracks = getTracksForGame(gameVersion);
 
   return selectedTrackIds
     .map((trackId) => tracks.find((track) => track.id === trackId) ?? null)
@@ -123,6 +219,57 @@ function isCarInClass(car, carClass) {
   ].map(normalizeClass);
 
   return carClassFields.some((value) => value.includes(requestedClass));
+}
+
+function toPercent(value) {
+  return Math.round((Number(value ?? 0) / 10) * 100);
+}
+
+function determineChampionshipType(dna) {
+  const candidates = [
+    { type: "Power Championship", score: dna.highSpeed },
+    {
+      type: "Technical Championship",
+      score: dna.technical * 0.85 + dna.stability * 0.15,
+    },
+    {
+      type: "Traction Championship",
+      score: dna.technical * 1.05 - dna.highSpeed * 0.25,
+    },
+    {
+      type: "Endurance Championship",
+      score: (dna.fuelImportance + dna.tyreSensitivity) / 2,
+    },
+  ].sort((a, b) => b.score - a.score);
+
+  if (
+    candidates[0].score < 65 ||
+    candidates[0].score - candidates[1].score < 5
+  ) {
+    return "Balanced Championship";
+  }
+
+  return candidates[0].type;
+}
+
+export function analyzeCalendarDNA(championshipTracks) {
+  if (!Array.isArray(championshipTracks) || championshipTracks.length === 0) {
+    return null;
+  }
+
+  const averages = getTrackAttributeAverages(championshipTracks);
+  const dna = {
+    highSpeed: toPercent(averages.topSpeed),
+    technical: toPercent(averages.traction),
+    stability: toPercent(averages.stability),
+    tyreSensitivity: toPercent(averages.tyres),
+    fuelImportance: toPercent(averages.fuel),
+  };
+
+  return {
+    ...dna,
+    championshipType: determineChampionshipType(dna),
+  };
 }
 
 function getTrackAttributeAverages(championshipTracks) {
@@ -230,14 +377,53 @@ export function analyzeDrivetrainSuitability(championshipTracks) {
   })).sort((a, b) => b.score - a.score);
 }
 
-export function analyzeDrivetrainSuitabilityByTrackIds(selectedTrackIds) {
-  return analyzeDrivetrainSuitability(resolveTracksByIds(selectedTrackIds));
+export function analyzeDrivetrainSuitabilityByTrackIds(
+  selectedTrackIds,
+  gameVersion = DEFAULT_GAME_VERSION,
+) {
+  return analyzeDrivetrainSuitability(
+    resolveTracksByIds(selectedTrackIds, gameVersion),
+  );
 }
 
 function getCarTrackScores(car, championshipTracks, raceSettings = {}) {
   return championshipTracks.map((track) =>
     scoreCarForTrack(car, track, raceSettings),
   );
+}
+
+export function analyzeCarBestAndWeakestTracks(
+  car,
+  championshipTracks,
+  raceSettings = {},
+) {
+  if (!Array.isArray(championshipTracks) || championshipTracks.length === 0) {
+    return null;
+  }
+
+  const trackScores = championshipTracks.map((track) => ({
+    track,
+    score: scoreCarForTrack(car, track, raceSettings),
+  }));
+
+  const best = trackScores.reduce((top, current) =>
+    current.score > top.score ? current : top,
+  );
+  const weakest = trackScores.reduce((low, current) =>
+    current.score < low.score ? current : low,
+  );
+
+  return {
+    bestTrack: {
+      name: best.track.name,
+      score: Number(best.score.toFixed(2)),
+    },
+    weakestTrack: {
+      name: weakest.track.name,
+      score: Number(weakest.score.toFixed(2)),
+    },
+    scoreDifference: Number((best.score - weakest.score).toFixed(2)),
+  };
 }
 
 function calculateConsistencyScore(trackScores) {
@@ -279,9 +465,12 @@ export function rankCarsByChampionshipConsistency(
   selectedTrackIds,
   carClass,
   raceSettings = {},
+  gameVersion = DEFAULT_GAME_VERSION,
 ) {
-  const championshipTracks = resolveTracksByIds(selectedTrackIds);
-  const candidateCars = cars.filter((car) => isCarInClass(car, carClass));
+  const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
+  const candidateCars = getCarsForGame(gameVersion).filter((car) =>
+    isCarInClass(car, carClass),
+  );
 
   return candidateCars
     .map((car) => ({
@@ -299,9 +488,12 @@ export function recommendCarsForChampionship(
   selectedTrackIds,
   carClass,
   raceSettings = {},
+  gameVersion = DEFAULT_GAME_VERSION,
 ) {
-  const championshipTracks = resolveTracksByIds(selectedTrackIds);
-  const candidateCars = cars.filter((car) => isCarInClass(car, carClass));
+  const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
+  const candidateCars = getCarsForGame(gameVersion).filter((car) =>
+    isCarInClass(car, carClass),
+  );
 
   return candidateCars
     .map((car) => ({
@@ -312,7 +504,10 @@ export function recommendCarsForChampionship(
     .sort((a, b) => b.score - a.score);
 }
 
-export function rankCarsForChampionship(championshipTracks, availableCars = cars) {
+export function rankCarsForChampionship(
+  championshipTracks,
+  availableCars = getCarsForGame(DEFAULT_GAME_VERSION),
+) {
   const resolvedTracks = championshipTracks;
 
   return [...availableCars]
@@ -325,7 +520,7 @@ export function rankCarsForChampionship(championshipTracks, availableCars = cars
 
 export function recommendBestCarForChampionship(
   championshipTracks,
-  availableCars = cars,
+  availableCars = getCarsForGame(DEFAULT_GAME_VERSION),
 ) {
   const rankedCars = rankCarsForChampionship(championshipTracks, availableCars);
   return rankedCars[0] ?? null;

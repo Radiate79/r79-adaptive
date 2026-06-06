@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="R79 emblem">
+  <defs>
+    <radialGradient id="r79Core" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#5a8fd4"/>
+      <stop offset="55%" stop-color="#2b56c8"/>
+      <stop offset="100%" stop-color="#121a2e"/>
+    </radialGradient>
+    <linearGradient id="r79Ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dce9ff"/>
+      <stop offset="50%" stop-color="#77a0ff"/>
+      <stop offset="100%" stop-color="#3e79ff"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="none" stroke="url(#r79Ring)" stroke-width="4"/>
+  <circle cx="100" cy="100" r="84" fill="url(#r79Core)" stroke="rgba(220,228,255,0.25)" stroke-width="1"/>
+  <text x="100" y="108" text-anchor="middle" font-family="Inter, Segoe UI, Roboto, sans-serif" font-size="44" font-weight="800" fill="#f3f7ff" letter-spacing="4">R79</text>
+  <path d="M52 138 Q100 158 148 138" fill="none" stroke="rgba(155,192,255,0.55)" stroke-width="2" stroke-linecap="round"/>
+</svg>
