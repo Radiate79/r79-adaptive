@@ -3,6 +3,11 @@ import {
   ALR_HISTORICAL_SEASON_FROM,
   ALR_HISTORICAL_SEASON_TO,
 } from "../data/alrChampionshipWeighting.js";
+import {
+  filterEligibleRecommendationResults,
+  isCarEligibleForRecommendations,
+  pickEligibleRecommendation,
+} from "../utils/carClassFilter.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import {
@@ -87,7 +92,12 @@ function getAccelerationValue(car) {
   return Number(((traction + rotation) / 2).toFixed(1));
 }
 
-function getCarALRHistoricalScore(carId) {
+function getCarALRHistoricalScore(carId, gameVersion = DEFAULT_GAME_VERSION) {
+  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
+  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
+    return 0;
+  }
+
   const records = loadALRRecords().filter(
     (record) =>
       record.car === carId &&
@@ -330,13 +340,13 @@ export function analyzeTodaysRace(input) {
   );
 
   const historicalScores = baseRecommendations.map((car) =>
-    getCarALRHistoricalScore(car.id),
+    getCarALRHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
 
   const enriched = baseRecommendations.map((car) => {
     const trackScore = scoreCarForTrack(car, track, raceSettings);
-    const historicalScore = getCarALRHistoricalScore(car.id);
+    const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
     const alrBonus = normalizeAlrBonus(historicalScore, maxHistorical);
     const bopModifier = getBopModifier(bopOn);
     const consistencyScore = scoreCarConsistency(car, [track], raceSettings);
@@ -387,13 +397,19 @@ export function analyzeTodaysRace(input) {
 
   enriched.sort((a, b) => b.overallScore - a.overallScore);
 
-  const top10 = enriched.slice(0, 10);
-  const availableRanked = enriched.filter((car) => !car.unavailable);
-  const topPick = availableRanked[0] ?? top10[0] ?? null;
-  const alternativeChoice =
+  const eligibleEnriched = filterEligibleRecommendationResults(enriched);
+  const top10 = filterEligibleRecommendationResults(
+    eligibleEnriched.slice(0, 10),
+  );
+  const availableRanked = eligibleEnriched.filter((car) => !car.unavailable);
+  const topPick = pickEligibleRecommendation(
+    availableRanked[0] ?? top10[0] ?? null,
+  );
+  const alternativeChoice = pickEligibleRecommendation(
     availableRanked.find((car) => car.id !== topPick?.id) ??
-    enriched.find((car) => car.id !== topPick?.id) ??
-    null;
+      eligibleEnriched.find((car) => car.id !== topPick?.id) ??
+      null,
+  );
 
   return {
     ready: true,

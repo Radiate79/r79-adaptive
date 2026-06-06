@@ -7,7 +7,11 @@ import {
   ALR_HISTORICAL_SEASON_FROM,
   ALR_HISTORICAL_SEASON_TO,
 } from "../data/alrChampionshipWeighting.js";
-import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  isCarEligibleForRecommendations,
+  pickEligibleRecommendation,
+} from "../utils/carClassFilter.js";
+import { getCarsForGame, getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import { getALRResultScore } from "./alrPerformanceEngine.js";
 
@@ -131,7 +135,12 @@ function getRotationValue(car) {
   return Number(car.rotation ?? DEFAULT_ROTATION[car.drivetrain] ?? 7);
 }
 
-function getCarALRHistoricalScore(carId) {
+function getCarALRHistoricalScore(carId, gameVersion = DEFAULT_GAME_VERSION) {
+  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
+  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
+    return 0;
+  }
+
   const records = loadALRRecords().filter(
     (record) =>
       record.car === carId &&
@@ -543,7 +552,7 @@ function computeConfidence(top, second, historicalPresent) {
 export function analyzeAIRaceEngineer(input) {
   const gameVersion = input.gameVersion ?? DEFAULT_GAME_VERSION;
   const tracks = getTracksForGame(gameVersion);
-  const cars = getCarsForGame(gameVersion);
+  const cars = getRecommendableCarsForGame(gameVersion);
   const track = tracks.find((entry) => entry.id === input.trackId) ?? null;
 
   if (!track) {
@@ -560,7 +569,12 @@ export function analyzeAIRaceEngineer(input) {
   const styleWeights = DRIVER_STYLE_WEIGHTS[styleId] ?? DRIVER_STYLE_WEIGHTS.balanced;
   const lengthMods = getRaceLengthModifiers(raceLength);
   const tyresAvailable = input.tyresAvailable ?? ["M", "H", "S"];
-  const availableSet = new Set(input.availableCarIds ?? []);
+  const availableSet = new Set(
+    (input.availableCarIds ?? []).filter((carId) => {
+      const car = getCarsForGame(gameVersion).find((entry) => entry.id === carId);
+      return car && isCarEligibleForRecommendations(car);
+    }),
+  );
 
   const candidateCars =
     availableSet.size > 0
@@ -568,7 +582,7 @@ export function analyzeAIRaceEngineer(input) {
       : cars;
 
   const historicalScores = candidateCars.map((car) =>
-    getCarALRHistoricalScore(car.id),
+    getCarALRHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
 
@@ -588,7 +602,7 @@ export function analyzeAIRaceEngineer(input) {
       0,
     );
 
-    const historicalScore = getCarALRHistoricalScore(car.id);
+    const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
     const alrBonus = (historicalScore / maxHistorical) * 12;
     const consistency = scoreConsistency(car, track, raceSettings);
     const compound = pickBestTyre(
@@ -623,8 +637,8 @@ export function analyzeAIRaceEngineer(input) {
 
   ranked.sort((a, b) => b.overallScore - a.overallScore);
 
-  const topPick = ranked[0] ?? null;
-  const alternativeChoice = ranked[1] ?? null;
+  const topPick = pickEligibleRecommendation(ranked[0] ?? null);
+  const alternativeChoice = pickEligibleRecommendation(ranked[1] ?? null);
   const styleLabel =
     DRIVER_STYLE_OPTIONS.find((option) => option.id === styleId)?.label ??
     "Balanced";

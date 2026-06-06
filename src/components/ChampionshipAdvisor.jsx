@@ -7,6 +7,7 @@ import {
   rankCarsByChampionshipConsistency,
   recommendCarsForChampionship,
 } from "../engine/championshipEngine.js";
+import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
 
 export default function ChampionshipAdvisor() {
@@ -330,9 +331,18 @@ export default function ChampionshipAdvisor() {
               <li key={car.id} style={styles.resultItem}>
                 <div style={styles.resultHeader}>
                   <span style={styles.carName}>{car.name}</span>
-                  <span style={styles.score}>
-                    Overall Score: {car.score.toFixed(2)}
-                  </span>
+                  <div style={styles.resultActions}>
+                    <span style={styles.score}>
+                      Overall Score: {car.score.toFixed(2)}
+                    </span>
+                    <ReportIssueButton
+                      sourcePage="Championship Advisor"
+                      itemName={car.name}
+                      defaultIssueType="wrong_recommendation"
+                      gameVersion={gameVersion}
+                      compact
+                    />
+                  </div>
                 </div>
                 {car.trackAnalysis ? (
                   <div style={styles.trackAnalysisBlock}>
@@ -379,7 +389,18 @@ export default function ChampionshipAdvisor() {
             {consistencyRankings.map((car) => (
               <li key={car.id} style={styles.consistencyItem}>
                 <span style={styles.carName}>{car.name}</span>
-                <span style={styles.score}>{car.consistencyScore.toFixed(2)}</span>
+                <div style={styles.resultActions}>
+                  <span style={styles.score}>
+                    {car.consistencyScore.toFixed(2)}
+                  </span>
+                  <ReportIssueButton
+                    sourcePage="Championship Advisor — Consistency"
+                    itemName={car.name}
+                    defaultIssueType="wrong_score"
+                    gameVersion={gameVersion}
+                    compact
+                  />
+                </div>
               </li>
             ))}
           </ol>
@@ -653,6 +674,14 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+  resultActions: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
   },
   carName: {
     color: "#f3f7ff",

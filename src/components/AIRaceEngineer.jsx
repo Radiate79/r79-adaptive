@@ -19,7 +19,8 @@ import {
 } from "../utils/aiRaceFeedbackStorage.js";
 import { PERSONALISATION_STATUS } from "../data/driverProfile.js";
 import { loadDriverProfile } from "../utils/driverProfileStorage.js";
-import { getCarsForGame, getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import { ReportIssueButton } from "./ReportIssue.jsx";
+import { getRecommendableCarsForGame, getTracksForGame, isGameDataReady } from "../utils/gameData.js";
 
 function ConfidenceMeter({ value }) {
   return (
@@ -43,7 +44,10 @@ function ConfidenceMeter({ value }) {
 export default function AIRaceEngineer() {
   const { gameVersion, setGameVersion, gameOptions, game } = useGameVersion();
   const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
-  const cars = useMemo(() => getCarsForGame(gameVersion), [gameVersion]);
+  const cars = useMemo(
+    () => getRecommendableCarsForGame(gameVersion),
+    [gameVersion],
+  );
 
   const [trackId, setTrackId] = useState("");
   const [raceLength, setRaceLength] = useState("medium");
@@ -446,7 +450,16 @@ export default function AIRaceEngineer() {
           </article>
 
           <section style={styles.detailSection}>
-            <h3 style={styles.detailSectionTitle}>Detailed Recommendations</h3>
+            <div style={styles.detailSectionHeader}>
+              <h3 style={styles.detailSectionTitle}>Detailed Recommendations</h3>
+              <ReportIssueButton
+                sourcePage="AI Race Engineer"
+                itemName={analysis.recommendedCar.name}
+                defaultIssueType="wrong_recommendation"
+                gameVersion={gameVersion}
+                compact
+              />
+            </div>
             <div style={styles.detailGrid}>
               <OutputRow
                 icon="🏎"
@@ -498,7 +511,16 @@ export default function AIRaceEngineer() {
 
           {analysis.alternativeChoice ? (
             <div style={styles.summaryCard}>
-              <h3 style={styles.panelTitle}>Alternative Choice</h3>
+              <div style={styles.summaryCardHeader}>
+                <h3 style={styles.panelTitle}>Alternative Choice</h3>
+                <ReportIssueButton
+                  sourcePage="AI Race Engineer — Alternative"
+                  itemName={analysis.alternativeChoice.car.name}
+                  defaultIssueType="wrong_recommendation"
+                  gameVersion={gameVersion}
+                  compact
+                />
+              </div>
               <p style={styles.summaryText}>
                 <strong>{analysis.alternativeChoice.car.name}</strong> —{" "}
                 {analysis.alternativeChoice.summary}
@@ -1006,6 +1028,13 @@ const styles = {
     marginBottom: "14px",
     padding: "14px",
   },
+  detailSectionHeader: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+  },
   detailSectionTitle: {
     color: "#e8efff",
     fontSize: "0.95rem",
@@ -1013,6 +1042,14 @@ const styles = {
     letterSpacing: "0.03em",
     margin: 0,
     textTransform: "uppercase",
+  },
+  summaryCardHeader: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+    marginBottom: "8px",
   },
   detailGrid: {
     display: "grid",

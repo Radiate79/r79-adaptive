@@ -5,6 +5,7 @@ import {
   getCarProfile,
   searchCarProfiles,
 } from "../engine/carProfileEngine.js";
+import { ReportIssueButton } from "./ReportIssue.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
 
 const TREND_STYLES = {
@@ -164,7 +165,16 @@ export default function CarProfiles() {
                   </span>
                 </div>
                 <div style={styles.heroContent}>
-                  <h3 style={styles.heroTitle}>{profile.name}</h3>
+                  <div style={styles.heroTitleRow}>
+                    <h3 style={styles.heroTitle}>{profile.name}</h3>
+                    <ReportIssueButton
+                      sourcePage="Car Profiles"
+                      itemName={profile.name}
+                      defaultIssueType="incorrect_car_class"
+                      gameVersion={gameVersion}
+                      compact
+                    />
+                  </div>
                   <div style={styles.heroTags}>
                     <span style={styles.tag}>{profile.manufacturer}</span>
                     <span style={styles.tag}>{profile.category}</span>
@@ -566,10 +576,18 @@ const styles = {
   heroContent: {
     minWidth: 0,
   },
+  heroTitleRow: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+    marginBottom: "10px",
+  },
   heroTitle: {
     color: "#f3f7ff",
     fontSize: "1.3rem",
-    margin: "0 0 10px",
+    margin: 0,
   },
   heroTags: {
     display: "flex",

@@ -3,6 +3,7 @@ import { useGameVersion } from "../context/GameVersionContext.jsx";
 import { ALR_TIER_POINTS } from "../data/alrChampionshipWeighting.js";
 import { driverStyles } from "../data/driverStyles.js";
 import { recommendTeamCarShortlist } from "../engine/shortlistAdvisorEngine.js";
+import { ReportIssueButton } from "./ReportIssue.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
 
 const TIERS = Object.keys(ALR_TIER_POINTS)
@@ -218,7 +219,16 @@ export default function TeamCarShortlistAdvisor() {
       ) : primaryPick ? (
         <>
           <div style={styles.heroPanel}>
-            <p style={styles.heroLabel}>Recommended Car</p>
+            <div style={styles.heroHeaderRow}>
+              <p style={styles.heroLabel}>Recommended Car</p>
+              <ReportIssueButton
+                sourcePage="Team Car Shortlist Advisor"
+                itemName={primaryPick.name}
+                defaultIssueType="wrong_recommendation"
+                gameVersion={gameVersion}
+                compact
+              />
+            </div>
             <h3 style={styles.heroTitle}>{primaryPick.name}</h3>
             <p style={styles.heroMeta}>
               {primaryPick.class} · {primaryPick.drivetrain} ·{" "}
@@ -261,7 +271,11 @@ export default function TeamCarShortlistAdvisor() {
               <h3 style={styles.submissionTitle}>Positions 2–5</h3>
               <div style={styles.shortlist}>
                 {submissionOrder.map((entry) => (
-                  <ShortlistCard key={entry.carId} entry={entry} />
+                  <ShortlistCard
+                    key={entry.carId}
+                    entry={entry}
+                    gameVersion={gameVersion}
+                  />
                 ))}
               </div>
             </div>
@@ -271,7 +285,12 @@ export default function TeamCarShortlistAdvisor() {
             <h3 style={styles.submissionTitle}>Full 5-Car Submission Order</h3>
             <div style={styles.shortlist}>
               {shortlist.map((entry) => (
-                <ShortlistCard key={`full-${entry.carId}`} entry={entry} compact />
+                <ShortlistCard
+                  key={`full-${entry.carId}`}
+                  entry={entry}
+                  gameVersion={gameVersion}
+                  compact
+                />
               ))}
             </div>
           </div>
@@ -312,7 +331,7 @@ function ScoreBreakdown({ entry }) {
   );
 }
 
-function ShortlistCard({ entry, compact = false }) {
+function ShortlistCard({ entry, compact = false, gameVersion }) {
   const riskStyle = RISK_STYLES[entry.availabilityRisk];
 
   return (
@@ -325,16 +344,25 @@ function ShortlistCard({ entry, compact = false }) {
             {entry.class} · {entry.drivetrain} · {entry.slotLabel}
           </p>
         </div>
-        <span
-          style={{
-            ...styles.riskBadge,
-            color: riskStyle.color,
-            borderColor: riskStyle.border,
-            background: riskStyle.background,
-          }}
-        >
-          {entry.availabilityRisk} Risk
-        </span>
+        <div style={styles.cardHeaderActions}>
+          <span
+            style={{
+              ...styles.riskBadge,
+              color: riskStyle.color,
+              borderColor: riskStyle.border,
+              background: riskStyle.background,
+            }}
+          >
+            {entry.availabilityRisk} Risk
+          </span>
+          <ReportIssueButton
+            sourcePage="Team Car Shortlist Advisor"
+            itemName={entry.name}
+            defaultIssueType="wrong_recommendation"
+            gameVersion={gameVersion}
+            compact
+          />
+        </div>
       </div>
 
       {!compact ? (
@@ -526,12 +554,20 @@ const styles = {
     marginBottom: "14px",
     padding: "16px",
   },
+  heroHeaderRow: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+    marginBottom: "6px",
+  },
   heroLabel: {
     color: "#b8cdff",
     fontSize: "0.82rem",
     fontWeight: 700,
     letterSpacing: "0.04em",
-    margin: "0 0 6px",
+    margin: 0,
     textTransform: "uppercase",
   },
   heroTitle: {
@@ -603,6 +639,12 @@ const styles = {
     gap: "12px",
     justifyContent: "space-between",
     marginBottom: "12px",
+  },
+  cardHeaderActions: {
+    alignItems: "flex-end",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
   },
   rankBadge: {
     background: "linear-gradient(90deg, #2b56c8, #3e79ff)",

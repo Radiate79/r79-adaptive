@@ -9,7 +9,10 @@ import {
   LABS_STATUS_COLORS,
 } from "../data/labsMeta.js";
 
-export default function R79Labs() {
+/**
+ * @param {{ onOpenDataReports?: () => void }} props
+ */
+export default function R79Labs({ onOpenDataReports }) {
   return (
     <section style={styles.shell}>
       <style>{`
@@ -75,6 +78,23 @@ export default function R79Labs() {
           <LabFeatureCard key={feature.id} feature={feature} />
         ))}
       </div>
+
+      {onOpenDataReports ? (
+        <div style={styles.toolsPanel}>
+          <h3 style={styles.toolsTitle}>Labs Tools</h3>
+          <p style={styles.toolsText}>
+            Found incorrect car, track, class or recommendation data? Report it
+            and review submissions locally.
+          </p>
+          <button
+            type="button"
+            onClick={onOpenDataReports}
+            style={styles.toolsButton}
+          >
+            Open Data Reports
+          </button>
+        </div>
+      ) : null}
 
       <footer style={styles.footer}>
         {LABS_FOOTER_LINES.map((line) => (
@@ -470,6 +490,35 @@ const styles = {
     height: "100%",
     minWidth: "4px",
     transition: "width 0.3s ease",
+  },
+  toolsPanel: {
+    background: "rgba(12, 18, 31, 0.75)",
+    border: "1px solid rgba(128, 160, 229, 0.28)",
+    borderRadius: "12px",
+    marginBottom: "16px",
+    padding: "16px",
+  },
+  toolsTitle: {
+    color: "#e8efff",
+    fontSize: "1rem",
+    margin: "0 0 8px",
+  },
+  toolsText: {
+    color: "#b8c8ef",
+    fontSize: "0.9rem",
+    lineHeight: 1.5,
+    margin: "0 0 12px",
+  },
+  toolsButton: {
+    background: "linear-gradient(135deg, #3b6fd4, #2a4f9c)",
+    border: "none",
+    borderRadius: "8px",
+    color: "#fff",
+    cursor: "pointer",
+    fontFamily: "inherit",
+    fontSize: "0.88rem",
+    fontWeight: 600,
+    padding: "10px 14px",
   },
   footer: {
     borderTop: "1px solid rgba(124, 156, 222, 0.22)",

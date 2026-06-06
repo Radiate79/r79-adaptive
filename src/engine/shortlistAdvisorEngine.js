@@ -1,5 +1,10 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
-import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import { isCarEligibleForRecommendations } from "../utils/carClassFilter.js";
+import {
+  getCarsForGame,
+  getRecommendableCarsForGame,
+  getTracksForGame,
+} from "../utils/gameData.js";
 import {
   ALR_HISTORICAL_SEASON_FROM,
   ALR_HISTORICAL_SEASON_TO,
@@ -107,29 +112,6 @@ const DRIVER_STYLE_WEIGHTS = {
   "Qualifying Specialist": { performance: 0.05, availabilityPenalty: 0.02 },
 };
 
-function normalizeClass(value) {
-  return String(value ?? "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function isCarInClass(car, carClass) {
-  if (!carClass) {
-    return true;
-  }
-
-  const requestedClass = normalizeClass(carClass);
-  const carClassFields = [
-    car.class,
-    car.carClass,
-    car.category,
-    car.group,
-    car.name,
-  ].map(normalizeClass);
-
-  return carClassFields.some((value) => value.includes(requestedClass));
-}
-
 function resolveTracks(trackIds, gameVersion = DEFAULT_GAME_VERSION) {
   const tracks = getTracksForGame(gameVersion);
 
@@ -159,7 +141,12 @@ function minMaxNormalize(values) {
  * @param {string} carId
  * @param {number} tier
  */
-function getCarTierALRHistoricalScore(carId, tier) {
+function getCarTierALRHistoricalScore(carId, tier, gameVersion = DEFAULT_GAME_VERSION) {
+  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
+  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
+    return 0;
+  }
+
   const records = loadALRRecords().filter(
     (record) =>
       record.car === carId &&
@@ -350,7 +337,11 @@ function buildCarMetrics(car, input, championshipTracks, drivetrainRankings) {
     championshipTracks,
     raceSettings,
   );
-  const alrHistoricalScore = getCarTierALRHistoricalScore(car.id, input.tier);
+  const alrHistoricalScore = getCarTierALRHistoricalScore(
+    car.id,
+    input.tier,
+    input.gameVersion ?? DEFAULT_GAME_VERSION,
+  );
   const drivetrainFitScore =
     drivetrainRankings.find((entry) => entry.drivetrain === car.drivetrain)
       ?.score ?? 50;
@@ -407,8 +398,7 @@ export function recommendTeamCarShortlist(input) {
   const championshipTracks = resolveTracks(input.trackIds, gameVersion);
   const drivetrainRankings = analyzeDrivetrainSuitability(championshipTracks);
   const driverStyles = [input.driver1, input.driver2].filter(Boolean);
-  const candidates = getCarsForGame(gameVersion)
-    .filter((car) => isCarInClass(car, carClass))
+  const candidates = getRecommendableCarsForGame(gameVersion, carClass)
     .map((car) => ({
       car,
       metrics: buildCarMetrics(
@@ -519,5 +509,11 @@ export function recommendTeamCarShortlist(input) {
     });
   }
 
-  return shortlist;
+  return shortlist.filter((entry) =>
+    isCarEligibleForRecommendations({
+      id: entry.carId,
+      name: entry.name,
+      class: entry.class,
+    }),
+  );
 }

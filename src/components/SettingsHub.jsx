@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   COMPLETED_MILESTONES,
   FOUNDER_NAME,
@@ -16,6 +16,7 @@ import {
 } from "../data/pathfinderMeta.js";
 import { getFounderStats } from "../utils/founderStats.js";
 import BrandVersionLabel from "./branding/BrandVersionLabel.jsx";
+import DataReports from "./DataReports.jsx";
 import R79Archive from "./R79Archive.jsx";
 
 const VIEWS = {
@@ -23,10 +24,25 @@ const VIEWS = {
   about: "about",
   archive: "archive",
   founder: "founder",
+  dataReports: "dataReports",
 };
 
-export default function SettingsHub() {
-  const [view, setView] = useState(VIEWS.settings);
+/**
+ * @param {{ bootView?: string | null, onBootViewConsumed?: () => void }} props
+ */
+export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
+  const [view, setView] = useState(
+    bootView === VIEWS.dataReports ? VIEWS.dataReports : VIEWS.settings,
+  );
+
+  useEffect(() => {
+    if (bootView !== VIEWS.dataReports) {
+      return;
+    }
+
+    setView(VIEWS.dataReports);
+    onBootViewConsumed?.();
+  }, [bootView]);
   const stats = useMemo(() => getFounderStats(), [view]);
 
   if (view === VIEWS.archive) {
@@ -118,6 +134,24 @@ export default function SettingsHub() {
     );
   }
 
+  if (view === VIEWS.dataReports) {
+    return (
+      <section style={styles.shell}>
+        <DataReports
+          breadcrumb={
+            <Breadcrumb
+              items={[
+                { label: "Settings", onClick: () => setView(VIEWS.settings) },
+                { label: "Data Reports", active: true },
+              ]}
+            />
+          }
+          onBack={() => setView(VIEWS.settings)}
+        />
+      </section>
+    );
+  }
+
   if (view === VIEWS.about) {
     return (
       <section style={styles.shell}>
@@ -203,6 +237,18 @@ export default function SettingsHub() {
       >
         <span style={styles.settingsRowLabel}>About R79</span>
         <span style={styles.settingsRowHint}>Version, Pathfinder, founder</span>
+        <span style={styles.chevron}>›</span>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setView(VIEWS.dataReports)}
+        style={styles.settingsRow}
+      >
+        <span style={styles.settingsRowLabel}>Data Reports</span>
+        <span style={styles.settingsRowHint}>
+          Review reported data issues locally
+        </span>
         <span style={styles.chevron}>›</span>
       </button>
     </section>

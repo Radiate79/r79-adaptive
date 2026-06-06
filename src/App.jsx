@@ -83,6 +83,7 @@ const LOGO_CLICK_RESET_MS = 3000;
 function AppShell() {
 
   const [page, setPage] = useState("todays-race");
+  const [settingsBootView, setSettingsBootView] = useState(null);
 
   const [showSplash, setShowSplash] = useState(() => !hasSeenSplash());
 
@@ -296,11 +297,23 @@ function AppShell() {
 
       {page === "pathfinder" ? <Pathfinder /> : null}
 
-      {page === "labs" ? <R79Labs /> : null}
+      {page === "labs" ? (
+        <R79Labs
+          onOpenDataReports={() => {
+            setSettingsBootView("dataReports");
+            setPage("settings");
+          }}
+        />
+      ) : null}
 
       {page === "ai-engineer" ? <AIRaceEngineer /> : null}
 
-      {page === "settings" ? <SettingsHub /> : null}
+      {page === "settings" ? (
+        <SettingsHub
+          bootView={settingsBootView}
+          onBootViewConsumed={() => setSettingsBootView(null)}
+        />
+      ) : null}
 
 
 

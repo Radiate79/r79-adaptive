@@ -1,5 +1,10 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
-import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  filterEligibleRecommendationResults,
+  filterRecommendationPool,
+  isCarEligibleForRecommendations,
+} from "../utils/carClassFilter.js";
+import { getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
 
 const SCORE_FIELDS = ["topSpeed", "traction", "fuel", "tyres", "stability"];
 const SCORING_FIELDS = [...SCORE_FIELDS, "rotation"];
@@ -196,29 +201,6 @@ function resolveTracksByIds(
   return selectedTrackIds
     .map((trackId) => tracks.find((track) => track.id === trackId) ?? null)
     .filter(Boolean);
-}
-
-function normalizeClass(value) {
-  return String(value ?? "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function isCarInClass(car, carClass) {
-  if (!carClass) {
-    return true;
-  }
-
-  const requestedClass = normalizeClass(carClass);
-  const carClassFields = [
-    car.class,
-    car.carClass,
-    car.category,
-    car.group,
-    car.name,
-  ].map(normalizeClass);
-
-  return carClassFields.some((value) => value.includes(requestedClass));
 }
 
 function toPercent(value) {
@@ -468,20 +450,20 @@ export function rankCarsByChampionshipConsistency(
   gameVersion = DEFAULT_GAME_VERSION,
 ) {
   const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
-  const candidateCars = getCarsForGame(gameVersion).filter((car) =>
-    isCarInClass(car, carClass),
-  );
+  const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
 
-  return candidateCars
-    .map((car) => ({
-      ...car,
-      consistencyScore: scoreCarConsistency(
-        car,
-        championshipTracks,
-        raceSettings,
-      ),
-    }))
-    .sort((a, b) => b.consistencyScore - a.consistencyScore);
+  return filterEligibleRecommendationResults(
+    candidateCars
+      .map((car) => ({
+        ...car,
+        consistencyScore: scoreCarConsistency(
+          car,
+          championshipTracks,
+          raceSettings,
+        ),
+      }))
+      .sort((a, b) => b.consistencyScore - a.consistencyScore),
+  );
 }
 
 export function recommendCarsForChampionship(
@@ -491,36 +473,39 @@ export function recommendCarsForChampionship(
   gameVersion = DEFAULT_GAME_VERSION,
 ) {
   const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
-  const candidateCars = getCarsForGame(gameVersion).filter((car) =>
-    isCarInClass(car, carClass),
-  );
+  const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
 
-  return candidateCars
-    .map((car) => ({
-      ...car,
-      score: scoreCarForChampionship(car, championshipTracks, raceSettings),
-      reasons: generateCarReasons(car, championshipTracks, raceSettings, 3),
-    }))
-    .sort((a, b) => b.score - a.score);
+  return filterEligibleRecommendationResults(
+    candidateCars
+      .map((car) => ({
+        ...car,
+        score: scoreCarForChampionship(car, championshipTracks, raceSettings),
+        reasons: generateCarReasons(car, championshipTracks, raceSettings, 3),
+      }))
+      .sort((a, b) => b.score - a.score),
+  );
 }
 
 export function rankCarsForChampionship(
   championshipTracks,
-  availableCars = getCarsForGame(DEFAULT_GAME_VERSION),
+  availableCars = getRecommendableCarsForGame(DEFAULT_GAME_VERSION),
 ) {
   const resolvedTracks = championshipTracks;
 
-  return [...availableCars]
-    .map((car) => ({
-      ...car,
-      score: scoreCarForChampionship(car, resolvedTracks),
-    }))
-    .sort((a, b) => b.score - a.score);
+  return filterEligibleRecommendationResults(
+    [...filterRecommendationPool(availableCars)]
+      .filter((car) => isCarEligibleForRecommendations(car))
+      .map((car) => ({
+        ...car,
+        score: scoreCarForChampionship(car, resolvedTracks),
+      }))
+      .sort((a, b) => b.score - a.score),
+  );
 }
 
 export function recommendBestCarForChampionship(
   championshipTracks,
-  availableCars = getCarsForGame(DEFAULT_GAME_VERSION),
+  availableCars = getRecommendableCarsForGame(DEFAULT_GAME_VERSION),
 ) {
   const rankedCars = rankCarsForChampionship(championshipTracks, availableCars);
   return rankedCars[0] ?? null;

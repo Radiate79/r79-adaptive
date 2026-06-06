@@ -7,6 +7,7 @@ import {
   RACE_LENGTH_OPTIONS,
   TYRE_COMPOUND_OPTIONS,
 } from "../engine/todaysRaceAdvisorEngine.js";
+import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
 
 function RatingBar({ label, value }) {
@@ -311,9 +312,17 @@ export default function TodaysRaceAdvisor() {
               <p style={styles.heroLabel}>Recommended Car</p>
               <h3 style={styles.heroTitle}>{analysis.topPick.name}</h3>
             </div>
-            <span style={styles.heroScore}>
-              {analysis.topPick.overallScore.toFixed(1)}
-            </span>
+            <div style={styles.cardActions}>
+              <span style={styles.heroScore}>
+                {analysis.topPick.overallScore.toFixed(1)}
+              </span>
+              <ReportIssueButton
+                sourcePage="Today's Race Advisor"
+                itemName={analysis.topPick.name}
+                defaultIssueType="wrong_recommendation"
+                gameVersion={gameVersion}
+              />
+            </div>
           </div>
           <div style={styles.heroRatings}>
             <RatingBar label="Strength" value={analysis.topPick.strengthRating} />
@@ -337,7 +346,16 @@ export default function TodaysRaceAdvisor() {
 
       {analysis.ready && analysis.alternativeChoice ? (
         <div style={styles.altPanel}>
-          <h3 style={styles.panelTitle}>Alternative Choice</h3>
+          <div style={styles.panelTitleRow}>
+            <h3 style={styles.panelTitle}>Alternative Choice</h3>
+            <ReportIssueButton
+              sourcePage="Today's Race Advisor"
+              itemName={analysis.alternativeChoice.name}
+              defaultIssueType="wrong_recommendation"
+              gameVersion={gameVersion}
+              compact
+            />
+          </div>
           <p style={styles.altLead}>
             If <strong>{analysis.topPick?.name}</strong> is unavailable, consider{" "}
             <strong>{analysis.alternativeChoice.name}</strong>.
@@ -378,16 +396,25 @@ export default function TodaysRaceAdvisor() {
                     <span style={styles.carRank}>#{index + 1}</span>
                     <h4 style={styles.carName}>{car.name}</h4>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleUnavailable(car.id)}
-                    style={{
-                      ...styles.unavailButton,
-                      ...(car.unavailable ? styles.unavailButtonActive : null),
-                    }}
-                  >
-                    {car.unavailable ? "Unavailable" : "Mark unavailable"}
-                  </button>
+                  <div style={styles.cardActions}>
+                    <ReportIssueButton
+                      sourcePage="Today's Race Advisor — Top 10"
+                      itemName={car.name}
+                      defaultIssueType="wrong_recommendation"
+                      gameVersion={gameVersion}
+                      compact
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleUnavailable(car.id)}
+                      style={{
+                        ...styles.unavailButton,
+                        ...(car.unavailable ? styles.unavailButtonActive : null),
+                      }}
+                    >
+                      {car.unavailable ? "Unavailable" : "Mark unavailable"}
+                    </button>
+                  </div>
                 </div>
 
                 <div style={styles.scoreRow}>
@@ -644,6 +671,21 @@ const styles = {
     justifyContent: "space-between",
     gap: "12px",
     marginBottom: "12px",
+  },
+  cardActions: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    justifyContent: "flex-end",
+  },
+  panelTitleRow: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+    marginBottom: "8px",
   },
   heroLabel: {
     margin: 0,

@@ -6,6 +6,7 @@ import {
   ALR_TIER_POINTS,
 } from "../data/alrChampionshipWeighting.js";
 import { GT7_GAME_VERSION } from "../data/gameVersions.js";
+import { isCarEligibleForRecommendations } from "../utils/carClassFilter.js";
 import { getCarsForGame } from "../utils/gameData.js";
 
 function normalizeCarId(car) {
@@ -141,6 +142,15 @@ export function getCarAveragePosition(car, filters = {}) {
  * @param {{ fromSeason?: number, toSeason?: number }} [filters]
  */
 export function getCarALRScore(car, filters = {}) {
+  const carId = normalizeCarId(car);
+  const carMeta = getCarsForGame(GT7_GAME_VERSION).find(
+    (entry) => entry.id === carId,
+  );
+
+  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
+    return 0;
+  }
+
   const records = getALRRecordsForCar(car, filters);
   if (records.length === 0) {
     return 0;
@@ -203,6 +213,11 @@ export function getAllCarsALRHistoricalScores(options = {}) {
       const carMeta = getCarsForGame(GT7_GAME_VERSION).find(
         (car) => car.id === carId,
       );
+
+      if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
+        return null;
+      }
+
       const records = getALRRecordsForCar(carId, { fromSeason, toSeason });
 
       return {
@@ -222,5 +237,6 @@ export function getAllCarsALRHistoricalScores(options = {}) {
         })),
       };
     })
+    .filter(Boolean)
     .sort((a, b) => b.historicalScore - a.historicalScore);
 }

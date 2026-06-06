@@ -2,6 +2,7 @@ import {
   DEFAULT_GAME_VERSION,
   getGameCatalogEntry,
 } from "../data/gameVersions.js";
+import { filterRecommendationPool } from "./carClassFilter.js";
 import { cars as gt7Cars } from "../data/gt7/cars.js";
 import { tracks as gt7Tracks } from "../data/gt7/tracks.js";
 import { cars as gt8Cars } from "../data/gt8/cars.js";
@@ -29,6 +30,19 @@ export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.cars ??
     GAME_DATA[DEFAULT_GAME_VERSION].cars
   );
+}
+
+/**
+ * Cars eligible for all R79 recommendation surfaces (advisors, engineer, shortlists).
+ * Source data is preserved; excluded cars remain in getCarsForGame().
+ * @param {GameVersion | string} [gameVersion]
+ * @param {string} [carClass]
+ */
+export function getRecommendableCarsForGame(
+  gameVersion = DEFAULT_GAME_VERSION,
+  carClass,
+) {
+  return filterRecommendationPool(getCarsForGame(gameVersion), carClass);
 }
 
 /**
