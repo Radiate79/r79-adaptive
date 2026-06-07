@@ -38,24 +38,20 @@ import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
 
 import TodaysRaceAdvisor from "./components/TodaysRaceAdvisor.jsx";
 
+import WheelSettingsHub from "./components/WheelSettingsHub.jsx";
+
 import { hasSeenSplash } from "./utils/splashStorage.js";
 
 
 
 const PAGES = [
-
   { id: "todays-race", label: "Today's Race" },
-
   { id: "ai-engineer", label: "AI Race Engineer" },
-
+  { id: "wheel-settings", label: "Wheel Settings" },
   { id: "advisor", label: "Championship Advisor" },
-
   { id: "shortlist", label: "Team Car Shortlist" },
-
   { id: "alr", label: "Race Archive" },
-
   { id: "rankings", label: "Historical Rankings" },
-
   { id: "profiles", label: "Car Profiles" },
 
   { id: "alr-corner", label: "ALR Corner" },
@@ -88,6 +84,7 @@ function AppShell() {
 
   const [page, setPage] = useState("todays-race");
   const [settingsBootView, setSettingsBootView] = useState(null);
+  const [wheelSettingsPrefill, setWheelSettingsPrefill] = useState(null);
 
   const [showSplash, setShowSplash] = useState(() => !hasSeenSplash());
 
@@ -102,7 +99,74 @@ function AppShell() {
   const showRaceDataNotice =
     RACE_DATA_PAGES.has(page) && gameVersion !== "gt7";
 
-
+  const renderPage = () => {
+    switch (page) {
+      case "todays-race":
+        return <TodaysRaceAdvisor />;
+      case "ai-engineer":
+        return (
+          <AIRaceEngineer
+            onOpenWheelSettings={(prefill) => {
+              setWheelSettingsPrefill(prefill);
+              setPage("wheel-settings");
+            }}
+          />
+        );
+      case "wheel-settings":
+        return (
+          <WheelSettingsHub
+            prefill={wheelSettingsPrefill}
+            onPrefillConsumed={() => setWheelSettingsPrefill(null)}
+          />
+        );
+      case "advisor":
+        return <ChampionshipAdvisor />;
+      case "shortlist":
+        return <TeamCarShortlistAdvisor />;
+      case "rankings":
+        return <ALRHistoricalRankings />;
+      case "profiles":
+        return <CarProfiles />;
+      case "alr":
+        return <ALRDataEntry />;
+      case "alr-corner":
+        return <ALRCorner />;
+      case "archive":
+        return (
+          <R79Archive
+            onNavigate={(view) => {
+              if (view === "settings" || view === "about") {
+                setPage("settings");
+              }
+            }}
+          />
+        );
+      case "promise":
+        return <ThePromise />;
+      case "membership":
+        return <Membership onOpenPathfinder={() => setPage("pathfinder")} />;
+      case "pathfinder":
+        return <Pathfinder />;
+      case "labs":
+        return (
+          <R79Labs
+            onOpenDataReports={() => {
+              setSettingsBootView("dataReports");
+              setPage("settings");
+            }}
+          />
+        );
+      case "settings":
+        return (
+          <SettingsHub
+            bootView={settingsBootView}
+            onBootViewConsumed={() => setSettingsBootView(null)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   const handleLogoClick = () => {
 
@@ -272,55 +336,7 @@ function AppShell() {
 
 
 
-      {page === "todays-race" ? <TodaysRaceAdvisor /> : null}
-
-      {page === "advisor" ? <ChampionshipAdvisor /> : null}
-
-      {page === "shortlist" ? <TeamCarShortlistAdvisor /> : null}
-
-      {page === "rankings" ? <ALRHistoricalRankings /> : null}
-
-      {page === "profiles" ? <CarProfiles /> : null}
-
-      {page === "alr" ? <ALRDataEntry /> : null}
-
-      {page === "alr-corner" ? <ALRCorner /> : null}
-
-      {page === "archive" ? (
-        <R79Archive
-          onNavigate={(view) => {
-            if (view === "settings" || view === "about") {
-              setPage("settings");
-            }
-          }}
-        />
-      ) : null}
-
-      {page === "promise" ? <ThePromise /> : null}
-
-      {page === "membership" ? (
-        <Membership onOpenPathfinder={() => setPage("pathfinder")} />
-      ) : null}
-
-      {page === "pathfinder" ? <Pathfinder /> : null}
-
-      {page === "labs" ? (
-        <R79Labs
-          onOpenDataReports={() => {
-            setSettingsBootView("dataReports");
-            setPage("settings");
-          }}
-        />
-      ) : null}
-
-      {page === "ai-engineer" ? <AIRaceEngineer /> : null}
-
-      {page === "settings" ? (
-        <SettingsHub
-          bootView={settingsBootView}
-          onBootViewConsumed={() => setSettingsBootView(null)}
-        />
-      ) : null}
+      {renderPage()}
 
 
 

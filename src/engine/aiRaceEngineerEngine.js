@@ -21,6 +21,8 @@ import {
 } from "../utils/recommendationScoring.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import { getALRResultScore } from "./alrPerformanceEngine.js";
+import { findWheelSetupForRaceEngineer } from "./wheelSettingsEngine.js";
+import { loadWheelSettingsPreferences } from "../utils/wheelSetupsStorage.js";
 
 const DEFAULT_ROTATION = {
   MR: 9,
@@ -732,11 +734,24 @@ export function analyzeAIRaceEngineer(input) {
       : null;
 
   const driverProfile = input.driverProfile ?? DEFAULT_DRIVER_PROFILE;
+  const wheelPreferences = loadWheelSettingsPreferences();
+  const engineerTyreCompound = compound ?? tyresAvailable[0] ?? "M";
+  const wheelSetupMatch = topPick
+    ? findWheelSetupForRaceEngineer({
+        gameVersion,
+        wheelBase: wheelPreferences.wheelBase ?? "thrustmaster_t598",
+        carId: topPick.id,
+        trackId: track.id,
+        tyreCompound: engineerTyreCompound,
+        bopOn,
+      })
+    : null;
 
   return {
     ready: true,
     track,
     recommendationStatus,
+    wheelSetupMatch,
     personalisation: {
       active: PERSONALISATION_STATUS.active,
       label: PERSONALISATION_STATUS.label,

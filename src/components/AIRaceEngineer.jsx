@@ -42,7 +42,17 @@ function ConfidenceMeter({ value }) {
   );
 }
 
-export default function AIRaceEngineer() {
+/**
+ * @param {{ onOpenWheelSettings?: (prefill: {
+ *   gameVersion: string,
+ *   wheelBase?: string,
+ *   carId: string,
+ *   trackId: string,
+ *   tyreCompound?: string,
+ *   bopOn?: boolean,
+ * }) => void }} props
+ */
+export default function AIRaceEngineer({ onOpenWheelSettings }) {
   const { gameVersion, setGameVersion, gameOptions, game } = useGameVersion();
   const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const cars = useMemo(
@@ -216,6 +226,33 @@ export default function AIRaceEngineer() {
         warning={analysis.recommendationStatus?.warning}
         message={analysis.recommendationStatus?.message}
       />
+
+      {analysis.wheelSetupMatch?.setup ? (
+        <div style={styles.wheelSetupBanner}>
+          <p style={styles.wheelSetupBannerText}>
+            Recommended Wheel Settings available
+            {analysis.wheelSetupMatch.setup.isStarter
+              ? " (Starter Setup)"
+              : ""}
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              onOpenWheelSettings?.({
+                gameVersion,
+                wheelBase: analysis.wheelSetupMatch.setup.wheelBase,
+                carId: analysis.wheelSetupMatch.setup.carId,
+                trackId: analysis.wheelSetupMatch.setup.trackId,
+                tyreCompound: analysis.wheelSetupMatch.setup.tyreCompound,
+                bopOn: analysis.wheelSetupMatch.setup.bopOn,
+              })
+            }
+            style={styles.wheelSetupLink}
+          >
+            Open Wheel Settings Hub
+          </button>
+        </div>
+      ) : null}
 
       <div style={styles.dashboardGrid}>
         <div style={styles.inputPanel}>
@@ -941,6 +978,34 @@ const styles = {
     margin: "12px auto 0",
     maxWidth: "560px",
     padding: "10px 12px",
+  },
+  wheelSetupBanner: {
+    alignItems: "center",
+    background: "rgba(30, 52, 101, 0.55)",
+    border: "1px solid rgba(132, 172, 255, 0.45)",
+    borderRadius: "12px",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "12px",
+    justifyContent: "space-between",
+    margin: "0 auto 14px",
+    maxWidth: "980px",
+    padding: "12px 14px",
+  },
+  wheelSetupBannerText: {
+    color: "#dce9ff",
+    fontSize: "0.92rem",
+    fontWeight: 600,
+    margin: 0,
+  },
+  wheelSetupLink: {
+    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    border: "1px solid #77a0ff",
+    borderRadius: "999px",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: 700,
+    padding: "8px 14px",
   },
   dashboardGrid: {
     display: "grid",
