@@ -5,13 +5,19 @@ import {
   isCarEligibleForRecommendations,
 } from "../utils/carClassFilter.js";
 import { getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
-import { getCalendarRecommendationStatus } from "../utils/trackClassification.js";
+import {
+  getCalendarRecommendationStatus,
+  getTrackSurfaceModifiers,
+} from "../utils/trackClassification.js";
 import {
   appendCommunityConfidenceReason,
   blendRecommendationScore,
+  buildRecommendationBreakdown,
   compareRecommendationRanking,
+  getAdjustedTechnicalScore,
   getCommunityConfidence,
   getRecommendationHistoricalScore,
+  passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
 
 const SCORE_FIELDS = ["topSpeed", "traction", "fuel", "tyres", "stability"];
@@ -93,6 +99,7 @@ function getAttributeDemandWeight(
 
 export function getTrackDemandWeights(track, raceSettings = {}) {
   const raceWeights = getScoreWeights(raceSettings);
+  const surfaceModifiers = getTrackSurfaceModifiers(track);
   const kerbDifficulty = Math.max(0, 8 - Number(track?.kerbs ?? 6));
   const attrs = {
     topSpeed: Number(track?.topSpeed ?? 5),
@@ -103,36 +110,57 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
   };
   const rotationValue = computeRotationDemand(track);
 
+  const applySurface = (field, weight) =>
+    weight * (surfaceModifiers[field] ?? 1);
+
   return {
-    topSpeed: getAttributeDemandWeight(
-      attrs.topSpeed,
-      raceWeights.topSpeed,
-      attrs.topSpeed >= 8 ? 1.4 : 1,
+    topSpeed: applySurface(
+      "topSpeed",
+      getAttributeDemandWeight(
+        attrs.topSpeed,
+        raceWeights.topSpeed,
+        attrs.topSpeed >= 8 ? 1.4 : 1,
+      ),
     ),
-    traction: getAttributeDemandWeight(
-      attrs.traction,
-      raceWeights.traction,
-      attrs.traction >= 8 ? 1.5 : 1,
+    traction: applySurface(
+      "traction",
+      getAttributeDemandWeight(
+        attrs.traction,
+        raceWeights.traction,
+        attrs.traction >= 8 ? 1.5 : 1,
+      ),
     ),
-    fuel: getAttributeDemandWeight(
-      attrs.fuel,
-      raceWeights.fuel,
-      attrs.fuel >= 8 ? 1.7 : 1,
+    fuel: applySurface(
+      "fuel",
+      getAttributeDemandWeight(
+        attrs.fuel,
+        raceWeights.fuel,
+        attrs.fuel >= 8 ? 1.7 : 1,
+      ),
     ),
-    tyres: getAttributeDemandWeight(
-      attrs.tyres,
-      raceWeights.tyres,
-      attrs.tyres >= 7 ? 1.5 : 1,
+    tyres: applySurface(
+      "tyres",
+      getAttributeDemandWeight(
+        attrs.tyres,
+        raceWeights.tyres,
+        attrs.tyres >= 7 ? 1.5 : 1,
+      ),
     ),
-    stability: getAttributeDemandWeight(
-      attrs.stability,
-      raceWeights.stability,
-      attrs.stability >= 7 || kerbDifficulty >= 3 ? 1.35 : 1,
+    stability: applySurface(
+      "stability",
+      getAttributeDemandWeight(
+        attrs.stability,
+        raceWeights.stability,
+        attrs.stability >= 7 || kerbDifficulty >= 3 ? 1.35 : 1,
+      ),
     ),
-    rotation: getAttributeDemandWeight(
-      rotationValue,
-      raceWeights.rotation,
-      attrs.traction >= 7.5 && attrs.topSpeed <= 8 ? 1.45 : 0.9,
+    rotation: applySurface(
+      "rotation",
+      getAttributeDemandWeight(
+        rotationValue,
+        raceWeights.rotation,
+        attrs.traction >= 7.5 && attrs.topSpeed <= 8 ? 1.45 : 0.9,
+      ),
     ),
   };
 }
@@ -573,20 +601,29 @@ export function recommendCarsForChampionship(
           car,
           generateCarReasons(car, championshipTracks, raceSettings, 3),
         );
+        const scoreBreakdown = buildRecommendationBreakdown(
+          technicalScore,
+          car,
+          historicalScores[index],
+          maxHistorical,
+        );
 
         return {
           ...car,
           technicalScore,
-          communityConfidence: getCommunityConfidence(car),
-          score: blendRecommendationScore(
+          adjustedTechnicalScore: getAdjustedTechnicalScore(
             technicalScore,
             car,
-            historicalScores[index],
-            maxHistorical,
           ),
+          trackFitScore: scoreBreakdown.trackFit,
+          technicalFitScore: scoreBreakdown.technicalFit,
+          communityConfidence: scoreBreakdown.communityConfidence,
+          scoreBreakdown,
+          score: scoreBreakdown.overallScore,
           reasons,
         };
       })
+      .filter((car) => passesCompetitiveUseGate(car, car.technicalScore))
       .sort(compareRecommendationRanking),
   );
 }

@@ -4,7 +4,9 @@ import { ALR_TIER_POINTS } from "../data/alrChampionshipWeighting.js";
 import { driverStyles } from "../data/driverStyles.js";
 import { recommendTeamCarShortlist } from "../engine/shortlistAdvisorEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
+import RacePresetControls from "./RacePresetControls.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
+import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 
 const TIERS = Object.keys(ALR_TIER_POINTS)
   .map(Number)
@@ -56,6 +58,15 @@ export default function TeamCarShortlistAdvisor() {
   const [driver2, setDriver2] = useState(driverStyles[1] ?? "");
   const [tier, setTier] = useState(1);
   const [carClass, setCarClass] = useState("Gr.3");
+  const {
+    presetId,
+    fuelMultiplier,
+    tyreMultiplier,
+    selectPreset,
+    setFuelMultiplier,
+    setTyreMultiplier,
+    raceSettings,
+  } = useRacePresetSettings();
 
   const teamLabel = useMemo(() => {
     if (inputMode === "team") {
@@ -72,11 +83,21 @@ export default function TeamCarShortlistAdvisor() {
         tier,
         carClass,
         gameVersion,
+        raceSettings,
         teamName: inputMode === "team" ? teamName.trim() : undefined,
         driver1: inputMode === "drivers" ? driver1 : undefined,
         driver2: inputMode === "drivers" ? driver2 : undefined,
       }),
-    [tier, carClass, gameVersion, inputMode, teamName, driver1, driver2],
+    [
+      tier,
+      carClass,
+      gameVersion,
+      raceSettings,
+      inputMode,
+      teamName,
+      driver1,
+      driver2,
+    ],
   );
 
   const primaryPick = shortlist[0] ?? null;
@@ -205,12 +226,22 @@ export default function TeamCarShortlistAdvisor() {
             </div>
           </div>
         </div>
+
+        <RacePresetControls
+          presetId={presetId}
+          onPresetChange={selectPreset}
+          fuelMultiplier={fuelMultiplier}
+          tyreMultiplier={tyreMultiplier}
+          onFuelMultiplierChange={setFuelMultiplier}
+          onTyreMultiplierChange={setTyreMultiplier}
+        />
       </div>
 
       <div style={styles.summaryPanel}>
         <h3 style={styles.summaryTitle}>5-Car Submission Strategy — {teamLabel}</h3>
         <p style={styles.summaryMeta}>
-          Tier {tier} · {carClass} · Submit cars in ranked order below
+          Tier {tier} · {carClass} · Tyre x{tyreMultiplier} · Fuel x{fuelMultiplier} ·
+          Submit cars in ranked order below
         </p>
       </div>
 

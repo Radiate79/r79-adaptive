@@ -6,6 +6,7 @@ import { getALRResultScore } from "../engine/alrPerformanceEngine.js";
 import { isCarEligibleForRecommendations } from "./carClassFilter.js";
 import { getCarsForGame } from "./gameData.js";
 import { loadALRRecords } from "./alrStorage.js";
+import { loadRaceArchiveEntries } from "./raceArchiveStorage.js";
 
 export const DEFAULT_COMMUNITY_CONFIDENCE = 60;
 
@@ -14,11 +15,14 @@ export const COMMUNITY_CONFIDENCE_REASON =
 
 export const COMMUNITY_CONFIDENCE_REASON_THRESHOLD = 75;
 
-/** Community can nudge rankings but must not overcome meaningful track-fit gaps. */
-export const COMMUNITY_MAX_MODIFIER = 3.5;
-export const HISTORICAL_MAX_MODIFIER = 2;
+/** Community reflects real GT7 competitive use alongside track fit. */
+export const COMMUNITY_MAX_MODIFIER = 12;
+export const HISTORICAL_MAX_MODIFIER = 6;
 export const COMMUNITY_BASELINE = DEFAULT_COMMUNITY_CONFIDENCE;
-export const TRACK_SUITABILITY_PRIORITY_GAP = 1;
+export const TRACK_SUITABILITY_PRIORITY_GAP = 0.75;
+export const LOW_COMPETITIVE_USE_TRACK_FIT_THRESHOLD = 88;
+export const RACE_ARCHIVE_WIN_POINTS = 12;
+export const RACE_ARCHIVE_PODIUM_POINTS = 4;
 
 /**
  * @param {{ communityConfidence?: number }} car
@@ -42,6 +46,74 @@ export function normalizeHistoricalContribution(historicalScore, maxHistorical) 
   }
 
   return (historicalScore / maxHistorical) * 100;
+}
+
+/**
+ * @param {{ recommendationPenalty?: number }} car
+ */
+export function getRecommendationPenalty(car) {
+  const penalty = Number(car?.recommendationPenalty ?? 0);
+  if (!Number.isFinite(penalty) || penalty <= 0) {
+    return 0;
+  }
+
+  return penalty;
+}
+
+/**
+ * @param {number} technicalScore
+ * @param {{ recommendationPenalty?: number }} car
+ */
+export function getAdjustedTechnicalScore(technicalScore, car) {
+  return Math.max(0, technicalScore - getRecommendationPenalty(car));
+}
+
+/**
+ * @param {{ competitiveUse?: string }} car
+ * @param {number} trackFitScore
+ */
+export function passesCompetitiveUseGate(car, trackFitScore) {
+  if (car?.competitiveUse !== "low") {
+    return true;
+  }
+
+  return trackFitScore >= LOW_COMPETITIVE_USE_TRACK_FIT_THRESHOLD;
+}
+
+/**
+ * @param {number} technicalScore
+ * @param {{ communityConfidence?: number, recommendationPenalty?: number }} car
+ * @param {number} [historicalScore]
+ * @param {number} [maxHistorical]
+ */
+export function buildRecommendationBreakdown(
+  technicalScore,
+  car,
+  historicalScore = 0,
+  maxHistorical = 1,
+) {
+  const trackFit = Number(technicalScore.toFixed(2));
+  const technicalFit = Number(
+    getAdjustedTechnicalScore(technicalScore, car).toFixed(2),
+  );
+  const communityConfidence = getCommunityConfidence(car);
+  const communityModifier = getCommunityModifier(car);
+  const historicalModifier = getHistoricalModifier(historicalScore, maxHistorical);
+
+  return {
+    trackFit,
+    technicalFit,
+    communityConfidence,
+    communityModifier: Number(communityModifier.toFixed(2)),
+    recommendationPenalty: getRecommendationPenalty(car),
+    historicalModifier: Number(historicalModifier.toFixed(2)),
+    overallScore: blendRecommendationScore(
+      technicalScore,
+      car,
+      historicalScore,
+      maxHistorical,
+    ),
+  };
 }
 
 /**
@@ -83,9 +155,11 @@ export function blendRecommendationScore(
   historicalScore = 0,
   maxHistorical = 1,
 ) {
+  const adjustedTechnical = getAdjustedTechnicalScore(technicalScore, car);
+
   return Number(
     (
-      technicalScore +
+      adjustedTechnical +
       getCommunityModifier(car) +
       getHistoricalModifier(historicalScore, maxHistorical)
     ).toFixed(2),
@@ -99,8 +173,12 @@ export function blendRecommendationScore(
  * @param {{ technicalScore?: number, overallScore?: number, score?: number }} b
  */
 export function compareRecommendationRanking(a, b) {
-  const techA = Number(a.technicalScore ?? a.score ?? 0);
-  const techB = Number(b.technicalScore ?? b.score ?? 0);
+  const techA = Number(
+    a.adjustedTechnicalScore ?? a.technicalScore ?? a.score ?? 0,
+  );
+  const techB = Number(
+    b.adjustedTechnicalScore ?? b.technicalScore ?? b.score ?? 0,
+  );
   const techDiff = techB - techA;
 
   if (Math.abs(techDiff) > TRACK_SUITABILITY_PRIORITY_GAP) {
@@ -141,6 +219,76 @@ export function appendCommunityConfidenceReason(car, reasons) {
 }
 
 /**
+ * @param {string} text
+ */
+function normalizeCarText(text) {
+  return String(text ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * @param {{ id: string, name: string }} car
+ * @param {string} text
+ */
+function archiveTextMatchesCar(car, text) {
+  const normalized = normalizeCarText(text);
+  if (!normalized) {
+    return false;
+  }
+
+  const carName = normalizeCarText(car.name);
+  const significantTokens = carName
+    .split(" ")
+    .filter((token) => token.length > 3 && !["gran", "turismo"].includes(token));
+
+  if (significantTokens.length === 0) {
+    return normalized.includes(normalizeCarText(car.id.replace(/_/g, " ")));
+  }
+
+  const matchedTokens = significantTokens.filter((token) =>
+    normalized.includes(token),
+  );
+
+  return matchedTokens.length >= Math.min(2, significantTokens.length);
+}
+
+/**
+ * @param {string} carId
+ * @param {import("../data/gameVersions.js").GameVersion | string} [gameVersion]
+ */
+export function getRaceArchiveHistoricalBonus(carId, gameVersion = "gt7") {
+  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
+  if (!carMeta || !isCarEligibleForRecommendations(carMeta)) {
+    return 0;
+  }
+
+  let bonus = 0;
+
+  for (const entry of loadRaceArchiveEntries()) {
+    const placements = [
+      { text: entry.winner, points: RACE_ARCHIVE_WIN_POINTS },
+      { text: entry.p2, points: RACE_ARCHIVE_PODIUM_POINTS },
+      { text: entry.p3, points: RACE_ARCHIVE_PODIUM_POINTS },
+    ];
+
+    for (const placement of placements) {
+      if (archiveTextMatchesCar(carMeta, placement.text)) {
+        bonus += placement.points;
+        break;
+      }
+    }
+
+    if (archiveTextMatchesCar(carMeta, entry.car)) {
+      bonus += 2;
+    }
+  }
+
+  return bonus;
+}
+
+/**
  * @param {string} carId
  * @param {import("../data/gameVersions.js").GameVersion | string} [gameVersion]
  */
@@ -160,11 +308,16 @@ export function getRecommendationHistoricalScore(
       record.season <= ALR_HISTORICAL_SEASON_TO,
   );
 
-  if (records.length === 0) {
+  const alrScore = records.reduce(
+    (sum, record) => sum + getALRResultScore(record),
+    0,
+  );
+  const archiveBonus = getRaceArchiveHistoricalBonus(carId, gameVersion);
+  const total = alrScore + archiveBonus;
+
+  if (total <= 0) {
     return 0;
   }
 
-  return Number(
-    records.reduce((sum, record) => sum + getALRResultScore(record), 0).toFixed(2),
-  );
+  return Number(total.toFixed(2));
 }

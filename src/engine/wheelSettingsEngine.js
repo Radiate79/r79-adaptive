@@ -2,9 +2,11 @@ import {
   getTemplateFamilyForWheelBase,
   getTemplateFieldsForWheelBase,
   getWheelBaseOption,
+  WHEEL_BASE_OPTIONS,
 } from "../data/wheelBases.js";
 import { STARTER_WHEEL_SETUPS } from "../data/wheelSetups.js";
 import { NO_EXACT_SETUP_MESSAGE } from "../data/wheelSetupsMeta.js";
+import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 
 /**
  * @typedef {Object} WheelSetupFilters
@@ -53,6 +55,52 @@ function matchesSetup(setup, filters, options = {}) {
   }
 
   return true;
+}
+
+/**
+ * @param {import("../data/wheelSetups.js").WheelSetupRecord} setup
+ * @param {string} [gameVersion]
+ */
+function getSetupSearchText(setup, gameVersion = setup.gameVersion) {
+  const car =
+    getCarsForGame(gameVersion).find((entry) => entry.id === setup.carId)?.name ??
+    setup.carId;
+  const track =
+    getTracksForGame(gameVersion).find((entry) => entry.id === setup.trackId)
+      ?.name ?? setup.trackId;
+  const wheel =
+    WHEEL_BASE_OPTIONS.find((entry) => entry.id === setup.wheelBase)?.label ??
+    setup.wheelBase;
+
+  return [setup.label, car, track, wheel, setup.tyreCompound, setup.gameVersion]
+    .join(" ")
+    .toLowerCase();
+}
+
+/** @returns {import("../data/wheelSetups.js").WheelSetupRecord[]} */
+export function listWheelSetups(gameVersion) {
+  if (!gameVersion) {
+    return [...STARTER_WHEEL_SETUPS];
+  }
+
+  return STARTER_WHEEL_SETUPS.filter((setup) => setup.gameVersion === gameVersion);
+}
+
+/**
+ * @param {string} query
+ * @param {string} [gameVersion]
+ */
+export function searchWheelSetups(query, gameVersion) {
+  const normalized = String(query ?? "").trim().toLowerCase();
+  const pool = listWheelSetups(gameVersion);
+
+  if (!normalized) {
+    return pool;
+  }
+
+  return pool.filter((setup) =>
+    getSetupSearchText(setup, gameVersion).includes(normalized),
+  );
 }
 
 /**

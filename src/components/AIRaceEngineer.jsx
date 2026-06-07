@@ -22,6 +22,8 @@ import { loadDriverProfile } from "../utils/driverProfileStorage.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getRecommendableCarsForGame, getTracksForGame, isGameDataReady } from "../utils/gameData.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
+import RacePresetControls from "./RacePresetControls.jsx";
+import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 
 function ConfidenceMeter({ value }) {
   return (
@@ -62,8 +64,14 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
 
   const [trackId, setTrackId] = useState("");
   const [raceLength, setRaceLength] = useState("medium");
-  const [tyreMultiplier, setTyreMultiplier] = useState(1);
-  const [fuelMultiplier, setFuelMultiplier] = useState(1);
+  const {
+    presetId,
+    fuelMultiplier,
+    tyreMultiplier,
+    selectPreset,
+    setFuelMultiplier,
+    setTyreMultiplier,
+  } = useRacePresetSettings();
   const [weather, setWeather] = useState("current");
   const [bopOn, setBopOn] = useState(true);
   const [tyresAvailable, setTyresAvailable] = useState(["M", "H", "S"]);
@@ -312,39 +320,15 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
             </select>
           </label>
 
-          <div style={styles.settingsGrid}>
-            <label style={styles.fieldLabel}>
-              Tyre Wear Multiplier
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                value={tyreMultiplier}
-                onChange={(event) =>
-                  setTyreMultiplier(Number(event.target.value))
-                }
-                style={styles.range}
-              />
-              <span style={styles.rangeValue}>x{tyreMultiplier}</span>
-            </label>
-
-            <label style={styles.fieldLabel}>
-              Fuel Wear Multiplier
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                value={fuelMultiplier}
-                onChange={(event) =>
-                  setFuelMultiplier(Number(event.target.value))
-                }
-                style={styles.range}
-              />
-              <span style={styles.rangeValue}>x{fuelMultiplier}</span>
-            </label>
-          </div>
+          <RacePresetControls
+            presetId={presetId}
+            onPresetChange={selectPreset}
+            fuelMultiplier={fuelMultiplier}
+            tyreMultiplier={tyreMultiplier}
+            onFuelMultiplierChange={setFuelMultiplier}
+            onTyreMultiplierChange={setTyreMultiplier}
+            style={styles.settingsGrid}
+          />
 
           <label style={styles.fieldLabel}>
             Weather

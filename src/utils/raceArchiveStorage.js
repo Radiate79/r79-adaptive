@@ -12,6 +12,9 @@ const STORAGE_KEY = "r79-race-archive-entries";
  * @property {string} p2
  * @property {string} p3
  * @property {string} notes
+ * @property {string} [racePresetId]
+ * @property {number} [fuelMultiplier]
+ * @property {number} [tyreMultiplier]
  */
 
 /**
@@ -32,6 +35,9 @@ function normalizeEntry(entry) {
     p2: String(entry.p2 ?? "").trim(),
     p3: String(entry.p3 ?? "").trim(),
     notes: String(entry.notes ?? "").trim(),
+    racePresetId: String(entry.racePresetId ?? "custom").trim() || "custom",
+    fuelMultiplier: Number(entry.fuelMultiplier ?? 1) || 1,
+    tyreMultiplier: Number(entry.tyreMultiplier ?? 1) || 1,
   };
 }
 

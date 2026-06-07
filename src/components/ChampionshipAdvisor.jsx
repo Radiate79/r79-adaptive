@@ -15,14 +15,23 @@ import {
   isCarClassSelectableForTrack,
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
+import RacePresetControls from "./RacePresetControls.jsx";
+import { getRaceConditionPreset, resolveRaceFormatId } from "../data/racePresets.js";
+import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 
 export default function ChampionshipAdvisor() {
   const { gameVersion, game } = useGameVersion();
   const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const [selectedTrackIds, setSelectedTrackIds] = useState([]);
   const [carClass, setCarClass] = useState("Gr.3");
-  const [fuelMultiplier, setFuelMultiplier] = useState(1);
-  const [tyreMultiplier, setTyreMultiplier] = useState(1);
+  const {
+    presetId,
+    fuelMultiplier,
+    tyreMultiplier,
+    selectPreset,
+    setFuelMultiplier,
+    setTyreMultiplier,
+  } = useRacePresetSettings();
   const selectedTracks = useMemo(
     () => tracks.filter((track) => selectedTrackIds.includes(track.id)),
     [tracks, selectedTrackIds],
@@ -70,11 +79,15 @@ export default function ChampionshipAdvisor() {
       labels.push("Mixed Calendar");
     }
 
+    const preset = getRaceConditionPreset(resolveRaceFormatId(presetId));
+    if (preset.id !== "custom") {
+      labels.push(preset.label);
+    }
     labels.push(`Fuel Multiplier x${fuelMultiplier}`);
     labels.push(`Tyre Multiplier x${tyreMultiplier}`);
 
     return Array.from(new Set(labels));
-  }, [selectedTracks, fuelMultiplier, tyreMultiplier]);
+  }, [selectedTracks, fuelMultiplier, tyreMultiplier, presetId]);
 
   const drivetrainRankings = useMemo(
     () => analyzeDrivetrainSuitability(selectedTracks),
@@ -242,34 +255,15 @@ export default function ChampionshipAdvisor() {
         })}
       </div>
 
-      <div style={styles.settingsRow}>
-        <label style={styles.settingLabel}>
-          Fuel Multiplier
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
-            value={fuelMultiplier}
-            onChange={(event) => setFuelMultiplier(Number(event.target.value))}
-            style={styles.settingInput}
-          />
-          <span style={styles.settingValue}>{fuelMultiplier}</span>
-        </label>
-        <label style={styles.settingLabel}>
-          Tyre Multiplier
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="1"
-            value={tyreMultiplier}
-            onChange={(event) => setTyreMultiplier(Number(event.target.value))}
-            style={styles.settingInput}
-          />
-          <span style={styles.settingValue}>{tyreMultiplier}</span>
-        </label>
-      </div>
+      <RacePresetControls
+        presetId={presetId}
+        onPresetChange={selectPreset}
+        fuelMultiplier={fuelMultiplier}
+        tyreMultiplier={tyreMultiplier}
+        onFuelMultiplierChange={setFuelMultiplier}
+        onTyreMultiplierChange={setTyreMultiplier}
+        style={styles.settingsRow}
+      />
 
       <div style={styles.trackGrid}>
         {tracks.map((track) => {
@@ -400,9 +394,20 @@ export default function ChampionshipAdvisor() {
                     </p>
                   </div>
                 ) : null}
-                <p style={styles.communityMeta}>
-                  Community Confidence: {car.communityConfidence ?? 60}
-                </p>
+                <div style={styles.scoreExplain}>
+                  <p style={styles.scoreExplainLine}>
+                    <span style={styles.scoreExplainLabel}>Technical Fit:</span>{" "}
+                    {car.technicalFitScore ?? car.technicalScore ?? car.score}
+                  </p>
+                  <p style={styles.scoreExplainLine}>
+                    <span style={styles.scoreExplainLabel}>Community Confidence:</span>{" "}
+                    {car.communityConfidence ?? 60}
+                  </p>
+                  <p style={styles.scoreExplainLine}>
+                    <span style={styles.scoreExplainLabel}>Track Fit:</span>{" "}
+                    {car.trackFitScore ?? car.technicalScore ?? car.score}
+                  </p>
+                </div>
                 <div style={styles.whyBlock}>
                   <p style={styles.whyTitle}>Why this car?</p>
                   <ul style={styles.reasonList}>
@@ -765,11 +770,23 @@ const styles = {
     fontSize: "0.82rem",
     fontWeight: 600,
   },
-  communityMeta: {
-    color: "#9bc0ff",
-    fontSize: "0.84rem",
-    fontWeight: 600,
+  scoreExplain: {
+    background: "rgba(18, 26, 45, 0.55)",
+    border: "1px solid rgba(113, 143, 209, 0.2)",
+    borderRadius: "8px",
+    display: "grid",
+    gap: "2px",
     margin: "0 0 8px",
+    padding: "8px 10px",
+  },
+  scoreExplainLine: {
+    color: "#dce8ff",
+    fontSize: "0.8rem",
+    margin: 0,
+  },
+  scoreExplainLabel: {
+    color: "#9bc0ff",
+    fontWeight: 700,
   },
   whyBlock: {
     background: "rgba(18, 26, 45, 0.55)",

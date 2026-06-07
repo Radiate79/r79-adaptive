@@ -14,6 +14,37 @@ import {
   isDirtTrack,
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
+import RacePresetControls from "./RacePresetControls.jsx";
+import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+
+function ScoreExplanation({ car }) {
+  if (!car?.scoreBreakdown && car?.technicalFitScore === undefined) {
+    return null;
+  }
+
+  const breakdown = car.scoreBreakdown ?? {
+    technicalFit: car.technicalFitScore ?? car.technicalScore,
+    communityConfidence: car.communityConfidence ?? 60,
+    trackFit: car.trackFitScore ?? car.technicalScore,
+  };
+
+  return (
+    <div style={styles.scoreExplain}>
+      <p style={styles.scoreExplainLine}>
+        <span style={styles.scoreExplainLabel}>Technical Fit:</span>{" "}
+        {breakdown.technicalFit}
+      </p>
+      <p style={styles.scoreExplainLine}>
+        <span style={styles.scoreExplainLabel}>Community Confidence:</span>{" "}
+        {breakdown.communityConfidence}
+      </p>
+      <p style={styles.scoreExplainLine}>
+        <span style={styles.scoreExplainLabel}>Track Fit:</span>{" "}
+        {breakdown.trackFit}
+      </p>
+    </div>
+  );
+}
 
 function RatingBar({ label, value }) {
   return (
@@ -40,8 +71,15 @@ export default function TodaysRaceAdvisor() {
   const [carClass, setCarClass] = useState("Gr.3");
   const [bopOn, setBopOn] = useState(true);
   const [tyreCompound, setTyreCompound] = useState("M");
-  const [fuelMultiplier, setFuelMultiplier] = useState(1);
-  const [tyreMultiplier, setTyreMultiplier] = useState(1);
+  const {
+    presetId,
+    fuelMultiplier,
+    tyreMultiplier,
+    selectPreset,
+    setFuelMultiplier,
+    setTyreMultiplier,
+    raceSettings,
+  } = useRacePresetSettings();
   const [raceLength, setRaceLength] = useState("medium");
   const [unavailableCarIds, setUnavailableCarIds] = useState([]);
 
@@ -53,8 +91,7 @@ export default function TodaysRaceAdvisor() {
         carClass,
         bopOn,
         tyreCompound,
-        fuelMultiplier,
-        tyreMultiplier,
+        ...raceSettings,
         raceLength,
         unavailableCarIds,
       }),
@@ -64,8 +101,7 @@ export default function TodaysRaceAdvisor() {
       carClass,
       bopOn,
       tyreCompound,
-      fuelMultiplier,
-      tyreMultiplier,
+      raceSettings,
       raceLength,
       unavailableCarIds,
     ],
@@ -232,37 +268,14 @@ export default function TodaysRaceAdvisor() {
               </select>
             </label>
 
-            <label style={styles.fieldLabel}>
-              Fuel Multiplier
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                value={fuelMultiplier}
-                onChange={(event) =>
-                  setFuelMultiplier(Number(event.target.value))
-                }
-                style={styles.range}
-              />
-              <span style={styles.rangeValue}>x{fuelMultiplier}</span>
-            </label>
-
-            <label style={styles.fieldLabel}>
-              Tyre Wear Multiplier
-              <input
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                value={tyreMultiplier}
-                onChange={(event) =>
-                  setTyreMultiplier(Number(event.target.value))
-                }
-                style={styles.range}
-              />
-              <span style={styles.rangeValue}>x{tyreMultiplier}</span>
-            </label>
+            <RacePresetControls
+              presetId={presetId}
+              onPresetChange={selectPreset}
+              fuelMultiplier={fuelMultiplier}
+              tyreMultiplier={tyreMultiplier}
+              onFuelMultiplierChange={setFuelMultiplier}
+              onTyreMultiplierChange={setTyreMultiplier}
+            />
           </div>
         </div>
 
@@ -352,6 +365,7 @@ export default function TodaysRaceAdvisor() {
               />
             </div>
           </div>
+          <ScoreExplanation car={analysis.topPick} />
           <div style={styles.heroRatings}>
             <RatingBar label="Strength" value={analysis.topPick.strengthRating} />
             <RatingBar label="Fuel" value={analysis.topPick.fuelRating} />
@@ -466,13 +480,9 @@ export default function TodaysRaceAdvisor() {
                       {car.historicalScore.toFixed(0)}
                     </span>
                   </div>
-                  <div style={styles.scoreCell}>
-                    <span style={styles.scoreLabel}>Community</span>
-                    <span style={styles.scoreValue}>
-                      {car.communityConfidence ?? 60}
-                    </span>
-                  </div>
                 </div>
+
+                <ScoreExplanation car={car} />
 
                 <div style={styles.ratingsCompact}>
                   <RatingBar label="Strength" value={car.strengthRating} />
@@ -837,6 +847,23 @@ const styles = {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "8px",
+  },
+  scoreExplain: {
+    background: "rgba(18, 26, 45, 0.55)",
+    border: "1px solid rgba(113, 143, 209, 0.2)",
+    borderRadius: "8px",
+    display: "grid",
+    gap: "2px",
+    padding: "8px 10px",
+  },
+  scoreExplainLine: {
+    color: "#dce8ff",
+    fontSize: "0.8rem",
+    margin: 0,
+  },
+  scoreExplainLabel: {
+    color: "#9bc0ff",
+    fontWeight: 700,
   },
   scoreCell: {
     background: "rgba(9, 14, 24, 0.55)",

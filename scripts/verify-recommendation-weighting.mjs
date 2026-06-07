@@ -1,61 +1,78 @@
 import { analyzeTodaysRace } from "../src/engine/todaysRaceAdvisorEngine.js";
-import { getTrackProfileWeightPercents } from "../src/engine/championshipEngine.js";
+import { analyzeAIRaceEngineer } from "../src/engine/aiRaceEngineerEngine.js";
 import { getTracksForGame } from "../src/utils/gameData.js";
 
 const WATCH_CAR_IDS = [
   "ferrari_296_gt3_23",
   "jaguar_f_type_gt3",
   "aston_martin_v12_vantage_gt3_12",
-  "mercedes_amg_gt3_20",
-  "genesis_x_gr3",
-  "nissan_gtr_gt3_18",
+  "suzuki_vision_gran_turismo_gr3",
   "porsche_911_gt3_r_22",
-];
-
-const SAMPLE_TRACKS = [
-  "spa",
-  "suzuka",
-  "daytona_road_course",
-  "watkins_glen",
-  "road_atlanta",
-  "fuji",
-  "dragon_trail_seaside",
+  "mercedes_amg_gt3_20",
 ];
 
 const tracks = getTracksForGame("gt7");
+const tarmacTracks = tracks.filter(
+  (track) => track.trackType !== "dirt" && track.trackType !== "snow",
+);
 
-console.log("Track profile weighting (percent share per attribute):\n");
-for (const trackId of SAMPLE_TRACKS) {
-  const track = tracks.find((entry) => entry.id === trackId);
-  const weights = getTrackProfileWeightPercents(track);
-  const formatted = Object.entries(weights)
-    .map(([field, value]) => `${field}:${value}%`)
-    .join(", ");
-  console.log(`${track.name}: ${formatted}`);
-}
+const watchStats = Object.fromEntries(
+  WATCH_CAR_IDS.map((id) => [id, { top10: 0, top1: 0, aiTop10: 0 }]),
+);
 
-console.log("\nTop recommendations per track:\n");
-let porscheTopCount = 0;
+let suzukiTop10 = 0;
+let porscheTop1 = 0;
 
-for (const trackId of SAMPLE_TRACKS) {
-  const result = analyzeTodaysRace({ trackId, carClass: "Gr.3" });
-  const top3 = result.recommendations
-    .slice(0, 3)
-    .map((car) => `${car.name} (${car.overallScore})`);
-  const watchlist = result.recommendations
-    .map((car, index) => ({ car, rank: index + 1 }))
-    .filter(({ car }) => WATCH_CAR_IDS.includes(car.id))
-    .map(({ car, rank }) => `${car.name.split(" ")[0]} #${rank}`)
-    .join(", ");
+for (const track of tarmacTracks) {
+  const result = analyzeTodaysRace({ trackId: track.id, carClass: "Gr.3" });
+  const top10 = result.recommendations.slice(0, 10);
 
-  if (result.recommendations[0]?.id === "porsche_911_gt3_r_22") {
-    porscheTopCount += 1;
+  top10.forEach((car, index) => {
+    if (watchStats[car.id]) {
+      watchStats[car.id].top10 += 1;
+      if (index === 0) {
+        watchStats[car.id].top1 += 1;
+      }
+    }
+  });
+
+  if (top10.some((car) => car.id === "suzuki_vision_gran_turismo_gr3")) {
+    suzukiTop10 += 1;
   }
 
-  console.log(`${trackId}: ${top3.join(" | ")}`);
-  console.log(`  watchlist: ${watchlist}`);
+  if (result.recommendations[0]?.id === "porsche_911_gt3_r_22") {
+    porscheTop1 += 1;
+  }
+
+  const aiResult = analyzeAIRaceEngineer({
+    trackId: track.id,
+    raceLength: "medium",
+    fuelMultiplier: 3,
+    tyreMultiplier: 5,
+  });
+
+  const aiPicks = [
+    aiResult.recommendedCar,
+    aiResult.alternativeChoice,
+  ].filter(Boolean);
+
+  aiPicks.forEach((car) => {
+    if (watchStats[car.id]) {
+      watchStats[car.id].aiTop10 += 1;
+    }
+  });
 }
 
-console.log(
-  `\nPorsche 911 GT3 R '22 is #1 on ${porscheTopCount}/${SAMPLE_TRACKS.length} sample tracks.`,
-);
+console.log(`Tracks audited: ${tarmacTracks.length}\n`);
+console.log("Today's Race Advisor — top-10 appearances:");
+for (const [id, stats] of Object.entries(watchStats)) {
+  console.log(`  ${id}: ${stats.top10}/${tarmacTracks.length} (wins: ${stats.top1})`);
+}
+
+console.log(`\nSuzuki VGT Gr.3 in top-10: ${suzukiTop10}/${tarmacTracks.length}`);
+console.log(`Porsche 911 GT3 R '22 #1: ${porscheTop1}/${tarmacTracks.length}`);
+
+console.log("\nAI Race Engineer (Full Race settings) — primary/alternate picks:");
+for (const [id, stats] of Object.entries(watchStats)) {
+  console.log(`  ${id}: ${stats.aiTop10}/${tarmacTracks.length}`);
+}

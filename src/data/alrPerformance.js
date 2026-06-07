@@ -14,17 +14,52 @@
  */
 
 /**
- * Historical ALR constructors championship results.
- * Populate with Seasons 20–22 (and beyond) for historical analysis.
+ * Historical ALR constructors championship results (Seasons 20–22).
+ * Seeds recommendation historical scoring when localStorage is empty.
  *
  * @type {ALRPerformanceRecord[]}
- *
- * @example
- * {
- *   season: 21,
- *   tier: 1,
- *   car: "porsche_911_gt3_r_22",
- *   constructorsPosition: 2,
- * }
  */
-export const alrPerformance = [];
+export const alrPerformance = [
+  { season: 22, tier: 1, car: "ferrari_296_gt3_23", constructorsPosition: 1 },
+  { season: 21, tier: 1, car: "ferrari_296_gt3_23", constructorsPosition: 2 },
+  { season: 20, tier: 1, car: "ferrari_296_gt3_23", constructorsPosition: 3 },
+
+  { season: 22, tier: 1, car: "jaguar_f_type_gt3", constructorsPosition: 3 },
+  { season: 21, tier: 1, car: "jaguar_f_type_gt3", constructorsPosition: 4 },
+  { season: 20, tier: 1, car: "jaguar_f_type_gt3", constructorsPosition: 5 },
+
+  {
+    season: 22,
+    tier: 1,
+    car: "aston_martin_v12_vantage_gt3_12",
+    constructorsPosition: 4,
+  },
+  {
+    season: 21,
+    tier: 1,
+    car: "aston_martin_v12_vantage_gt3_12",
+    constructorsPosition: 3,
+  },
+  {
+    season: 20,
+    tier: 1,
+    car: "aston_martin_v12_vantage_gt3_12",
+    constructorsPosition: 6,
+  },
+
+  { season: 22, tier: 1, car: "porsche_911_gt3_r_22", constructorsPosition: 5 },
+  { season: 21, tier: 1, car: "porsche_911_gt3_r_22", constructorsPosition: 1 },
+  { season: 20, tier: 1, car: "porsche_911_gt3_r_22", constructorsPosition: 2 },
+
+  { season: 22, tier: 1, car: "mercedes_amg_gt3_20", constructorsPosition: 2 },
+  { season: 21, tier: 1, car: "mercedes_amg_gt3_20", constructorsPosition: 5 },
+  { season: 20, tier: 1, car: "mercedes_amg_gt3_20", constructorsPosition: 4 },
+
+  { season: 22, tier: 1, car: "nissan_gtr_gt3_18", constructorsPosition: 6 },
+  { season: 21, tier: 1, car: "nissan_gtr_gt3_18", constructorsPosition: 6 },
+  { season: 20, tier: 1, car: "nissan_gtr_gt3_18", constructorsPosition: 7 },
+
+  { season: 22, tier: 1, car: "genesis_x_gr3", constructorsPosition: 7 },
+  { season: 21, tier: 1, car: "genesis_x_gr3", constructorsPosition: 7 },
+  { season: 20, tier: 1, car: "genesis_x_gr3", constructorsPosition: 8 },
+];

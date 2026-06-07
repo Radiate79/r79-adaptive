@@ -4,23 +4,22 @@ import {
   PERSONALISATION_STATUS,
 } from "../data/driverProfile.js";
 import {
-  ALR_HISTORICAL_SEASON_FROM,
-  ALR_HISTORICAL_SEASON_TO,
-} from "../data/alrChampionshipWeighting.js";
-import {
   isCarEligibleForRecommendations,
   pickEligibleRecommendation,
 } from "../utils/carClassFilter.js";
 import { getCarsForGame, getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import { getTrackRecommendationStatus } from "../utils/trackClassification.js";
 import {
-  blendRecommendationScore,
+  buildRecommendationBreakdown,
   compareRecommendationRanking,
-  getCommunityConfidence,
   getCommunityConfidenceReason,
+  getRecommendationHistoricalScore,
+  passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
-import { loadALRRecords } from "../utils/alrStorage.js";
-import { getALRResultScore } from "./alrPerformanceEngine.js";
+import {
+  scoreCarConsistency,
+  scoreCarForTrack,
+} from "./championshipEngine.js";
 import { findWheelSetupForRaceEngineer } from "./wheelSettingsEngine.js";
 import { loadWheelSettingsPreferences } from "../utils/wheelSetupsStorage.js";
 
@@ -142,30 +141,6 @@ function toRating(value) {
 
 function getRotationValue(car) {
   return Number(car.rotation ?? DEFAULT_ROTATION[car.drivetrain] ?? 7);
-}
-
-function getCarALRHistoricalScore(carId, gameVersion = DEFAULT_GAME_VERSION) {
-  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
-  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
-    return 0;
-  }
-
-  const records = loadALRRecords().filter(
-    (record) =>
-      record.car === carId &&
-      record.season >= ALR_HISTORICAL_SEASON_FROM &&
-      record.season <= ALR_HISTORICAL_SEASON_TO,
-  );
-
-  if (records.length === 0) {
-    return 0;
-  }
-
-  return Number(
-    records
-      .reduce((sum, record) => sum + getALRResultScore(record), 0)
-      .toFixed(2),
-  );
 }
 
 function getRaceLengthModifiers(raceLength) {
@@ -633,28 +608,16 @@ export function analyzeAIRaceEngineer(input) {
   }
 
   const historicalScores = candidateCars.map((car) =>
-    getCarALRHistoricalScore(car.id, gameVersion),
+    getRecommendationHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
 
   const ranked = candidateCars.map((car) => {
-    const fields = ["topSpeed", "traction", "tyres", "fuel", "stability", "rotation"];
-    const attributeScore = fields.reduce(
-      (sum, field) =>
-        sum +
-        scoreAttribute(
-          car,
-          track,
-          field,
-          raceSettings,
-          styleWeights,
-          field === "tyres" ? lengthMods.tyreWeight : field === "fuel" ? lengthMods.fuelWeight : 1,
-        ),
-      0,
+    const historicalScore = getRecommendationHistoricalScore(
+      car.id,
+      gameVersion,
     );
-
-    const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
-    const consistency = scoreConsistency(car, track, raceSettings);
+    const consistency = scoreCarConsistency(car, [track], raceSettings);
     const compound = pickBestTyre(
       car,
       track,
@@ -663,9 +626,17 @@ export function analyzeAIRaceEngineer(input) {
       lengthMods,
     );
 
+    const baseTrackScore = scoreCarForTrack(car, track, raceSettings);
+    const styleBias = Object.entries(styleWeights).reduce((sum, [field, weight]) => {
+      const carValue =
+        field === "rotation"
+          ? getRotationValue(car)
+          : Number(car?.[field] ?? 5);
+      return sum + (Number(weight) - 1) * (carValue / 50);
+    }, 0);
     const technicalScore =
-      (attributeScore / fields.length) * getBopModifier(bopOn);
-    const overallScore = blendRecommendationScore(
+      baseTrackScore * getBopModifier(bopOn) * (1 + styleBias);
+    const breakdown = buildRecommendationBreakdown(
       technicalScore,
       car,
       historicalScore,
@@ -677,21 +648,34 @@ export function analyzeAIRaceEngineer(input) {
       name: car.name,
       class: car.class,
       drivetrain: car.drivetrain,
-      overallScore,
-      technicalScore: Number(technicalScore.toFixed(2)),
-      communityConfidence: getCommunityConfidence(car),
+      overallScore: breakdown.overallScore,
+      technicalScore: breakdown.trackFit,
+      adjustedTechnicalScore: breakdown.technicalFit,
+      communityConfidence: breakdown.communityConfidence,
+      communityModifier: breakdown.communityModifier,
+      trackFit: breakdown.trackFit,
       historicalScore,
       recommendedCompound: compound,
-      strengthRating: toRating((attributeScore / fields.length) * 10),
-      consistencyRating: toRating((consistency / 10) * 100),
+      strengthRating: toRating(technicalScore),
+      consistencyRating: toRating(consistency),
       reasoning: buildReasoning(car, track, historicalScore, styleId),
     };
   });
 
   ranked.sort(compareRecommendationRanking);
 
-  const topPick = pickEligibleRecommendation(ranked[0] ?? null);
-  const alternativeChoice = pickEligibleRecommendation(ranked[1] ?? null);
+  const eligibleRanked = ranked.filter((entry) => {
+    const carData = candidateCars.find((car) => car.id === entry.id);
+    return (
+      carData &&
+      passesCompetitiveUseGate(carData, entry.technicalScore ?? entry.trackFit)
+    );
+  });
+
+  const topPick = pickEligibleRecommendation(eligibleRanked[0] ?? null);
+  const alternativeChoice = pickEligibleRecommendation(
+    eligibleRanked.find((entry) => entry.id !== topPick?.id) ?? null,
+  );
   const styleLabel =
     DRIVER_STYLE_OPTIONS.find((option) => option.id === styleId)?.label ??
     "Balanced";

@@ -18,6 +18,9 @@ import {
   formatRaceArchiveDate,
   loadRaceArchiveEntriesNewestFirst,
 } from "../utils/raceArchiveStorage.js";
+import RacePresetControls from "./RacePresetControls.jsx";
+import { formatRaceConditionSummary } from "../data/racePresets.js";
+import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 import ALRImageUpload from "./ALRImageUpload.jsx";
 import ALRImportProgress from "./ALRImportProgress.jsx";
 import {
@@ -71,6 +74,15 @@ export default function ALRDataEntry() {
   const [p2, setP2] = useState("");
   const [p3, setP3] = useState("");
   const [notes, setNotes] = useState("");
+  const {
+    presetId,
+    fuelMultiplier,
+    tyreMultiplier,
+    selectPreset,
+    setFuelMultiplier,
+    setTyreMultiplier,
+    reset: resetRaceConditions,
+  } = useRacePresetSettings();
 
   const [season, setSeason] = useState(22);
   const [tier, setTier] = useState(1);
@@ -126,6 +138,7 @@ export default function ALRDataEntry() {
     setP2("");
     setP3("");
     setNotes("");
+    resetRaceConditions();
   };
 
   const handleSaveRaceData = () => {
@@ -143,6 +156,9 @@ export default function ALRDataEntry() {
       p2,
       p3,
       notes,
+      racePresetId: presetId,
+      fuelMultiplier,
+      tyreMultiplier,
     });
 
     if (!saved) {
@@ -388,6 +404,17 @@ export default function ALRDataEntry() {
                 style={styles.textarea}
               />
             </label>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <RacePresetControls
+                presetId={presetId}
+                onPresetChange={selectPreset}
+                fuelMultiplier={fuelMultiplier}
+                tyreMultiplier={tyreMultiplier}
+                onFuelMultiplierChange={setFuelMultiplier}
+                onTyreMultiplierChange={setTyreMultiplier}
+              />
+            </div>
           </div>
         ) : null}
 
@@ -430,6 +457,7 @@ export default function ALRDataEntry() {
                   <th style={styles.th}>Winner</th>
                   <th style={styles.th}>P2</th>
                   <th style={styles.th}>P3</th>
+                  <th style={styles.th}>Conditions</th>
                   <th style={styles.thAction} />
                 </tr>
               </thead>
@@ -444,6 +472,9 @@ export default function ALRDataEntry() {
                     <td style={styles.td}>{entry.winner || "—"}</td>
                     <td style={styles.td}>{entry.p2 || "—"}</td>
                     <td style={styles.td}>{entry.p3 || "—"}</td>
+                    <td style={styles.td}>
+                      {formatRaceConditionSummary(entry)}
+                    </td>
                     <td style={styles.tdAction}>
                       <button
                         type="button"

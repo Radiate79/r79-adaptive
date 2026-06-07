@@ -184,3 +184,47 @@ export function isCarClassSelectableForTrack(carClass, track) {
 
   return true;
 }
+
+/**
+ * Surface-aware demand modifiers for track scoring.
+ *
+ * @param {{ trackType?: string, drivingStyle?: string } | null | undefined} track
+ * @returns {Partial<Record<string, number>>}
+ */
+export function getTrackSurfaceModifiers(track) {
+  if (!track) {
+    return {};
+  }
+
+  if (track.trackType === "street") {
+    return {
+      stability: 1.12,
+      traction: 1.08,
+      topSpeed: 0.92,
+      kerbs: 1.1,
+    };
+  }
+
+  if (track.trackType === "oval") {
+    return {
+      topSpeed: 1.22,
+      traction: 0.88,
+      stability: 1.05,
+      rotation: 0.85,
+    };
+  }
+
+  if (track.drivingStyle === "high_speed") {
+    return { topSpeed: 1.1, stability: 1.05 };
+  }
+
+  if (track.drivingStyle === "technical") {
+    return { traction: 1.1, rotation: 1.08, stability: 1.05 };
+  }
+
+  if (track.drivingStyle === "endurance") {
+    return { fuel: 1.12, tyres: 1.1 };
+  }
+
+  return {};
+}

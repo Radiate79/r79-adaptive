@@ -9,6 +9,7 @@ import {
 import {
   findWheelSetup,
   formatWheelSetupValues,
+  searchWheelSetups,
 } from "../engine/wheelSettingsEngine.js";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
@@ -72,12 +73,33 @@ export default function WheelSettingsHub({
     loadWheelSetupRequestsNewestFirst(),
   );
   const [exportMessage, setExportMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const cars = useMemo(
     () => getCarsForGame(filterGame).filter((car) => car.class === "Gr.3"),
     [filterGame],
   );
   const tracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);
+  const searchMatches = useMemo(
+    () => searchWheelSetups(searchQuery, filterGame),
+    [searchQuery, filterGame],
+  );
+  const filteredCars = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return cars;
+    }
+
+    return cars.filter((car) => car.name.toLowerCase().includes(query));
+  }, [cars, searchQuery]);
+  const filteredTracks = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return tracks;
+    }
+
+    return tracks.filter((track) => track.name.toLowerCase().includes(query));
+  }, [tracks, searchQuery]);
   const requestCars = useMemo(
     () => getCarsForGame(requestGame).filter((car) => car.class === "Gr.3"),
     [requestGame],
@@ -197,6 +219,47 @@ export default function WheelSettingsHub({
 
       <div style={styles.filtersPanel}>
         <h3 style={styles.panelTitle}>Filters</h3>
+        <label style={styles.searchField}>
+          Search setups, cars, or tracks
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="e.g. Ferrari, Spa, T598"
+            style={styles.searchInput}
+          />
+        </label>
+        {searchQuery.trim() && searchMatches.length > 0 ? (
+          <div style={styles.searchResults}>
+            {searchMatches.map((setup) => {
+              const carName =
+                cars.find((car) => car.id === setup.carId)?.name ?? setup.carId;
+              const trackName =
+                tracks.find((track) => track.id === setup.trackId)?.name ??
+                setup.trackId;
+              const wheelName =
+                WHEEL_BASE_OPTIONS.find((option) => option.id === setup.wheelBase)
+                  ?.label ?? setup.wheelBase;
+
+              return (
+                <button
+                  key={setup.id}
+                  type="button"
+                  onClick={() => {
+                    setWheelBase(setup.wheelBase);
+                    setCarId(setup.carId);
+                    setTrackId(setup.trackId);
+                    setTyreCompound(setup.tyreCompound);
+                    setBopOn(setup.bopOn);
+                  }}
+                  style={styles.searchResultButton}
+                >
+                  {carName} · {trackName} · {wheelName}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         <div style={styles.filtersGrid}>
           <label style={styles.fieldLabel}>
             Game
@@ -244,7 +307,7 @@ export default function WheelSettingsHub({
               style={styles.select}
             >
               <option value="">Select a car…</option>
-              {cars.map((car) => (
+              {filteredCars.map((car) => (
                 <option key={car.id} value={car.id}>
                   {car.name}
                 </option>
@@ -260,7 +323,7 @@ export default function WheelSettingsHub({
               style={styles.select}
             >
               <option value="">Select a track…</option>
-              {tracks.map((track) => (
+              {filteredTracks.map((track) => (
                 <option key={track.id} value={track.id}>
                   {track.name}
                 </option>
@@ -611,6 +674,37 @@ const styles = {
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
+  },
+  searchField: {
+    color: "#dce9ff",
+    display: "grid",
+    gap: "6px",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    marginBottom: "10px",
+  },
+  searchInput: {
+    background: "rgba(17, 22, 35, 0.95)",
+    border: "1px solid rgba(138, 159, 212, 0.3)",
+    borderRadius: "8px",
+    color: "#f3f7ff",
+    fontSize: "0.9rem",
+    padding: "9px 10px",
+  },
+  searchResults: {
+    display: "grid",
+    gap: "6px",
+    marginBottom: "10px",
+  },
+  searchResultButton: {
+    background: "rgba(20, 30, 52, 0.9)",
+    border: "1px solid rgba(128, 160, 229, 0.35)",
+    borderRadius: "8px",
+    color: "#dce9ff",
+    cursor: "pointer",
+    fontSize: "0.84rem",
+    padding: "8px 10px",
+    textAlign: "left",
   },
   filtersGrid: {
     display: "grid",

@@ -1,18 +1,15 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
 import {
-  ALR_HISTORICAL_SEASON_FROM,
-  ALR_HISTORICAL_SEASON_TO,
-} from "../data/alrChampionshipWeighting.js";
-import {
   filterEligibleRecommendationResults,
-  isCarEligibleForRecommendations,
   pickEligibleRecommendation,
 } from "../utils/carClassFilter.js";
 import {
   appendCommunityConfidenceReason,
-  blendRecommendationScore,
+  buildRecommendationBreakdown,
   compareRecommendationRanking,
-  getCommunityConfidence,
+  getAdjustedTechnicalScore,
+  getRecommendationHistoricalScore,
+  passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import {
@@ -20,7 +17,6 @@ import {
   TRACK_TYPE_LABELS,
 } from "../data/gt7/trackTypes.js";
 import { getTrackRecommendationStatus } from "../utils/trackClassification.js";
-import { loadALRRecords } from "../utils/alrStorage.js";
 import {
   analyzeCalendarDNA,
   analyzeDrivetrainSuitability,
@@ -30,7 +26,6 @@ import {
   scoreCarConsistency,
   scoreCarForTrack,
 } from "./championshipEngine.js";
-import { getALRResultScore } from "./alrPerformanceEngine.js";
 
 const DEFAULT_ROTATION = {
   MR: 9,
@@ -103,31 +98,6 @@ function getAccelerationValue(car) {
   const traction = Number(car.traction ?? 7);
   const rotation = getRotationValue(car);
   return Number(((traction + rotation) / 2).toFixed(1));
-}
-
-function getCarALRHistoricalScore(carId, gameVersion = DEFAULT_GAME_VERSION) {
-  const carMeta = getCarsForGame(gameVersion).find((car) => car.id === carId);
-  if (carMeta && !isCarEligibleForRecommendations(carMeta)) {
-    return 0;
-  }
-
-  const records = loadALRRecords().filter(
-    (record) =>
-      record.car === carId &&
-      record.season >= ALR_HISTORICAL_SEASON_FROM &&
-      record.season <= ALR_HISTORICAL_SEASON_TO,
-  );
-
-  if (records.length === 0) {
-    return 0;
-  }
-
-  const score = records.reduce(
-    (sum, record) => sum + getALRResultScore(record),
-    0,
-  );
-
-  return Number(score.toFixed(2));
 }
 
 function getCompoundTyreModifier(tyreCompound) {
@@ -420,13 +390,16 @@ export function analyzeTodaysRace(input) {
   }
 
   const historicalScores = baseRecommendations.map((car) =>
-    getCarALRHistoricalScore(car.id, gameVersion),
+    getRecommendationHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
 
   const enriched = baseRecommendations.map((car) => {
     const trackScore = scoreCarForTrack(car, track, raceSettings);
-    const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
+    const historicalScore = getRecommendationHistoricalScore(
+      car.id,
+      gameVersion,
+    );
     const bopModifier = getBopModifier(bopOn);
     const consistencyScore = scoreCarConsistency(car, [track], raceSettings);
 
@@ -446,11 +419,16 @@ export function analyzeTodaysRace(input) {
     );
 
     const technicalScore = trackScore * bopModifier;
-    const overallScore = blendRecommendationScore(
+    const scoreBreakdown = buildRecommendationBreakdown(
       technicalScore,
       car,
       historicalScore,
       maxHistorical,
+    );
+    const overallScore = scoreBreakdown.overallScore;
+    const adjustedTechnicalScore = getAdjustedTechnicalScore(
+      technicalScore,
+      car,
     );
 
     return {
@@ -460,7 +438,11 @@ export function analyzeTodaysRace(input) {
       drivetrain: car.drivetrain,
       overallScore,
       technicalScore: Number(technicalScore.toFixed(2)),
-      communityConfidence: getCommunityConfidence(car),
+      adjustedTechnicalScore: Number(adjustedTechnicalScore.toFixed(2)),
+      trackFitScore: scoreBreakdown.trackFit,
+      technicalFitScore: scoreBreakdown.technicalFit,
+      communityConfidence: scoreBreakdown.communityConfidence,
+      scoreBreakdown,
       historicalScore,
       strengthRating: toRating(trackScore),
       fuelRating,
@@ -488,7 +470,9 @@ export function analyzeTodaysRace(input) {
 
   const eligibleEnriched = filterEligibleRecommendationResults(enriched);
   const top10 = filterEligibleRecommendationResults(
-    eligibleEnriched.slice(0, 10),
+    eligibleEnriched
+      .filter((car) => passesCompetitiveUseGate(car, car.technicalScore))
+      .slice(0, 10),
   );
   const availableRanked = eligibleEnriched.filter((car) => !car.unavailable);
   const topPick = pickEligibleRecommendation(
