@@ -578,7 +578,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
             <div style={styles.reasoningPanel}>
               <h4 style={styles.reasoningTitle}>🧠 AI Reasoning</h4>
               <ul style={styles.reasoningList}>
-                {analysis.aiReasoning.map((line) => (
+                {(analysis.aiReasoning ?? []).map((line) => (
                   <li key={line} style={styles.reasoningItem}>
                     {line}
                   </li>
@@ -604,7 +604,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                 {analysis.alternativeChoice.summary}
               </p>
               <ul style={styles.reasoningList}>
-                {analysis.alternativeChoice.reasoning.map((line) => (
+                {(analysis.alternativeChoice.reasoning ?? []).map((line) => (
                   <li key={line} style={styles.reasoningItem}>
                     {line}
                   </li>

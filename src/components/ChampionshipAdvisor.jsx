@@ -372,8 +372,8 @@ export default function ChampionshipAdvisor() {
         <h3 style={styles.resultsTitle}>Top 5 Recommendations</h3>
         {recommendationsWithTrackAnalysis.length === 0 ? (
           <p style={styles.emptyState}>
-            {tracks.length === 0
-              ? `No ${game.shortLabel} tracks available yet.`
+            {selectableTracks.length === 0
+              ? `No ${game?.shortLabel ?? "GT7"} tracks available yet.`
               : calendarRecommendationStatus.message ??
                 "Select one or more tracks to generate recommendations."}
           </p>

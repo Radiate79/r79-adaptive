@@ -342,11 +342,11 @@ export default function TodaysRaceAdvisor() {
         )}
       </div>
 
-      {analysis.ready && analysis.strategyNotes.length > 0 ? (
+      {analysis.ready && (analysis.strategyNotes ?? []).length > 0 ? (
         <div style={styles.strategyPanel}>
           <h3 style={styles.panelTitle}>Strategy Notes</h3>
           <ul style={styles.strategyList}>
-            {analysis.strategyNotes.map((note) => (
+            {(analysis.strategyNotes ?? []).map((note) => (
               <li key={note} style={styles.strategyItem}>
                 {note}
               </li>
@@ -389,7 +389,7 @@ export default function TodaysRaceAdvisor() {
           <div style={styles.whyBlock}>
             <p style={styles.whyTitle}>Why this car?</p>
             <ul style={styles.reasonList}>
-              {analysis.topPick.reasons.map((reason) => (
+              {(analysis.topPick.reasons ?? []).map((reason) => (
                 <li key={reason} style={styles.reasonItem}>
                   {reason}
                 </li>
@@ -428,7 +428,7 @@ export default function TodaysRaceAdvisor() {
             </span>
           </div>
           <ul style={styles.reasonList}>
-            {analysis.alternativeChoice.reasons.slice(0, 3).map((reason) => (
+            {(analysis.alternativeChoice.reasons ?? []).slice(0, 3).map((reason) => (
               <li key={reason} style={styles.reasonItem}>
                 {reason}
               </li>
@@ -439,16 +439,16 @@ export default function TodaysRaceAdvisor() {
 
       <div style={styles.resultsPanel}>
         <h3 style={styles.panelTitle}>Top 10 Recommended Cars</h3>
-        {!analysis.ready || analysis.recommendations.length === 0 ? (
+        {!analysis.ready || (analysis.recommendations ?? []).length === 0 ? (
           <p style={styles.emptyState}>
-            {tracks.length === 0
-              ? `No ${game.shortLabel} tracks available yet.`
+            {selectableTracks.length === 0
+              ? `No ${game?.shortLabel ?? "GT7"} tracks available yet.`
               : analysis.recommendationStatus?.message ??
                 "Select a track and class to generate recommendations."}
           </p>
         ) : (
           <div style={styles.resultsGrid}>
-            {analysis.recommendations.map((car, index) => (
+            {(analysis.recommendations ?? []).map((car, index) => (
               <article key={car.id} style={styles.carCard}>
                 <div style={styles.carCardHeader}>
                   <div>

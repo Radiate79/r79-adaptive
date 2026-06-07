@@ -81,7 +81,8 @@ export default function WheelSettingsHub({
   const [searchQuery, setSearchQuery] = useState("");
 
   const cars = useMemo(
-    () => getCarsForGame(filterGame).filter((car) => car.class === "Gr.3"),
+    () =>
+      (getCarsForGame(filterGame) ?? []).filter((car) => car?.class === "Gr.3"),
     [filterGame],
   );
   const allTracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);
@@ -90,7 +91,7 @@ export default function WheelSettingsHub({
     [filterGame],
   );
   const searchMatches = useMemo(
-    () => searchWheelSetups(searchQuery, filterGame),
+    () => searchWheelSetups(searchQuery, filterGame) ?? [],
     [searchQuery, filterGame],
   );
   const filteredCars = useMemo(() => {

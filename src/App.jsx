@@ -40,6 +40,8 @@ import TodaysRaceAdvisor from "./components/TodaysRaceAdvisor.jsx";
 
 import WheelSettingsHub from "./components/WheelSettingsHub.jsx";
 
+import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
+
 import { hasSeenSplash } from "./utils/splashStorage.js";
 
 
@@ -100,68 +102,82 @@ function AppShell() {
     RACE_DATA_PAGES.has(page) && gameVersion !== "gt7";
 
   const renderPage = () => {
+    const wrap = (label, node) => (
+      <AppErrorBoundary key={label} label={label}>
+        {node}
+      </AppErrorBoundary>
+    );
+
     switch (page) {
       case "todays-race":
-        return <TodaysRaceAdvisor />;
+        return wrap("Today's Race", <TodaysRaceAdvisor />);
       case "ai-engineer":
-        return (
+        return wrap(
+          "AI Race Engineer",
           <AIRaceEngineer
             onOpenWheelSettings={(prefill) => {
               setWheelSettingsPrefill(prefill);
               setPage("wheel-settings");
             }}
-          />
+          />,
         );
       case "wheel-settings":
-        return (
+        return wrap(
+          "Wheel Settings",
           <WheelSettingsHub
             prefill={wheelSettingsPrefill}
             onPrefillConsumed={() => setWheelSettingsPrefill(null)}
-          />
+          />,
         );
       case "advisor":
-        return <ChampionshipAdvisor />;
+        return wrap("Championship Advisor", <ChampionshipAdvisor />);
       case "shortlist":
-        return <TeamCarShortlistAdvisor />;
+        return wrap("Team Car Shortlist", <TeamCarShortlistAdvisor />);
       case "rankings":
-        return <ALRHistoricalRankings />;
+        return wrap("Historical Rankings", <ALRHistoricalRankings />);
       case "profiles":
-        return <CarProfiles />;
+        return wrap("Car Profiles", <CarProfiles />);
       case "alr":
-        return <ALRDataEntry />;
+        return wrap("Race Archive", <ALRDataEntry />);
       case "alr-corner":
-        return <ALRCorner />;
+        return wrap("ALR Corner", <ALRCorner />);
       case "archive":
-        return (
+        return wrap(
+          "R79 Archive",
           <R79Archive
             onNavigate={(view) => {
               if (view === "settings" || view === "about") {
                 setPage("settings");
               }
             }}
-          />
+          />,
         );
       case "promise":
-        return <ThePromise />;
+        return wrap("The Promise", <ThePromise />);
       case "membership":
-        return <Membership onOpenPathfinder={() => setPage("pathfinder")} />;
+        return wrap(
+          "Membership",
+          <Membership onOpenPathfinder={() => setPage("pathfinder")} />,
+        );
       case "pathfinder":
-        return <Pathfinder />;
+        return wrap("Pathfinder", <Pathfinder />);
       case "labs":
-        return (
+        return wrap(
+          "R79 Labs",
           <R79Labs
             onOpenDataReports={() => {
               setSettingsBootView("dataReports");
               setPage("settings");
             }}
-          />
+          />,
         );
       case "settings":
-        return (
+        return wrap(
+          "Settings",
           <SettingsHub
             bootView={settingsBootView}
             onBootViewConsumed={() => setSettingsBootView(null)}
-          />
+          />,
         );
       default:
         return null;
@@ -359,17 +375,13 @@ function AppShell() {
 
 
 export default function App() {
-
   return (
-
-    <GameVersionProvider>
-
-      <AppShell />
-
-    </GameVersionProvider>
-
+    <AppErrorBoundary label="R79 Application">
+      <GameVersionProvider>
+        <AppShell />
+      </GameVersionProvider>
+    </AppErrorBoundary>
   );
-
 }
 
 

@@ -80,11 +80,13 @@ function getSetupSearchText(setup, gameVersion = setup.gameVersion) {
 
 /** @returns {import("../data/wheelSetups.js").WheelSetupRecord[]} */
 export function listWheelSetups(gameVersion) {
+  const pool = Array.isArray(STARTER_WHEEL_SETUPS) ? STARTER_WHEEL_SETUPS : [];
+
   if (!gameVersion) {
-    return [...STARTER_WHEEL_SETUPS];
+    return [...pool];
   }
 
-  return STARTER_WHEEL_SETUPS.filter((setup) => setup.gameVersion === gameVersion);
+  return pool.filter((setup) => setup?.gameVersion === gameVersion);
 }
 
 /**
@@ -207,12 +209,17 @@ export function findWheelSetupForRaceEngineer(filters) {
  * @param {import("../data/wheelSetups.js").WheelSetupRecord} setup
  */
 export function formatWheelSetupValues(setup) {
-  const fields = getTemplateFieldsForWheelBase(setup.wheelBase);
+  if (!setup) {
+    return [];
+  }
+
+  const fields = getTemplateFieldsForWheelBase(setup.wheelBase ?? "");
+  const values = setup.values ?? {};
 
   return fields.map((field) => ({
     key: field.key,
     label: field.label,
-    value: setup.values[field.key] ?? "—",
+    value: values[field.key] ?? "—",
   }));
 }
 

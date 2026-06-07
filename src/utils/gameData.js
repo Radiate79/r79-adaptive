@@ -30,10 +30,11 @@ const GAME_DATA = {
  * @param {GameVersion | string} [gameVersion]
  */
 export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
-  return (
+  const cars =
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.cars ??
-    GAME_DATA[DEFAULT_GAME_VERSION].cars
-  );
+    GAME_DATA[DEFAULT_GAME_VERSION]?.cars;
+
+  return Array.isArray(cars) ? cars : [];
 }
 
 /**
@@ -53,10 +54,11 @@ export function getRecommendableCarsForGame(
  * @param {GameVersion | string} [gameVersion]
  */
 export function getTracksForGame(gameVersion = DEFAULT_GAME_VERSION) {
-  return (
+  const tracks =
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.tracks ??
-    GAME_DATA[DEFAULT_GAME_VERSION].tracks
-  );
+    GAME_DATA[DEFAULT_GAME_VERSION]?.tracks;
+
+  return Array.isArray(tracks) ? tracks : [];
 }
 
 /**

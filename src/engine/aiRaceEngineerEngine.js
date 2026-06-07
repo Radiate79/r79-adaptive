@@ -324,18 +324,19 @@ function buildEngineerReportSections({
   const whyThisCar = reasoning?.length
     ? reasoning.slice(0, 4)
     : [`Strong ${joinStrengthPhrases(strengths)} suit this circuit.`];
-  const strengthItems = strengths.map(
+  const safeStrengths = Array.isArray(strengths) ? strengths : [];
+  const strengthItems = safeStrengths.map(
     (phrase) => phrase.charAt(0).toUpperCase() + phrase.slice(1),
   );
 
   return {
     summary,
-    whyThisCar,
+    whyThisCar: Array.isArray(whyThisCar) ? whyThisCar : [],
     strengths: strengthItems,
     weaknesses: buildWeaknessList(topCarData ?? topPick, track),
-    tyreRecommendation: tyreStrategy,
-    fuelStrategy,
-    strategyNotes: thingsToWatch,
+    tyreRecommendation: tyreStrategy ?? "",
+    fuelStrategy: fuelStrategy ?? "",
+    strategyNotes: Array.isArray(thingsToWatch) ? thingsToWatch : [],
   };
 }
 
@@ -574,7 +575,13 @@ export function analyzeAIRaceEngineer(input) {
   const track = tracks.find((entry) => entry.id === input.trackId) ?? null;
 
   if (!track) {
-    return { ready: false };
+    return {
+      ready: false,
+      recommendations: [],
+      strategyNotes: [],
+      aiReasoning: [],
+      engineerReportSections: null,
+    };
   }
 
   const recommendationStatus = getTrackRecommendationStatus(track, "Gr.3");
@@ -800,7 +807,9 @@ export function analyzeAIRaceEngineer(input) {
       ? {
           car: alternativeChoice,
           summary: buildAlternativeSummary(topPick, alternativeChoice, track),
-          reasoning: alternativeChoice.reasoning.slice(0, 4),
+          reasoning: Array.isArray(alternativeChoice.reasoning)
+            ? alternativeChoice.reasoning.slice(0, 4)
+            : [],
         }
       : null,
     thingsToWatch,

@@ -135,5 +135,11 @@ export function enrichTrackRecord(track) {
  * @param {Array<Record<string, unknown>>} records
  */
 export function enrichTrackRecords(records) {
-  return records.map((track) => enrichTrackRecord(track));
+  if (!Array.isArray(records)) {
+    return [];
+  }
+
+  return records
+    .filter((track) => track && typeof track === "object")
+    .map((track) => enrichTrackRecord(track));
 }
