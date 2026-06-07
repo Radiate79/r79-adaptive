@@ -8,10 +8,15 @@ import {
   TYRE_COMPOUND_OPTIONS,
 } from "../engine/todaysRaceAdvisorEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
-import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import {
+  getSelectableTracksForClass,
+  getTrackDisplayName,
+  getTracksForGame,
+  isGameDataReady,
+} from "../utils/gameData.js";
 import {
   isCarClassSelectableForTrack,
-  isDirtTrack,
+  isTrackEligibleForClass,
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
@@ -65,10 +70,13 @@ function RatingBar({ label, value }) {
 
 export default function TodaysRaceAdvisor() {
   const { gameVersion, setGameVersion, gameOptions, game } = useGameVersion();
-  const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
-
   const [trackId, setTrackId] = useState("");
   const [carClass, setCarClass] = useState("Gr.3");
+  const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
+  const selectableTracks = useMemo(
+    () => getSelectableTracksForClass(gameVersion, carClass),
+    [gameVersion, carClass],
+  );
   const [bopOn, setBopOn] = useState(true);
   const [tyreCompound, setTyreCompound] = useState("M");
   const {
@@ -115,17 +123,18 @@ export default function TodaysRaceAdvisor() {
     );
   };
 
-  const selectedTrack = tracks.find((track) => track.id === trackId) ?? null;
+  const selectedTrack =
+    allTracks.find((track) => track.id === trackId) ?? null;
 
   useEffect(() => {
-    if (!selectedTrack) {
+    if (!trackId) {
       return;
     }
 
-    if (isDirtTrack(selectedTrack)) {
-      setCarClass("Gr.B");
+    if (!isTrackEligibleForClass(selectedTrack, carClass)) {
+      setTrackId("");
     }
-  }, [selectedTrack?.id]);
+  }, [trackId, carClass, selectedTrack]);
 
   return (
     <section style={styles.shell}>
@@ -178,9 +187,9 @@ export default function TodaysRaceAdvisor() {
               style={styles.select}
             >
               <option value="">Select a track…</option>
-              {tracks.map((track) => (
+              {selectableTracks.map((track) => (
                 <option key={track.id} value={track.id}>
-                  {track.name}
+                  {getTrackDisplayName(track)}
                 </option>
               ))}
             </select>

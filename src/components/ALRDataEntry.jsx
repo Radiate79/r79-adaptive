@@ -1,4 +1,9 @@
 import { useMemo, useState } from "react";
+import { useGameVersion } from "../context/GameVersionContext.jsx";
+import {
+  getSelectableTracksForClass,
+  getTrackDisplayName,
+} from "../utils/gameData.js";
 import { cars } from "../data/cars.js";
 import { ALR_TIER_POINTS } from "../data/alrChampionshipWeighting.js";
 import {
@@ -59,6 +64,11 @@ function sortRecords(records) {
 }
 
 export default function ALRDataEntry() {
+  const { gameVersion } = useGameVersion();
+  const standardRaceTracks = useMemo(
+    () => getSelectableTracksForClass(gameVersion, "Gr.3"),
+    [gameVersion],
+  );
   const [records, setRecords] = useState(() => loadALRRecords());
   const [raceEntries, setRaceEntries] = useState(() =>
     loadRaceArchiveEntriesNewestFirst(),
@@ -347,11 +357,17 @@ export default function ALRDataEntry() {
               Track
               <input
                 type="text"
+                list="race-archive-standard-tracks"
                 value={track}
                 onChange={(event) => setTrack(event.target.value)}
                 placeholder="e.g. Spa-Francorchamps"
                 style={styles.input}
               />
+              <datalist id="race-archive-standard-tracks">
+                {standardRaceTracks.map((entry) => (
+                  <option key={entry.id} value={getTrackDisplayName(entry)} />
+                ))}
+              </datalist>
             </label>
 
             <label style={styles.field}>

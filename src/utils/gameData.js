@@ -3,6 +3,10 @@ import {
   getGameCatalogEntry,
 } from "../data/gameVersions.js";
 import { filterRecommendationPool } from "./carClassFilter.js";
+import { getTrackDisplayName } from "../data/gt7/trackMetadata.js";
+import {
+  getSelectableTracksForClass as filterTracksForClass,
+} from "./trackClassification.js";
 import { cars as gt7Cars } from "../data/gt7/cars.js";
 import { tracks as gt7Tracks } from "../data/gt7/tracks.js";
 import { cars as gt8Cars } from "../data/gt8/cars.js";
@@ -54,6 +58,31 @@ export function getTracksForGame(gameVersion = DEFAULT_GAME_VERSION) {
     GAME_DATA[DEFAULT_GAME_VERSION].tracks
   );
 }
+
+/**
+ * Tracks valid for recommendation selectors for the selected class.
+ * Full track records are preserved in getTracksForGame().
+ *
+ * @param {GameVersion | string} [gameVersion]
+ * @param {string} selectedClass
+ */
+export function getSelectableTracksForClass(
+  gameVersion = DEFAULT_GAME_VERSION,
+  selectedClass,
+) {
+  return filterTracksForClass(getTracksForGame(gameVersion), selectedClass);
+}
+
+/**
+ * Tarmac tracks for Gr.3 / Gr.4 recommendation selectors.
+ *
+ * @param {GameVersion | string} [gameVersion]
+ */
+export function getStandardRaceTracks(gameVersion = DEFAULT_GAME_VERSION) {
+  return getSelectableTracksForClass(gameVersion, "Gr.3");
+}
+
+export { getTrackDisplayName };
 
 /**
  * @param {GameVersion | string} [gameVersion]

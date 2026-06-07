@@ -280,27 +280,63 @@ function joinStrengthPhrases(phrases) {
   return `${phrases.slice(0, -1).join(", ")} and ${phrases[phrases.length - 1]}`;
 }
 
-function buildEngineerBriefing(car, track, compound, styleLabel, strengths, confidence) {
-  const shortName = getCarShortName(car.name);
-  const strengthText = joinStrengthPhrases(strengths);
+function buildWeaknessList(car, track) {
+  if (Array.isArray(car?.weaknesses) && car.weaknesses.length > 0) {
+    return car.weaknesses;
+  }
 
-  return `The ${shortName} is recommended for ${track.name} due to ${strengthText}. A ${compound} compound is appropriate for this race profile, with strategy aligned to a ${styleLabel.toLowerCase()} driving approach. Assessment confidence is ${confidence}%.`;
+  const items = [];
+
+  if (Number(car?.tyres ?? 7) <= 5 && Number(track.tyres ?? 5) >= 7) {
+    items.push("Higher tyre wear on abrasive circuits.");
+  }
+
+  if (Number(car?.fuel ?? 7) <= 5 && Number(track.fuel ?? 5) >= 7) {
+    items.push("Fuel consumption may require saving.");
+  }
+
+  if (Number(car?.stability ?? 7) <= 5 && Number(track.stability ?? 5) >= 7) {
+    items.push("Less stable under heavy braking.");
+  }
+
+  if (items.length === 0) {
+    items.push("No significant weaknesses identified for this circuit profile.");
+  }
+
+  return items.slice(0, 4);
 }
 
-function buildEngineerReport(
-  briefing,
+function buildEngineerReportSections({
+  topPick,
+  topCarData,
   track,
-  raceLengthLabel,
-  pitWindow,
-  historicalScore,
   compound,
-) {
-  const historicalNote =
-    historicalScore > 0
-      ? "Historical championship data supports this selection."
-      : "Historical data is limited; this assessment is primarily attribute-based.";
+  confidenceScore,
+  reasoning,
+  strengths,
+  tyreStrategy,
+  fuelStrategy,
+  thingsToWatch,
+}) {
+  const trackName = track.displayName ?? track.name;
+  const shortName = getCarShortName(topPick.name);
+  const summary = `The ${shortName} is the strongest choice for ${trackName} on ${compound} tyres (${confidenceScore}% confidence).`;
+  const whyThisCar = reasoning?.length
+    ? reasoning.slice(0, 4)
+    : [`Strong ${joinStrengthPhrases(strengths)} suit this circuit.`];
+  const strengthItems = strengths.map(
+    (phrase) => phrase.charAt(0).toUpperCase() + phrase.slice(1),
+  );
 
-  return `${briefing} ${historicalNote} Race distance is classified as ${raceLengthLabel.toLowerCase()}, with ${compound} tyres selected from your available compounds. Estimated pit timing: ${pitWindow.charAt(0).toLowerCase()}${pitWindow.slice(1)}.`;
+  return {
+    summary,
+    whyThisCar,
+    strengths: strengthItems,
+    weaknesses: buildWeaknessList(topCarData ?? topPick, track),
+    tyreRecommendation: tyreStrategy,
+    fuelStrategy,
+    strategyNotes: thingsToWatch,
+  };
 }
 
 function buildReasoning(car, track, historicalScore, styleId) {
@@ -479,13 +515,6 @@ function buildThingsToWatch(track) {
   return items.slice(0, 5);
 }
 
-function buildPlainSummary(car, track, compound, confidence, styleLabel, strengths) {
-  const shortName = getCarShortName(car.name);
-  const strengthText = joinStrengthPhrases(strengths);
-
-  return `In summary, the ${shortName} offers the most complete package for ${track.name}. Its ${strengthText} align with circuit requirements, ${compound} tyres suit the stint plan, and the ${styleLabel.toLowerCase()} profile was applied throughout the assessment. Confidence stands at ${confidence}%.`;
-}
-
 function buildAlternativeSummary(primary, alternative, track) {
   if (!alternative) {
     return null;
@@ -596,8 +625,7 @@ export function analyzeAIRaceEngineer(input) {
         },
         recommendedCar: null,
         alternativeChoice: null,
-        engineerBriefing: null,
-        engineerReport: null,
+        engineerReportSections: null,
         tyreStrategy: [],
         fuelStrategy: [],
         brakeBalance: null,
@@ -690,32 +718,39 @@ export function analyzeAIRaceEngineer(input) {
   const compound = topPick?.recommendedCompound ?? "M";
   const topCarData =
     candidateCars.find((car) => car.id === topPick?.id) ?? topPick ?? null;
-  const raceLengthLabel = RACE_LENGTH_LABELS[raceLength] ?? raceLength;
   const pitWindow = buildPitWindow(raceLength, track, raceSettings, lengthMods);
   const strengths = topCarData
     ? buildStrengthPhrases(topCarData, track)
     : ["well-rounded race characteristics"];
-  const engineerBriefing = topPick
-    ? buildEngineerBriefing(
+  const tyreStrategy = buildTyreStrategy(
+    track,
+    raceLength,
+    compound,
+    raceSettings,
+    lengthMods,
+  );
+  const fuelStrategy = buildFuelStrategy(
+    track,
+    raceLength,
+    raceSettings,
+    lengthMods,
+    styleId,
+  );
+  const thingsToWatch = buildThingsToWatch(track);
+  const engineerReportSections = topPick
+    ? buildEngineerReportSections({
         topPick,
+        topCarData,
         track,
         compound,
-        styleLabel,
-        strengths,
         confidenceScore,
-      )
+        reasoning: topPick.reasoning,
+        strengths,
+        tyreStrategy,
+        fuelStrategy,
+        thingsToWatch,
+      })
     : null;
-  const engineerReport =
-    topPick && engineerBriefing
-      ? buildEngineerReport(
-          engineerBriefing,
-          track,
-          raceLengthLabel,
-          pitWindow,
-          topPick.historicalScore,
-          compound,
-        )
-      : null;
 
   const driverProfile = input.driverProfile ?? DEFAULT_DRIVER_PROFILE;
   const wheelPreferences = loadWheelSettingsPreferences();
@@ -741,23 +776,10 @@ export function analyzeAIRaceEngineer(input) {
       label: PERSONALISATION_STATUS.label,
       profile: driverProfile,
     },
-    engineerBriefing,
-    engineerReport,
+    engineerReportSections,
     recommendedCar: topPick,
-    tyreStrategy: buildTyreStrategy(
-      track,
-      raceLength,
-      compound,
-      raceSettings,
-      lengthMods,
-    ),
-    fuelStrategy: buildFuelStrategy(
-      track,
-      raceLength,
-      raceSettings,
-      lengthMods,
-      styleId,
-    ),
+    tyreStrategy,
+    fuelStrategy,
     brakeBalance: topPick
       ? buildBrakeBalance(
           candidateCars.find((car) => car.id === topPick.id) ?? {},
@@ -774,16 +796,6 @@ export function analyzeAIRaceEngineer(input) {
     pitWindow,
     confidenceScore,
     aiReasoning: topPick?.reasoning ?? [],
-    whyRecommendation: topPick
-      ? buildPlainSummary(
-          topPick,
-          track,
-          compound,
-          confidenceScore,
-          styleLabel,
-          strengths,
-        )
-      : null,
     alternativeChoice: alternativeChoice
       ? {
           car: alternativeChoice,
@@ -791,7 +803,7 @@ export function analyzeAIRaceEngineer(input) {
           reasoning: alternativeChoice.reasoning.slice(0, 4),
         }
       : null,
-    thingsToWatch: buildThingsToWatch(track),
+    thingsToWatch,
     raceContext: {
       gameVersion,
       raceLength,

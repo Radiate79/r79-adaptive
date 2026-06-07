@@ -8,7 +8,12 @@ import {
   recommendCarsForChampionship,
 } from "../engine/championshipEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
-import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import {
+  getSelectableTracksForClass,
+  getTrackDisplayName,
+  getTracksForGame,
+  isGameDataReady,
+} from "../utils/gameData.js";
 import {
   getCalendarRecommendationStatus,
   getNonTarmacTracks,
@@ -21,9 +26,13 @@ import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 
 export default function ChampionshipAdvisor() {
   const { gameVersion, game } = useGameVersion();
-  const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const [selectedTrackIds, setSelectedTrackIds] = useState([]);
   const [carClass, setCarClass] = useState("Gr.3");
+  const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
+  const selectableTracks = useMemo(
+    () => getSelectableTracksForClass(gameVersion, carClass),
+    [gameVersion, carClass],
+  );
   const {
     presetId,
     fuelMultiplier,
@@ -33,9 +42,17 @@ export default function ChampionshipAdvisor() {
     setTyreMultiplier,
   } = useRacePresetSettings();
   const selectedTracks = useMemo(
-    () => tracks.filter((track) => selectedTrackIds.includes(track.id)),
-    [tracks, selectedTrackIds],
+    () => allTracks.filter((track) => selectedTrackIds.includes(track.id)),
+    [allTracks, selectedTrackIds],
   );
+
+  useEffect(() => {
+    setSelectedTrackIds((current) =>
+      current.filter((id) =>
+        selectableTracks.some((track) => track.id === id),
+      ),
+    );
+  }, [selectableTracks]);
 
   const championshipSummary = useMemo(() => {
     if (selectedTracks.length === 0) {
@@ -266,7 +283,7 @@ export default function ChampionshipAdvisor() {
       />
 
       <div style={styles.trackGrid}>
-        {tracks.map((track) => {
+        {selectableTracks.map((track) => {
           const selected = selectedTrackIds.includes(track.id);
           return (
             <button
@@ -278,7 +295,7 @@ export default function ChampionshipAdvisor() {
                 ...(selected ? styles.trackButtonSelected : null),
               }}
             >
-              {track.name}
+              {getTrackDisplayName(track)}
             </button>
           );
         })}

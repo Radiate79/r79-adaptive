@@ -12,7 +12,12 @@ import {
   searchWheelSetups,
 } from "../engine/wheelSettingsEngine.js";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
-import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  getCarsForGame,
+  getSelectableTracksForClass,
+  getTrackDisplayName,
+  getTracksForGame,
+} from "../utils/gameData.js";
 import {
   addWheelSetupRequest,
   exportWheelSetupRequestsJson,
@@ -79,7 +84,11 @@ export default function WheelSettingsHub({
     () => getCarsForGame(filterGame).filter((car) => car.class === "Gr.3"),
     [filterGame],
   );
-  const tracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);
+  const allTracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);
+  const tracks = useMemo(
+    () => getSelectableTracksForClass(filterGame, "Gr.3"),
+    [filterGame],
+  );
   const searchMatches = useMemo(
     () => searchWheelSetups(searchQuery, filterGame),
     [searchQuery, filterGame],
@@ -98,14 +107,16 @@ export default function WheelSettingsHub({
       return tracks;
     }
 
-    return tracks.filter((track) => track.name.toLowerCase().includes(query));
+    return tracks.filter((track) =>
+      getTrackDisplayName(track).toLowerCase().includes(query),
+    );
   }, [tracks, searchQuery]);
   const requestCars = useMemo(
     () => getCarsForGame(requestGame).filter((car) => car.class === "Gr.3"),
     [requestGame],
   );
   const requestTracks = useMemo(
-    () => getTracksForGame(requestGame),
+    () => getSelectableTracksForClass(requestGame, "Gr.3"),
     [requestGame],
   );
 
@@ -123,6 +134,21 @@ export default function WheelSettingsHub({
 
     onPrefillConsumed?.();
   }, [prefill, onPrefillConsumed]);
+
+  useEffect(() => {
+    if (trackId && !tracks.some((track) => track.id === trackId)) {
+      setTrackId("");
+    }
+  }, [trackId, tracks]);
+
+  useEffect(() => {
+    if (
+      requestTrackId &&
+      !requestTracks.some((track) => track.id === requestTrackId)
+    ) {
+      setRequestTrackId("");
+    }
+  }, [requestTrackId, requestTracks]);
 
   useEffect(() => {
     saveWheelSettingsPreferences({
@@ -212,8 +238,7 @@ export default function WheelSettingsHub({
       <div style={styles.header}>
         <h2 style={styles.title}>Wheel Settings Hub</h2>
         <p style={styles.subtitle}>
-          Universal GT7/GT8 wheel-base settings for Thrustmaster, Logitech,
-          Fanatec, Moza and custom rigs.
+          Professional wheel-base settings for Gran Turismo 7.
         </p>
       </div>
 
@@ -234,9 +259,11 @@ export default function WheelSettingsHub({
             {searchMatches.map((setup) => {
               const carName =
                 cars.find((car) => car.id === setup.carId)?.name ?? setup.carId;
-              const trackName =
-                tracks.find((track) => track.id === setup.trackId)?.name ??
-                setup.trackId;
+              const trackName = getTrackDisplayName(
+                tracks.find((track) => track.id === setup.trackId) ?? {
+                  displayName: setup.trackId,
+                },
+              );
               const wheelName =
                 WHEEL_BASE_OPTIONS.find((option) => option.id === setup.wheelBase)
                   ?.label ?? setup.wheelBase;
@@ -246,6 +273,10 @@ export default function WheelSettingsHub({
                   key={setup.id}
                   type="button"
                   onClick={() => {
+                    if (!tracks.some((entry) => entry.id === setup.trackId)) {
+                      return;
+                    }
+
                     setWheelBase(setup.wheelBase);
                     setCarId(setup.carId);
                     setTrackId(setup.trackId);
@@ -289,7 +320,7 @@ export default function WheelSettingsHub({
             <select
               value={wheelBase}
               onChange={(event) => setWheelBase(event.target.value)}
-              style={styles.select}
+              style={styles.controlSelect}
             >
               {WHEEL_BASE_OPTIONS.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -304,7 +335,7 @@ export default function WheelSettingsHub({
             <select
               value={carId}
               onChange={(event) => setCarId(event.target.value)}
-              style={styles.select}
+              style={styles.controlSelect}
             >
               <option value="">Select a car…</option>
               {filteredCars.map((car) => (
@@ -320,12 +351,12 @@ export default function WheelSettingsHub({
             <select
               value={trackId}
               onChange={(event) => setTrackId(event.target.value)}
-              style={styles.select}
+              style={styles.controlSelect}
             >
               <option value="">Select a track…</option>
               {filteredTracks.map((track) => (
                 <option key={track.id} value={track.id}>
-                  {track.name}
+                  {getTrackDisplayName(track)}
                 </option>
               ))}
             </select>
@@ -336,7 +367,7 @@ export default function WheelSettingsHub({
             <select
               value={tyreCompound}
               onChange={(event) => setTyreCompound(event.target.value)}
-              style={styles.select}
+              style={styles.controlSelect}
             >
               {TYRE_COMPOUND_OPTIONS.map((compound) => (
                 <option key={compound} value={compound}>
@@ -388,7 +419,7 @@ export default function WheelSettingsHub({
           <>
             <p style={styles.contextLine}>
               {GAME_CATALOG[filterGame]?.shortLabel} · {wheelLabel} ·{" "}
-              {selectedCar?.name} · {selectedTrack?.name} · {tyreCompound} · BOP{" "}
+              {selectedCar?.name} · {getTrackDisplayName(selectedTrack)} · {tyreCompound} · BOP{" "}
               {bopOn ? "On" : "Off"}
             </p>
             {lookup.message ? (
@@ -417,7 +448,7 @@ export default function WheelSettingsHub({
               <select
                 value={requestGame}
                 onChange={(event) => setRequestGame(event.target.value)}
-                style={styles.select}
+                style={styles.controlSelect}
               >
                 {gameOptions.map((version) => (
                   <option key={version} value={version}>
@@ -432,7 +463,7 @@ export default function WheelSettingsHub({
               <select
                 value={requestWheelBase}
                 onChange={(event) => setRequestWheelBase(event.target.value)}
-                style={styles.select}
+                style={styles.controlSelect}
               >
                 {WHEEL_BASE_OPTIONS.map((option) => (
                   <option key={option.id} value={option.id}>
@@ -447,7 +478,7 @@ export default function WheelSettingsHub({
               <select
                 value={requestCarId}
                 onChange={(event) => setRequestCarId(event.target.value)}
-                style={styles.select}
+                style={styles.controlSelect}
                 required
               >
                 <option value="">Select a car…</option>
@@ -464,13 +495,13 @@ export default function WheelSettingsHub({
               <select
                 value={requestTrackId}
                 onChange={(event) => setRequestTrackId(event.target.value)}
-                style={styles.select}
+                style={styles.controlSelect}
                 required
               >
                 <option value="">Select a track…</option>
                 {requestTracks.map((track) => (
                   <option key={track.id} value={track.id}>
-                    {track.name}
+                    {getTrackDisplayName(track)}
                   </option>
                 ))}
               </select>
@@ -481,7 +512,7 @@ export default function WheelSettingsHub({
               <select
                 value={requestTyres}
                 onChange={(event) => setRequestTyres(event.target.value)}
-                style={styles.select}
+                style={styles.controlSelect}
               >
                 {TYRE_COMPOUND_OPTIONS.map((compound) => (
                   <option key={compound} value={compound}>
@@ -594,10 +625,11 @@ export default function WheelSettingsHub({
                     getCarsForGame(request.gameVersion).find(
                       (car) => car.id === request.carId,
                     )?.name ?? request.carId;
-                  const trackName =
+                  const trackName = getTrackDisplayName(
                     getTracksForGame(request.gameVersion).find(
                       (track) => track.id === request.trackId,
-                    )?.name ?? request.trackId;
+                    ) ?? { displayName: request.trackId },
+                  );
                   const baseName =
                     WHEEL_BASE_OPTIONS.find(
                       (option) => option.id === request.wheelBase,
@@ -707,9 +739,10 @@ const styles = {
     textAlign: "left",
   },
   filtersGrid: {
+    alignItems: "end",
     display: "grid",
     gap: "12px",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   },
   panelTitle: {
     margin: "0 0 10px",
@@ -730,6 +763,17 @@ const styles = {
     color: "#dbe6ff",
     fontSize: "0.9rem",
     padding: "8px 10px",
+  },
+  controlSelect: {
+    background: "rgba(17, 22, 35, 0.95)",
+    border: "1px solid rgba(138, 159, 212, 0.3)",
+    borderRadius: "8px",
+    boxSizing: "border-box",
+    color: "#dbe6ff",
+    fontSize: "0.9rem",
+    minHeight: "42px",
+    padding: "8px 10px",
+    width: "100%",
   },
   toggleRow: { display: "flex", flexWrap: "wrap", gap: "8px" },
   toggleButton: {

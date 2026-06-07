@@ -1,9 +1,15 @@
 import {
+  isStandardRaceTrack,
+  resolveEligibleClasses,
+  resolveTrackSurface,
+} from "../data/gt7/trackMetadata.js";
+import {
   DRIVING_STYLE_LABELS,
   TRACK_TYPE_LABELS,
 } from "../data/gt7/trackTypes.js";
 
-export const NON_TARMAC_TRACK_TYPES = ["dirt", "snow"];
+export const NON_TARMAC_TRACK_TYPES = ["dirt", "snow", "rallycross"];
+export const NON_STANDARD_RACE_SURFACES = ["dirt", "snow", "mixed"];
 
 export const STANDARD_RACE_CAR_CLASSES = ["Gr.1", "Gr.2", "Gr.3", "Gr.4"];
 
@@ -13,17 +19,81 @@ export const NON_TARMAC_SURFACE_WARNING =
 const DIRT_RECOMMENDATION_CLASS = "Gr.B";
 
 /**
- * @param {{ trackType?: string } | null | undefined} track
+ * @param {{ trackType?: string, surface?: string } | null | undefined} track
  */
 export function isNonTarmacTrack(track) {
-  return NON_TARMAC_TRACK_TYPES.includes(track?.trackType ?? "");
+  if (!track) {
+    return false;
+  }
+
+  if (NON_TARMAC_TRACK_TYPES.includes(track.trackType ?? "")) {
+    return true;
+  }
+
+  return NON_STANDARD_RACE_SURFACES.includes(resolveTrackSurface(track));
 }
 
 /**
- * @param {{ trackType?: string } | null | undefined} track
+ * @param {{ eligibleClasses?: string[], trackType?: string, surface?: string } | null | undefined} track
+ * @param {string} selectedClass
+ */
+export function isTrackEligibleForClass(track, selectedClass) {
+  if (!track || !selectedClass) {
+    return false;
+  }
+
+  return resolveEligibleClasses(track).includes(selectedClass);
+}
+
+/**
+ * @param {{ eligibleForStandardRaceCars?: boolean, id?: string, trackType?: string, surface?: string } | null | undefined} track
+ */
+export function isTrackSelectableForStandardRaceCars(track) {
+  return isStandardRaceTrack(track);
+}
+
+/**
+ * @param {Array<{ id?: string, eligibleClasses?: string[], eligibleForStandardRaceCars?: boolean, trackType?: string, surface?: string }>} tracks
+ * @param {string} selectedClass
+ */
+export function getSelectableTracksForClass(tracks, selectedClass) {
+  if (!Array.isArray(tracks) || !selectedClass) {
+    return [];
+  }
+
+  const requiresStandardSurface = STANDARD_RACE_CAR_CLASSES.includes(selectedClass);
+
+  return tracks.filter((track) => {
+    if (!isTrackEligibleForClass(track, selectedClass)) {
+      return false;
+    }
+
+    if (requiresStandardSurface && track.eligibleForStandardRaceCars === false) {
+      return false;
+    }
+
+    if (requiresStandardSurface && !isStandardRaceTrack(track)) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * @param {{ trackType?: string, surface?: string } | null | undefined} track
  */
 export function isDirtTrack(track) {
-  return track?.trackType === "dirt";
+  if (!track) {
+    return false;
+  }
+
+  return (
+    track.trackType === "dirt" ||
+    track.trackType === "rallycross" ||
+    resolveTrackSurface(track) === "dirt" ||
+    resolveTrackSurface(track) === "mixed"
+  );
 }
 
 /**
@@ -38,19 +108,7 @@ export function isSnowTrack(track) {
  * @param {string} [carClass]
  */
 export function isCarClassSupportedOnTrack(track, carClass) {
-  if (!track || !carClass) {
-    return false;
-  }
-
-  if (isSnowTrack(track)) {
-    return false;
-  }
-
-  if (isDirtTrack(track)) {
-    return carClass === DIRT_RECOMMENDATION_CLASS;
-  }
-
-  return true;
+  return isTrackEligibleForClass(track, carClass);
 }
 
 /**
@@ -174,15 +232,7 @@ export function isCarClassSelectableForTrack(carClass, track) {
     return true;
   }
 
-  if (isSnowTrack(track)) {
-    return false;
-  }
-
-  if (isDirtTrack(track)) {
-    return carClass === DIRT_RECOMMENDATION_CLASS;
-  }
-
-  return true;
+  return isTrackEligibleForClass(track, carClass);
 }
 
 /**

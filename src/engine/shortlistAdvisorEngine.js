@@ -3,6 +3,7 @@ import { isCarEligibleForRecommendations } from "../utils/carClassFilter.js";
 import {
   getCarsForGame,
   getRecommendableCarsForGame,
+  getSelectableTracksForClass,
   getTracksForGame,
 } from "../utils/gameData.js";
 import {
@@ -116,8 +117,8 @@ const DRIVER_STYLE_WEIGHTS = {
   "Qualifying Specialist": { performance: 0.05, availabilityPenalty: 0.02 },
 };
 
-function resolveTracks(trackIds, gameVersion = DEFAULT_GAME_VERSION) {
-  const tracks = getTracksForGame(gameVersion);
+function resolveTracks(trackIds, gameVersion = DEFAULT_GAME_VERSION, carClass = "Gr.3") {
+  const tracks = getSelectableTracksForClass(gameVersion, carClass);
 
   if (Array.isArray(trackIds) && trackIds.length > 0) {
     return trackIds
@@ -401,7 +402,11 @@ function scoreForSlot(metrics, slot, weights, pickedDrivetrains) {
 export function recommendTeamCarShortlist(input) {
   const gameVersion = input.gameVersion ?? DEFAULT_GAME_VERSION;
   const carClass = input.carClass ?? "Gr.3";
-  const championshipTracks = resolveTracks(input.trackIds, gameVersion);
+  const championshipTracks = resolveTracks(
+    input.trackIds,
+    gameVersion,
+    input.carClass ?? "Gr.3",
+  );
   const drivetrainRankings = analyzeDrivetrainSuitability(championshipTracks);
   const driverStyles = [input.driver1, input.driver2].filter(Boolean);
   const candidates = getRecommendableCarsForGame(gameVersion, carClass)

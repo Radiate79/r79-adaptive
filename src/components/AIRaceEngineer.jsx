@@ -20,7 +20,13 @@ import {
 import { PERSONALISATION_STATUS } from "../data/driverProfile.js";
 import { loadDriverProfile } from "../utils/driverProfileStorage.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
-import { getRecommendableCarsForGame, getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import {
+  getRecommendableCarsForGame,
+  getSelectableTracksForClass,
+  getTrackDisplayName,
+  getTracksForGame,
+  isGameDataReady,
+} from "../utils/gameData.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
@@ -56,7 +62,11 @@ function ConfidenceMeter({ value }) {
  */
 export default function AIRaceEngineer({ onOpenWheelSettings }) {
   const { gameVersion, setGameVersion, gameOptions, game } = useGameVersion();
-  const tracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
+  const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
+  const selectableTracks = useMemo(
+    () => getSelectableTracksForClass(gameVersion, "Gr.3"),
+    [gameVersion],
+  );
   const cars = useMemo(
     () => getRecommendableCarsForGame(gameVersion),
     [gameVersion],
@@ -138,7 +148,18 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
     );
   };
 
-  const selectedTrack = tracks.find((track) => track.id === trackId) ?? null;
+  const selectedTrack =
+    allTracks.find((track) => track.id === trackId) ?? null;
+
+  useEffect(() => {
+    if (!trackId) {
+      return;
+    }
+
+    if (!selectableTracks.some((track) => track.id === trackId)) {
+      setTrackId("");
+    }
+  }, [trackId, selectableTracks]);
 
   useEffect(() => {
     if (!analysis.ready || !analysis.recommendedCar) {
@@ -297,9 +318,9 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               style={styles.select}
             >
               <option value="">Select a track…</option>
-              {tracks.map((track) => (
+              {selectableTracks.map((track) => (
                 <option key={track.id} value={track.id}>
-                  {track.name}
+                  {getTrackDisplayName(track)}
                 </option>
               ))}
             </select>
@@ -460,21 +481,58 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                 <h3 style={styles.reportTitle}>Engineer Report</h3>
               </div>
               <div style={styles.reportMetaBlock}>
-                <span style={styles.reportMetaItem}>{analysis.track.name}</span>
                 <span style={styles.reportMetaItem}>
-                  {analysis.raceContext.raceLengthLabel}
+                  Track: {getTrackDisplayName(analysis.track)}
                 </span>
                 <span style={styles.reportMetaItem}>
-                  {analysis.raceContext.driverStyle}
+                  Race Profile: {analysis.raceContext.raceLengthLabel}
                 </span>
-                <span style={styles.reportMetaPersonalisation}>
-                  {analysis.personalisation.label}
+                <span style={styles.reportMetaItem}>
+                  Driving Style: {analysis.raceContext.driverStyle}
+                </span>
+                <span style={styles.reportMetaConfidence}>
+                  Confidence: {analysis.confidenceScore}%
                 </span>
               </div>
             </div>
 
-            <p style={styles.reportBriefing}>{analysis.engineerBriefing}</p>
-            <p style={styles.reportBody}>{analysis.engineerReport}</p>
+            {analysis.engineerReportSections ? (
+              <>
+                <div style={styles.reportSummaryBlock}>
+                  <h4 style={styles.reportSectionHeading}>Summary</h4>
+                  <p style={styles.reportSummaryText}>
+                    {analysis.engineerReportSections.summary}
+                  </p>
+                </div>
+
+                <div style={styles.reportSectionsGrid}>
+                  <ReportSection
+                    title="Why this car?"
+                    items={analysis.engineerReportSections.whyThisCar}
+                  />
+                  <ReportSection
+                    title="Strengths"
+                    items={analysis.engineerReportSections.strengths}
+                  />
+                  <ReportSection
+                    title="Weaknesses"
+                    items={analysis.engineerReportSections.weaknesses}
+                  />
+                  <ReportSection
+                    title="Tyre Recommendation"
+                    text={analysis.engineerReportSections.tyreRecommendation}
+                  />
+                  <ReportSection
+                    title="Fuel Strategy"
+                    text={analysis.engineerReportSections.fuelStrategy}
+                  />
+                  <ReportSection
+                    title="Strategy Notes"
+                    items={analysis.engineerReportSections.strategyNotes}
+                  />
+                </div>
+              </>
+            ) : null}
           </article>
 
           <section style={styles.detailSection}>
@@ -501,12 +559,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                 value={`${analysis.recommendedCar.communityConfidence ?? 60}/100`}
               />
               <OutputRow
-                icon="🛞"
-                label="Recommended Tyre Strategy"
-                value={analysis.tyreStrategy}
-              />
-              <OutputRow icon="⛽" label="Fuel Strategy" value={analysis.fuelStrategy} />
-              <OutputRow
                 icon="⚖"
                 label="Recommended Brake Balance"
                 value={analysis.brakeBalance}
@@ -523,8 +575,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               />
             </div>
 
-            <ConfidenceMeter value={analysis.confidenceScore} />
-
             <div style={styles.reasoningPanel}>
               <h4 style={styles.reasoningTitle}>🧠 AI Reasoning</h4>
               <ul style={styles.reasoningList}>
@@ -536,11 +586,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               </ul>
             </div>
           </section>
-
-          <div style={styles.summaryCard}>
-            <h3 style={styles.panelTitle}>Why this recommendation</h3>
-            <p style={styles.summaryText}>{analysis.whyRecommendation}</p>
-          </div>
 
           {analysis.alternativeChoice ? (
             <div style={styles.summaryCard}>
@@ -567,17 +612,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               </ul>
             </div>
           ) : null}
-
-          <div style={styles.watchCard}>
-            <h3 style={styles.panelTitle}>Things to Watch</h3>
-            <ul style={styles.watchList}>
-              {analysis.thingsToWatch.map((item) => (
-                <li key={item} style={styles.watchItem}>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
 
           <div style={styles.engineerNotesCard}>
             <h3 style={styles.panelTitle}>Engineer Notes</h3>
@@ -886,6 +920,25 @@ function HistoryMeta({ label, value }) {
   );
 }
 
+function ReportSection({ title, items, text }) {
+  return (
+    <div style={styles.reportSectionCard}>
+      <h4 style={styles.reportSectionHeading}>{title}</h4>
+      {text ? (
+        <p style={styles.reportSectionText}>{text}</p>
+      ) : (
+        <ul style={styles.reportSectionList}>
+          {(items ?? []).map((item) => (
+            <li key={item} style={styles.reportSectionItem}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function OutputRow({ icon, label, value, highlight = false }) {
   return (
     <div
@@ -1013,7 +1066,7 @@ const styles = {
     boxShadow: "0 12px 28px rgba(0, 0, 0, 0.28)",
     marginBottom: "18px",
     padding: "20px 18px",
-    textAlign: "center",
+    textAlign: "left",
   },
   reportHeader: {
     alignItems: "flex-start",
@@ -1053,7 +1106,7 @@ const styles = {
     fontWeight: 600,
     padding: "5px 12px",
   },
-  reportMetaPersonalisation: {
+  reportMetaConfidence: {
     background: "rgba(24, 44, 82, 0.65)",
     border: "1px solid rgba(132, 172, 255, 0.4)",
     borderRadius: "999px",
@@ -1062,23 +1115,53 @@ const styles = {
     fontWeight: 600,
     padding: "5px 12px",
   },
-  reportBriefing: {
+  reportSummaryBlock: {
+    borderBottom: "1px solid rgba(124, 156, 222, 0.2)",
+    marginBottom: "16px",
+    paddingBottom: "14px",
+  },
+  reportSummaryText: {
     color: "#e8efff",
-    fontSize: "1.02rem",
+    fontSize: "1rem",
     fontStyle: "italic",
     fontWeight: 500,
-    lineHeight: 1.65,
-    margin: "0 auto 14px",
-    maxWidth: "720px",
+    lineHeight: 1.6,
+    margin: "6px 0 0",
   },
-  reportBody: {
-    borderTop: "1px solid rgba(124, 156, 222, 0.2)",
-    color: "rgba(220, 228, 255, 0.88)",
-    fontSize: "0.92rem",
-    lineHeight: 1.65,
-    margin: "0 auto",
-    maxWidth: "720px",
-    paddingTop: "14px",
+  reportSectionsGrid: {
+    display: "grid",
+    gap: "12px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+  },
+  reportSectionCard: {
+    background: "rgba(9, 14, 24, 0.55)",
+    border: "1px solid rgba(124, 156, 222, 0.22)",
+    borderRadius: "10px",
+    padding: "12px",
+  },
+  reportSectionHeading: {
+    color: "#b8cdff",
+    fontSize: "0.78rem",
+    fontWeight: 700,
+    letterSpacing: "0.06em",
+    margin: "0 0 8px",
+    textTransform: "uppercase",
+  },
+  reportSectionText: {
+    color: "rgba(220, 228, 255, 0.9)",
+    fontSize: "0.9rem",
+    lineHeight: 1.55,
+    margin: 0,
+  },
+  reportSectionList: {
+    color: "rgba(220, 228, 255, 0.9)",
+    fontSize: "0.88rem",
+    lineHeight: 1.5,
+    margin: 0,
+    paddingLeft: "18px",
+  },
+  reportSectionItem: {
+    marginBottom: "4px",
   },
   detailSection: {
     background: "rgba(9, 14, 24, 0.88)",

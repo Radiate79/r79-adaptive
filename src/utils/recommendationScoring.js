@@ -19,7 +19,8 @@ export const COMMUNITY_CONFIDENCE_REASON_THRESHOLD = 75;
 export const COMMUNITY_MAX_MODIFIER = 12;
 export const HISTORICAL_MAX_MODIFIER = 6;
 export const COMMUNITY_BASELINE = DEFAULT_COMMUNITY_CONFIDENCE;
-export const TRACK_SUITABILITY_PRIORITY_GAP = 0.75;
+export const TRACK_SUITABILITY_PRIORITY_GAP = 1.25;
+export const COMPETITIVE_USE_HIGH_MODIFIER = 2.5;
 export const LOW_COMPETITIVE_USE_TRACK_FIT_THRESHOLD = 88;
 export const RACE_ARCHIVE_WIN_POINTS = 12;
 export const RACE_ARCHIVE_PODIUM_POINTS = 4;
@@ -117,6 +118,13 @@ export function buildRecommendationBreakdown(
 }
 
 /**
+ * @param {{ competitiveUse?: string }} car
+ */
+export function getCompetitiveUseModifier(car) {
+  return car?.competitiveUse === "high" ? COMPETITIVE_USE_HIGH_MODIFIER : 0;
+}
+
+/**
  * @param {{ communityConfidence?: number }} car
  */
 export function getCommunityModifier(car) {
@@ -161,7 +169,8 @@ export function blendRecommendationScore(
     (
       adjustedTechnical +
       getCommunityModifier(car) +
-      getHistoricalModifier(historicalScore, maxHistorical)
+      getHistoricalModifier(historicalScore, maxHistorical) +
+      getCompetitiveUseModifier(car)
     ).toFixed(2),
   );
 }

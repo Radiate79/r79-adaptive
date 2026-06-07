@@ -1020,9 +1020,9 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
-    communityConfidence: 20,
+    communityConfidence: 15,
     competitiveUse: "low",
-    recommendationPenalty: 30,
+    recommendationPenalty: 38,
     notes: "Rarely used competitively in GT7 Gr.3 events.",
   },
   {

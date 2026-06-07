@@ -6,7 +6,7 @@ import {
 } from "../data/wheelBases.js";
 import { STARTER_WHEEL_SETUPS } from "../data/wheelSetups.js";
 import { NO_EXACT_SETUP_MESSAGE } from "../data/wheelSetupsMeta.js";
-import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import { getCarsForGame, getTrackDisplayName, getTracksForGame } from "../utils/gameData.js";
 
 /**
  * @typedef {Object} WheelSetupFilters
@@ -65,9 +65,10 @@ function getSetupSearchText(setup, gameVersion = setup.gameVersion) {
   const car =
     getCarsForGame(gameVersion).find((entry) => entry.id === setup.carId)?.name ??
     setup.carId;
-  const track =
-    getTracksForGame(gameVersion).find((entry) => entry.id === setup.trackId)
-      ?.name ?? setup.trackId;
+  const trackRecord = getTracksForGame(gameVersion).find(
+    (entry) => entry.id === setup.trackId,
+  );
+  const track = trackRecord ? getTrackDisplayName(trackRecord) : setup.trackId;
   const wheel =
     WHEEL_BASE_OPTIONS.find((entry) => entry.id === setup.wheelBase)?.label ??
     setup.wheelBase;
