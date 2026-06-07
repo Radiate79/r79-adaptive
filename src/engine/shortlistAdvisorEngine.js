@@ -14,6 +14,10 @@ import {
   scoreCarConsistency,
   scoreCarForChampionship,
 } from "./championshipEngine.js";
+import {
+  blendRecommendationScore,
+  getCommunityConfidence,
+} from "../utils/recommendationScoring.js";
 import { getALRResultScore } from "./alrPerformanceEngine.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 
@@ -327,11 +331,12 @@ function buildFallbackNotes(metrics, rank) {
  */
 function buildCarMetrics(car, input, championshipTracks, drivetrainRankings) {
   const raceSettings = input.raceSettings ?? {};
-  const performanceScore = scoreCarForChampionship(
+  const technicalScore = scoreCarForChampionship(
     car,
     championshipTracks,
     raceSettings,
   );
+  const performanceScore = technicalScore;
   const consistencyScore = scoreCarConsistency(
     car,
     championshipTracks,
@@ -348,6 +353,7 @@ function buildCarMetrics(car, input, championshipTracks, drivetrainRankings) {
 
   return {
     tier: input.tier,
+    technicalScore,
     performanceScore,
     consistencyScore,
     alrHistoricalScore,
@@ -412,6 +418,20 @@ export function recommendTeamCarShortlist(input) {
   if (candidates.length === 0) {
     return [];
   }
+
+  const maxHistorical = Math.max(
+    ...candidates.map((entry) => entry.metrics.alrHistoricalScore),
+    1,
+  );
+
+  candidates.forEach((entry) => {
+    entry.metrics.performanceScore = blendRecommendationScore(
+      entry.metrics.technicalScore,
+      entry.car,
+      entry.metrics.alrHistoricalScore,
+      maxHistorical,
+    );
+  });
 
   const performanceValues = candidates.map(
     (entry) => entry.metrics.performanceScore,
@@ -499,6 +519,7 @@ export function recommendTeamCarShortlist(input) {
       drivetrain: car.drivetrain,
       whyThisPosition: buildWhyThisPosition(car, metrics, slot, slot.rank),
       performanceScore: metrics.performanceScore,
+      communityConfidence: getCommunityConfidence(car),
       alrHistoricalScore: metrics.alrHistoricalScore,
       consistencyScore: metrics.consistencyScore,
       drivetrainFitScore: metrics.drivetrainFitScore,

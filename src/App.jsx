@@ -26,6 +26,8 @@ import Pathfinder from "./components/Pathfinder.jsx";
 
 import ThePromise from "./components/ThePromise.jsx";
 
+import ALRCorner from "./components/ALRCorner.jsx";
+
 import SettingsHub from "./components/SettingsHub.jsx";
 
 import SplashScreen from "./components/SplashScreen.jsx";
@@ -44,27 +46,29 @@ const PAGES = [
 
   { id: "todays-race", label: "Today's Race" },
 
+  { id: "ai-engineer", label: "AI Race Engineer" },
+
   { id: "advisor", label: "Championship Advisor" },
 
   { id: "shortlist", label: "Team Car Shortlist" },
+
+  { id: "alr", label: "Race Archive" },
 
   { id: "rankings", label: "Historical Rankings" },
 
   { id: "profiles", label: "Car Profiles" },
 
-  { id: "alr", label: "Race Archive" },
+  { id: "alr-corner", label: "ALR Corner" },
 
   { id: "archive", label: "R79 Archive" },
+
+  { id: "labs", label: "R79 Labs" },
 
   { id: "promise", label: "The Promise" },
 
   { id: "membership", label: "Membership" },
 
   { id: "pathfinder", label: "Pathfinder" },
-
-  { id: "labs", label: "R79 Labs" },
-
-  { id: "ai-engineer", label: "AI Race Engineer" },
 
   { id: "settings", label: "Settings" },
 
@@ -279,6 +283,8 @@ function AppShell() {
       {page === "profiles" ? <CarProfiles /> : null}
 
       {page === "alr" ? <ALRDataEntry /> : null}
+
+      {page === "alr-corner" ? <ALRCorner /> : null}
 
       {page === "archive" ? (
         <R79Archive

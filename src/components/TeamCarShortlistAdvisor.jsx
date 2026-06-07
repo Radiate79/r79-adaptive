@@ -308,6 +308,10 @@ function ScoreBreakdown({ entry }) {
         <strong style={styles.scoreValue}>{entry.performanceScore.toFixed(1)}</strong>
       </div>
       <div style={styles.scoreItem}>
+        <span style={styles.scoreLabel}>Community Confidence</span>
+        <strong style={styles.scoreValue}>{entry.communityConfidence ?? 60}</strong>
+      </div>
+      <div style={styles.scoreItem}>
         <span style={styles.scoreLabel}>Historical</span>
         <strong style={styles.scoreValue}>
           {entry.alrHistoricalScore.toFixed(1)}

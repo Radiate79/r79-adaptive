@@ -74,8 +74,7 @@ export default function ALRHistoricalRankings() {
       <div style={styles.header}>
         <h2 style={styles.title}>Historical Rankings</h2>
         <p style={styles.subtitle}>
-          Top 25 cars by historical race score with championship results,
-          consistency trends, and filterable constructor history.
+          Explore car and constructor trends from imported race data.
         </p>
       </div>
 

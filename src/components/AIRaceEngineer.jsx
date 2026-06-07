@@ -468,6 +468,11 @@ export default function AIRaceEngineer() {
                 highlight
               />
               <OutputRow
+                icon="🌐"
+                label="Community Confidence"
+                value={`${analysis.recommendedCar.communityConfidence ?? 60}/100`}
+              />
+              <OutputRow
                 icon="🛞"
                 label="Recommended Tyre Strategy"
                 value={analysis.tyreStrategy}

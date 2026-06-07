@@ -330,6 +330,10 @@ export default function TodaysRaceAdvisor() {
             <RatingBar label="Tyre" value={analysis.topPick.tyreRating} />
             <RatingBar label="Stability" value={analysis.topPick.stabilityRating} />
             <RatingBar label="Rotation" value={analysis.topPick.rotationRating} />
+            <RatingBar
+              label="Community Confidence"
+              value={analysis.topPick.communityConfidence ?? 60}
+            />
           </div>
           <div style={styles.whyBlock}>
             <p style={styles.whyTitle}>Why this car?</p>
@@ -367,6 +371,9 @@ export default function TodaysRaceAdvisor() {
             </span>
             <span>
               Strength: {analysis.alternativeChoice.strengthRating}
+            </span>
+            <span>
+              Community: {analysis.alternativeChoice.communityConfidence ?? 60}
             </span>
           </div>
           <ul style={styles.reasonList}>
@@ -428,6 +435,12 @@ export default function TodaysRaceAdvisor() {
                     <span style={styles.scoreLabel}>Historical</span>
                     <span style={styles.scoreValue}>
                       {car.historicalScore.toFixed(0)}
+                    </span>
+                  </div>
+                  <div style={styles.scoreCell}>
+                    <span style={styles.scoreLabel}>Community</span>
+                    <span style={styles.scoreValue}>
+                      {car.communityConfidence ?? 60}
                     </span>
                   </div>
                 </div>

@@ -8,6 +8,11 @@ import {
   isCarEligibleForRecommendations,
   pickEligibleRecommendation,
 } from "../utils/carClassFilter.js";
+import {
+  appendCommunityConfidenceReason,
+  blendRecommendationScore,
+  getCommunityConfidence,
+} from "../utils/recommendationScoring.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import {
@@ -115,14 +120,6 @@ function getCarALRHistoricalScore(carId, gameVersion = DEFAULT_GAME_VERSION) {
   );
 
   return Number(score.toFixed(2));
-}
-
-function normalizeAlrBonus(historicalScore, maxHistorical) {
-  if (maxHistorical <= 0 || historicalScore <= 0) {
-    return 0;
-  }
-
-  return Number(((historicalScore / maxHistorical) * 8).toFixed(2));
 }
 
 function getCompoundTyreModifier(tyreCompound) {
@@ -347,7 +344,6 @@ export function analyzeTodaysRace(input) {
   const enriched = baseRecommendations.map((car) => {
     const trackScore = scoreCarForTrack(car, track, raceSettings);
     const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
-    const alrBonus = normalizeAlrBonus(historicalScore, maxHistorical);
     const bopModifier = getBopModifier(bopOn);
     const consistencyScore = scoreCarConsistency(car, [track], raceSettings);
 
@@ -366,12 +362,12 @@ export function analyzeTodaysRace(input) {
       lengthMods.tyreWeight * compoundWear,
     );
 
-    const overallScore = Number(
-      (
-        trackScore * bopModifier * 0.72 +
-        alrBonus +
-        consistencyScore * 0.08
-      ).toFixed(2),
+    const technicalScore = trackScore * bopModifier;
+    const overallScore = blendRecommendationScore(
+      technicalScore,
+      car,
+      historicalScore,
+      maxHistorical,
     );
 
     return {
@@ -380,6 +376,8 @@ export function analyzeTodaysRace(input) {
       class: car.class,
       drivetrain: car.drivetrain,
       overallScore,
+      technicalScore: Number(technicalScore.toFixed(2)),
+      communityConfidence: getCommunityConfidence(car),
       historicalScore,
       strengthRating: toRating(trackScore),
       fuelRating,
@@ -389,7 +387,10 @@ export function analyzeTodaysRace(input) {
       accelerationRating: toRating((getAccelerationValue(car) / 10) * 100),
       consistencyRating: toRating(consistencyScore),
       topSpeedRating: getWeightedAttributeRating(car, track, "topSpeed", raceSettings),
-      reasons: buildCarReasons(car, track, raceSettings, historicalScore),
+      reasons: appendCommunityConfidenceReason(
+        car,
+        buildCarReasons(car, track, raceSettings, historicalScore),
+      ),
       engineReasons: car.reasons ?? [],
       unavailable: unavailable.has(car.id),
     };

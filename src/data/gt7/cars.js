@@ -10,6 +10,7 @@ export const cars = [
     tyres: 7,
     stability: 8,
     rotation: 7,
+    communityConfidence: 92,
   },
   {
     id: "nissan_gtr_gt3_18",
@@ -22,6 +23,7 @@ export const cars = [
     tyres: 6,
     stability: 7,
     rotation: 6,
+    communityConfidence: 85,
   },
   {
     id: "porsche_911_gt3_r_22",
@@ -34,6 +36,7 @@ export const cars = [
     tyres: 7,
     stability: 8,
     rotation: 9,
+    communityConfidence: 95,
   },
   {
     id: "bmw_m6_gt3_sprint_model",
@@ -45,6 +48,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 8,
+    communityConfidence: 82,
   },
   {
     id: "aston_martin_v12_vantage_gt3_12",
@@ -56,6 +60,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 7,
+    communityConfidence: 86,
   },
   {
     id: "mercedes_amg_gt3_20",
@@ -68,6 +73,7 @@ export const cars = [
     tyres: 6,
     stability: 9,
     rotation: 7,
+    communityConfidence: 90,
   },
   {
     id: "lexus_rcf_gt3",
@@ -79,6 +85,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 7,
+    communityConfidence: 82,
   },
   {
     id: "jaguar_f_type_gt3",
@@ -90,6 +97,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 7,
+    communityConfidence: 88,
   },
   {
     id: "audi_r8_lms_evo",
@@ -123,6 +131,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 7,
+    communityConfidence: 86,
   },
   {
     id: "supra_racing_concept",
@@ -134,6 +143,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    communityConfidence: 85,
   },
   {
     id: "peugeot_rcz_gr3",
@@ -453,6 +463,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    communityConfidence: 0,
     excludedFromRecommendations: true,
     exclusionNote: "Pending GT7 classification verification.",
   },
@@ -952,6 +963,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    communityConfidence: 45,
   },
   {
     id: "porsche_911_rsr_991_17",
@@ -996,6 +1008,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    communityConfidence: 35,
   },
   {
     id: "toyota_ft1_vision_gran_turismo_gr3",

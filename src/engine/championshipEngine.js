@@ -5,6 +5,12 @@ import {
   isCarEligibleForRecommendations,
 } from "../utils/carClassFilter.js";
 import { getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  appendCommunityConfidenceReason,
+  blendRecommendationScore,
+  getCommunityConfidence,
+  getRecommendationHistoricalScore,
+} from "../utils/recommendationScoring.js";
 
 const SCORE_FIELDS = ["topSpeed", "traction", "fuel", "tyres", "stability"];
 const SCORING_FIELDS = [...SCORE_FIELDS, "rotation"];
@@ -475,13 +481,37 @@ export function recommendCarsForChampionship(
   const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
   const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
 
+  const historicalScores = candidateCars.map((car) =>
+    getRecommendationHistoricalScore(car.id, gameVersion),
+  );
+  const maxHistorical = Math.max(...historicalScores, 1);
+
   return filterEligibleRecommendationResults(
     candidateCars
-      .map((car) => ({
-        ...car,
-        score: scoreCarForChampionship(car, championshipTracks, raceSettings),
-        reasons: generateCarReasons(car, championshipTracks, raceSettings, 3),
-      }))
+      .map((car, index) => {
+        const technicalScore = scoreCarForChampionship(
+          car,
+          championshipTracks,
+          raceSettings,
+        );
+        const reasons = appendCommunityConfidenceReason(
+          car,
+          generateCarReasons(car, championshipTracks, raceSettings, 3),
+        );
+
+        return {
+          ...car,
+          technicalScore,
+          communityConfidence: getCommunityConfidence(car),
+          score: blendRecommendationScore(
+            technicalScore,
+            car,
+            historicalScores[index],
+            maxHistorical,
+          ),
+          reasons,
+        };
+      })
       .sort((a, b) => b.score - a.score),
   );
 }

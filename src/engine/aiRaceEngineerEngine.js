@@ -12,6 +12,11 @@ import {
   pickEligibleRecommendation,
 } from "../utils/carClassFilter.js";
 import { getCarsForGame, getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  blendRecommendationScore,
+  getCommunityConfidence,
+  getCommunityConfidenceReason,
+} from "../utils/recommendationScoring.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import { getALRResultScore } from "./alrPerformanceEngine.js";
 
@@ -322,6 +327,11 @@ function buildEngineerReport(
 function buildReasoning(car, track, historicalScore, styleId) {
   const points = [];
   const rotation = getRotationValue(car);
+  const communityReason = getCommunityConfidenceReason(car);
+
+  if (communityReason) {
+    points.push(communityReason);
+  }
 
   if (historicalScore > 0) {
     points.push(
@@ -603,7 +613,6 @@ export function analyzeAIRaceEngineer(input) {
     );
 
     const historicalScore = getCarALRHistoricalScore(car.id, gameVersion);
-    const alrBonus = (historicalScore / maxHistorical) * 12;
     const consistency = scoreConsistency(car, track, raceSettings);
     const compound = pickBestTyre(
       car,
@@ -613,12 +622,13 @@ export function analyzeAIRaceEngineer(input) {
       lengthMods,
     );
 
-    const overallScore = Number(
-      (
-        (attributeScore / fields.length) * getBopModifier(bopOn) +
-        alrBonus +
-        consistency * 0.6
-      ).toFixed(2),
+    const technicalScore =
+      (attributeScore / fields.length) * getBopModifier(bopOn);
+    const overallScore = blendRecommendationScore(
+      technicalScore,
+      car,
+      historicalScore,
+      maxHistorical,
     );
 
     return {
@@ -627,6 +637,8 @@ export function analyzeAIRaceEngineer(input) {
       class: car.class,
       drivetrain: car.drivetrain,
       overallScore,
+      technicalScore: Number(technicalScore.toFixed(2)),
+      communityConfidence: getCommunityConfidence(car),
       historicalScore,
       recommendedCompound: compound,
       strengthRating: toRating((attributeScore / fields.length) * 10),

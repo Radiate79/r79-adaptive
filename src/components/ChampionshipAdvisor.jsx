@@ -359,6 +359,9 @@ export default function ChampionshipAdvisor() {
                     </p>
                   </div>
                 ) : null}
+                <p style={styles.communityMeta}>
+                  Community Confidence: {car.communityConfidence ?? 60}
+                </p>
                 <div style={styles.whyBlock}>
                   <p style={styles.whyTitle}>Why this car?</p>
                   <ul style={styles.reasonList}>
@@ -716,6 +719,12 @@ const styles = {
     color: "#9bc0ff",
     fontSize: "0.82rem",
     fontWeight: 600,
+  },
+  communityMeta: {
+    color: "#9bc0ff",
+    fontSize: "0.84rem",
+    fontWeight: 600,
+    margin: "0 0 8px",
   },
   whyBlock: {
     background: "rgba(18, 26, 45, 0.55)",
