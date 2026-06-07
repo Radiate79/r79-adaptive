@@ -12,8 +12,10 @@ import {
   pickEligibleRecommendation,
 } from "../utils/carClassFilter.js";
 import { getCarsForGame, getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import { getTrackRecommendationStatus } from "../utils/trackClassification.js";
 import {
   blendRecommendationScore,
+  compareRecommendationRanking,
   getCommunityConfidence,
   getCommunityConfidenceReason,
 } from "../utils/recommendationScoring.js";
@@ -569,6 +571,8 @@ export function analyzeAIRaceEngineer(input) {
     return { ready: false };
   }
 
+  const recommendationStatus = getTrackRecommendationStatus(track, "Gr.3");
+
   const raceSettings = {
     fuelMultiplier: input.fuelMultiplier ?? 1,
     tyreMultiplier: input.tyreMultiplier ?? 1,
@@ -586,10 +590,45 @@ export function analyzeAIRaceEngineer(input) {
     }),
   );
 
-  const candidateCars =
+  let candidateCars =
     availableSet.size > 0
       ? cars.filter((car) => availableSet.has(car.id))
       : cars;
+
+  if (!recommendationStatus.enabled) {
+    if (recommendationStatus.recommendedClass) {
+      const surfaceCars = getRecommendableCarsForGame(
+        gameVersion,
+        recommendationStatus.recommendedClass,
+      );
+      candidateCars =
+        availableSet.size > 0
+          ? surfaceCars.filter((car) => availableSet.has(car.id))
+          : surfaceCars;
+    }
+
+    if (candidateCars.length === 0) {
+      return {
+        ready: true,
+        track,
+        recommendationStatus,
+        personalisation: {
+          active: PERSONALISATION_STATUS.active,
+          label: PERSONALISATION_STATUS.label,
+          profile: input.driverProfile ?? DEFAULT_DRIVER_PROFILE,
+        },
+        recommendedCar: null,
+        alternativeChoice: null,
+        engineerBriefing: null,
+        engineerReport: null,
+        tyreStrategy: [],
+        fuelStrategy: [],
+        brakeBalance: null,
+        confidenceScore: 0,
+        rankedCars: [],
+      };
+    }
+  }
 
   const historicalScores = candidateCars.map((car) =>
     getCarALRHistoricalScore(car.id, gameVersion),
@@ -647,7 +686,7 @@ export function analyzeAIRaceEngineer(input) {
     };
   });
 
-  ranked.sort((a, b) => b.overallScore - a.overallScore);
+  ranked.sort(compareRecommendationRanking);
 
   const topPick = pickEligibleRecommendation(ranked[0] ?? null);
   const alternativeChoice = pickEligibleRecommendation(ranked[1] ?? null);
@@ -697,6 +736,7 @@ export function analyzeAIRaceEngineer(input) {
   return {
     ready: true,
     track,
+    recommendationStatus,
     personalisation: {
       active: PERSONALISATION_STATUS.active,
       label: PERSONALISATION_STATUS.label,

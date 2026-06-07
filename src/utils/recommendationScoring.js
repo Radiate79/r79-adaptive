@@ -14,9 +14,11 @@ export const COMMUNITY_CONFIDENCE_REASON =
 
 export const COMMUNITY_CONFIDENCE_REASON_THRESHOLD = 75;
 
-const TECHNICAL_WEIGHT = 0.6;
-const COMMUNITY_WEIGHT = 0.3;
-const HISTORICAL_WEIGHT = 0.1;
+/** Community can nudge rankings but must not overcome meaningful track-fit gaps. */
+export const COMMUNITY_MAX_MODIFIER = 3.5;
+export const HISTORICAL_MAX_MODIFIER = 2;
+export const COMMUNITY_BASELINE = DEFAULT_COMMUNITY_CONFIDENCE;
+export const TRACK_SUITABILITY_PRIORITY_GAP = 1;
 
 /**
  * @param {{ communityConfidence?: number }} car
@@ -43,6 +45,33 @@ export function normalizeHistoricalContribution(historicalScore, maxHistorical) 
 }
 
 /**
+ * @param {{ communityConfidence?: number }} car
+ */
+export function getCommunityModifier(car) {
+  const community = getCommunityConfidence(car);
+  const normalized = (community - COMMUNITY_BASELINE) / 40;
+  const modifier = normalized * COMMUNITY_MAX_MODIFIER;
+
+  return Math.max(
+    -COMMUNITY_MAX_MODIFIER,
+    Math.min(COMMUNITY_MAX_MODIFIER, modifier),
+  );
+}
+
+/**
+ * @param {number} historicalScore
+ * @param {number} maxHistorical
+ */
+export function getHistoricalModifier(historicalScore, maxHistorical) {
+  const normalized =
+    normalizeHistoricalContribution(historicalScore, maxHistorical) / 100;
+
+  return normalized * HISTORICAL_MAX_MODIFIER;
+}
+
+/**
+ * Track suitability is the primary score; community and history are small modifiers.
+ *
  * @param {number} technicalScore
  * @param {{ communityConfidence?: number }} car
  * @param {number} [historicalScore]
@@ -54,19 +83,34 @@ export function blendRecommendationScore(
   historicalScore = 0,
   maxHistorical = 1,
 ) {
-  const community = getCommunityConfidence(car);
-  const historical = normalizeHistoricalContribution(
-    historicalScore,
-    maxHistorical,
-  );
-
   return Number(
     (
-      technicalScore * TECHNICAL_WEIGHT +
-      community * COMMUNITY_WEIGHT +
-      historical * HISTORICAL_WEIGHT
+      technicalScore +
+      getCommunityModifier(car) +
+      getHistoricalModifier(historicalScore, maxHistorical)
     ).toFixed(2),
   );
+}
+
+/**
+ * Track suitability is always the primary ranking signal.
+ *
+ * @param {{ technicalScore?: number, overallScore?: number, score?: number }} a
+ * @param {{ technicalScore?: number, overallScore?: number, score?: number }} b
+ */
+export function compareRecommendationRanking(a, b) {
+  const techA = Number(a.technicalScore ?? a.score ?? 0);
+  const techB = Number(b.technicalScore ?? b.score ?? 0);
+  const techDiff = techB - techA;
+
+  if (Math.abs(techDiff) > TRACK_SUITABILITY_PRIORITY_GAP) {
+    return techDiff;
+  }
+
+  const overallA = Number(a.overallScore ?? a.score ?? techA);
+  const overallB = Number(b.overallScore ?? b.score ?? techB);
+
+  return overallB - overallA;
 }
 
 /**

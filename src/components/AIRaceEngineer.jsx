@@ -21,6 +21,7 @@ import { PERSONALISATION_STATUS } from "../data/driverProfile.js";
 import { loadDriverProfile } from "../utils/driverProfileStorage.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getRecommendableCarsForGame, getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 
 function ConfidenceMeter({ value }) {
   return (
@@ -210,6 +211,11 @@ export default function AIRaceEngineer() {
           </p>
         ) : null}
       </header>
+
+      <TrackSurfaceWarning
+        warning={analysis.recommendationStatus?.warning}
+        message={analysis.recommendationStatus?.message}
+      />
 
       <div style={styles.dashboardGrid}>
         <div style={styles.inputPanel}>
@@ -418,9 +424,10 @@ export default function AIRaceEngineer() {
       {!analysis.ready || !analysis.recommendedCar ? (
         <div style={styles.awaitingReport}>
           <p style={styles.emptyState}>
-            {selectedTrack
-              ? "Preparing engineer report…"
-              : "Select a track to generate your engineer report."}
+            {!selectedTrack
+              ? "Select a track to generate your engineer report."
+              : analysis.recommendationStatus?.message ??
+                "Preparing engineer report…"}
           </p>
         </div>
       ) : (

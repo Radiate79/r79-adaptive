@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
   analyzeCalendarDNA,
@@ -9,6 +9,12 @@ import {
 } from "../engine/championshipEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import {
+  getCalendarRecommendationStatus,
+  getNonTarmacTracks,
+  isCarClassSelectableForTrack,
+} from "../utils/trackClassification.js";
+import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 
 export default function ChampionshipAdvisor() {
   const { gameVersion, game } = useGameVersion();
@@ -159,6 +165,24 @@ export default function ChampionshipAdvisor() {
     [selectedTracks],
   );
 
+  const calendarRecommendationStatus = useMemo(
+    () => getCalendarRecommendationStatus(selectedTracks, carClass),
+    [selectedTracks, carClass],
+  );
+
+  const nonTarmacTracks = useMemo(
+    () => getNonTarmacTracks(selectedTracks),
+    [selectedTracks],
+  );
+
+  const classOptions = useMemo(() => {
+    const options = ["Gr.3", "Gr.4"];
+    if (nonTarmacTracks.some((track) => track.trackType === "dirt")) {
+      options.push("Gr.B");
+    }
+    return options;
+  }, [nonTarmacTracks]);
+
   const toggleTrack = (trackId) => {
     setSelectedTrackIds((current) =>
       current.includes(trackId)
@@ -166,6 +190,12 @@ export default function ChampionshipAdvisor() {
         : [...current, trackId],
     );
   };
+
+  useEffect(() => {
+    if (nonTarmacTracks.some((track) => track.trackType === "dirt")) {
+      setCarClass("Gr.B");
+    }
+  }, [nonTarmacTracks.length]);
 
   return (
     <section style={styles.shell}>
@@ -183,17 +213,27 @@ export default function ChampionshipAdvisor() {
         ) : null}
       </div>
 
+      <TrackSurfaceWarning
+        warning={calendarRecommendationStatus.warning}
+        message={calendarRecommendationStatus.message}
+      />
+
       <div style={styles.classRow}>
-        {["Gr.3", "Gr.4"].map((value) => {
+        {classOptions.map((value) => {
           const isActive = carClass === value;
+          const selectable = selectedTracks.every((track) =>
+            isCarClassSelectableForTrack(value, track),
+          );
           return (
             <button
               key={value}
               type="button"
-              onClick={() => setCarClass(value)}
+              onClick={() => selectable && setCarClass(value)}
+              disabled={!selectable}
               style={{
                 ...styles.classButton,
                 ...(isActive ? styles.classButtonActive : null),
+                ...(!selectable ? styles.classButtonDisabled : null),
               }}
             >
               {value}
@@ -323,7 +363,8 @@ export default function ChampionshipAdvisor() {
           <p style={styles.emptyState}>
             {tracks.length === 0
               ? `No ${game.shortLabel} tracks available yet.`
-              : "Select one or more tracks to generate recommendations."}
+              : calendarRecommendationStatus.message ??
+                "Select one or more tracks to generate recommendations."}
           </p>
         ) : (
           <ol style={styles.resultsList}>
@@ -463,6 +504,10 @@ const styles = {
     background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
     borderColor: "#77a0ff",
     color: "#ffffff",
+  },
+  classButtonDisabled: {
+    cursor: "not-allowed",
+    opacity: 0.45,
   },
   settingsRow: {
     display: "grid",

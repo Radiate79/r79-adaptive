@@ -2,6 +2,8 @@ export const tracks = [
   {
     id: "watkins_glen",
     name: "Watkins Glen",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 7,
     fuel: 7,
@@ -14,6 +16,8 @@ export const tracks = [
   {
     id: "road_atlanta",
     name: "Road Atlanta",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -26,6 +30,8 @@ export const tracks = [
   {
     id: "suzuka",
     name: "Suzuka",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 7,
     traction: 9,
     fuel: 7,
@@ -38,6 +44,8 @@ export const tracks = [
   {
     id: "spa",
     name: "Spa",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 9,
     traction: 7,
     fuel: 8,
@@ -50,6 +58,8 @@ export const tracks = [
   {
     id: "daytona_road_course",
     name: "Daytona Road Course",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 10,
     traction: 6,
     fuel: 8,
@@ -62,6 +72,8 @@ export const tracks = [
   {
     id: "fuji",
     name: "Fuji",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 10,
     traction: 7,
     fuel: 8,
@@ -74,6 +86,8 @@ export const tracks = [
   {
     id: "dragon_trail_seaside",
     name: "Dragon Trail - Seaside",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 8,
     traction: 8,
     fuel: 7,
@@ -86,6 +100,8 @@ export const tracks = [
   {
     id: "lago_maggiore",
     name: "Lago Maggiore",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -98,6 +114,8 @@ export const tracks = [
   {
     id: "brands_hatch",
     name: "Brands Hatch",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 6,
     traction: 8,
     fuel: 7,
@@ -110,6 +128,8 @@ export const tracks = [
   {
     id: "laguna_seca",
     name: "Laguna Seca",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 6,
     traction: 8,
     fuel: 7,
@@ -122,6 +142,8 @@ export const tracks = [
   {
     id: "nurburgring_gp",
     name: "Nürburgring GP",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -134,6 +156,8 @@ export const tracks = [
   {
     id: "mount_panorama",
     name: "Mount Panorama",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 9,
     traction: 7,
     fuel: 8,
@@ -146,6 +170,8 @@ export const tracks = [
   {
     id: "le_mans",
     name: "Le Mans",
+    trackType: "road",
+    drivingStyle: "endurance",
     topSpeed: 10,
     traction: 6,
     fuel: 9,
@@ -158,6 +184,8 @@ export const tracks = [
   {
     id: "interlagos",
     name: "Interlagos",
+    trackType: "road",
+    drivingStyle: "traction",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -170,6 +198,8 @@ export const tracks = [
   {
     id: "monza",
     name: "Monza",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 10,
     traction: 6,
     fuel: 8,
@@ -182,6 +212,8 @@ export const tracks = [
   {
     id: "barcelona_catalunya_gp",
     name: "Barcelona-Catalunya GP",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 8,
     fuel: 7,
@@ -194,6 +226,8 @@ export const tracks = [
   {
     id: "red_bull_ring",
     name: "Red Bull Ring",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 7,
     fuel: 7,
@@ -206,6 +240,8 @@ export const tracks = [
   {
     id: "autopolis",
     name: "Autopolis",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -218,6 +254,8 @@ export const tracks = [
   {
     id: "deep_forest",
     name: "Deep Forest",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 9,
     fuel: 7,
@@ -230,6 +268,8 @@ export const tracks = [
   {
     id: "trial_mountain",
     name: "Trial Mountain",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 9,
     fuel: 7,
@@ -242,6 +282,8 @@ export const tracks = [
   {
     id: "grand_valley_highway_1",
     name: "Grand Valley Highway 1",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 8,
     fuel: 7,
@@ -254,6 +296,8 @@ export const tracks = [
   {
     id: "tsukuba",
     name: "Tsukuba",
+    trackType: "road",
+    drivingStyle: "traction",
     topSpeed: 5,
     traction: 9,
     fuel: 6,
@@ -266,6 +310,8 @@ export const tracks = [
   {
     id: "kyoto_driving_park",
     name: "Kyoto Driving Park",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 6,
     traction: 8,
     fuel: 7,
@@ -278,6 +324,8 @@ export const tracks = [
   {
     id: "sardegna_road_track",
     name: "Sardegna Road Track",
+    trackType: "road",
+    drivingStyle: "endurance",
     topSpeed: 8,
     traction: 7,
     fuel: 8,
@@ -290,6 +338,8 @@ export const tracks = [
   {
     id: "alsace",
     name: "Alsace",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 7,
     traction: 8,
     fuel: 7,
@@ -302,6 +352,8 @@ export const tracks = [
   {
     id: "sainte_croix",
     name: "Saint-Croix",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 8,
     fuel: 7,
@@ -314,6 +366,8 @@ export const tracks = [
   {
     id: "tokyo_expressway",
     name: "Tokyo Expressway",
+    trackType: "street",
+    drivingStyle: "balanced",
     topSpeed: 7,
     traction: 7,
     fuel: 7,
@@ -326,6 +380,8 @@ export const tracks = [
   {
     id: "high_speed_ring",
     name: "High Speed Ring",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 9,
     traction: 6,
     fuel: 7,
@@ -338,6 +394,8 @@ export const tracks = [
   {
     id: "blue_moon_bay",
     name: "Blue Moon Bay",
+    trackType: "oval",
+    drivingStyle: "high_speed",
     topSpeed: 8,
     traction: 7,
     fuel: 7,
@@ -345,11 +403,13 @@ export const tracks = [
     stability: 7,
     kerbs: 5,
     overtaking: 6,
-    notes: ["Coastal circuit with fast bends", "Watch surface transitions"],
+    notes: ["Oval layout with draft battles", "Consistent rhythm around the banking"],
   },
   {
     id: "willow_springs",
     name: "Willow Springs",
+    trackType: "road",
+    drivingStyle: "balanced",
     topSpeed: 8,
     traction: 7,
     fuel: 7,
@@ -362,6 +422,8 @@ export const tracks = [
   {
     id: "goodwood",
     name: "Goodwood",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 6,
     traction: 8,
     fuel: 7,
@@ -374,6 +436,8 @@ export const tracks = [
   {
     id: "daytona_tri_oval",
     name: "Daytona Tri-Oval",
+    trackType: "oval",
+    drivingStyle: "high_speed",
     topSpeed: 10,
     traction: 5,
     fuel: 8,
@@ -386,6 +450,8 @@ export const tracks = [
   {
     id: "dragon_trail_gardens",
     name: "Dragon Trail - Gardens",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 7,
     traction: 9,
     fuel: 7,
@@ -398,6 +464,8 @@ export const tracks = [
   {
     id: "broad_bean_raceway",
     name: "Broad Bean Raceway",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 6,
     traction: 8,
     fuel: 6,
@@ -410,6 +478,8 @@ export const tracks = [
   {
     id: "circuit_gilles_villeneuve",
     name: "Circuit Gilles-Villeneuve",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 9,
     traction: 7,
     fuel: 7,
@@ -422,6 +492,8 @@ export const tracks = [
   {
     id: "colorado_springs",
     name: "Colorado Springs",
+    trackType: "dirt",
+    drivingStyle: "rally",
     topSpeed: 6,
     traction: 5,
     fuel: 7,
@@ -434,6 +506,8 @@ export const tracks = [
   {
     id: "eiger_nordwand",
     name: "Eiger Nordwand",
+    trackType: "snow",
+    drivingStyle: "rally",
     topSpeed: 5,
     traction: 4,
     fuel: 7,
@@ -446,6 +520,8 @@ export const tracks = [
   {
     id: "fishermans_ranch",
     name: "Fishermans Ranch",
+    trackType: "dirt",
+    drivingStyle: "rally",
     topSpeed: 5,
     traction: 5,
     fuel: 7,
@@ -458,6 +534,8 @@ export const tracks = [
   {
     id: "lake_louise",
     name: "Lake Louise",
+    trackType: "snow",
+    drivingStyle: "rally",
     topSpeed: 6,
     traction: 4,
     fuel: 7,
@@ -470,6 +548,8 @@ export const tracks = [
   {
     id: "northern_isle_speedway",
     name: "Northern Isle Speedway",
+    trackType: "oval",
+    drivingStyle: "high_speed",
     topSpeed: 8,
     traction: 6,
     fuel: 7,
@@ -482,6 +562,8 @@ export const tracks = [
   {
     id: "special_stage_route_x",
     name: "Special Stage Route X",
+    trackType: "road",
+    drivingStyle: "high_speed",
     topSpeed: 10,
     traction: 5,
     fuel: 8,
@@ -494,6 +576,8 @@ export const tracks = [
   {
     id: "yas_marina_circuit",
     name: "Yas Marina Circuit",
+    trackType: "road",
+    drivingStyle: "technical",
     topSpeed: 8,
     traction: 8,
     fuel: 7,
@@ -502,5 +586,33 @@ export const tracks = [
     kerbs: 6,
     overtaking: 6,
     notes: ["Technical hotel section", "Strong traction through slow corners"],
+  },
+  {
+    id: "sardegna_windmills",
+    name: "Sardegna - Windmills",
+    trackType: "dirt",
+    drivingStyle: "rally",
+    topSpeed: 6,
+    traction: 5,
+    fuel: 7,
+    tyres: 6,
+    stability: 5,
+    kerbs: 3,
+    overtaking: 4,
+    notes: ["Loose gravel through windmill sector", "Car control on crests and drops"],
+  },
+  {
+    id: "barcelona_rallycross",
+    name: "Barcelona Rallycross",
+    trackType: "dirt",
+    drivingStyle: "rally",
+    topSpeed: 6,
+    traction: 5,
+    fuel: 6,
+    tyres: 6,
+    stability: 5,
+    kerbs: 3,
+    overtaking: 5,
+    notes: ["Mixed-surface rallycross layout", "Aggressive turn-in on loose dirt"],
   },
 ];

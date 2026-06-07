@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GAME_CATALOG } from "../data/gameVersions.js";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
@@ -9,6 +9,11 @@ import {
 } from "../engine/todaysRaceAdvisorEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import { getTracksForGame, isGameDataReady } from "../utils/gameData.js";
+import {
+  isCarClassSelectableForTrack,
+  isDirtTrack,
+} from "../utils/trackClassification.js";
+import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 
 function RatingBar({ label, value }) {
   return (
@@ -76,6 +81,16 @@ export default function TodaysRaceAdvisor() {
 
   const selectedTrack = tracks.find((track) => track.id === trackId) ?? null;
 
+  useEffect(() => {
+    if (!selectedTrack) {
+      return;
+    }
+
+    if (isDirtTrack(selectedTrack)) {
+      setCarClass("Gr.B");
+    }
+  }, [selectedTrack?.id]);
+
   return (
     <section style={styles.shell}>
       <div style={styles.header}>
@@ -140,14 +155,17 @@ export default function TodaysRaceAdvisor() {
             <div style={styles.toggleRow}>
               {CAR_CLASS_OPTIONS.map((value) => {
                 const isActive = carClass === value;
+                const isSelectable = isCarClassSelectableForTrack(value, selectedTrack);
                 return (
                   <button
                     key={value}
                     type="button"
-                    onClick={() => setCarClass(value)}
+                    onClick={() => isSelectable && setCarClass(value)}
+                    disabled={!isSelectable}
                     style={{
                       ...styles.classChip,
                       ...(isActive ? styles.classChipActive : null),
+                      ...(!isSelectable ? styles.classChipDisabled : null),
                     }}
                   >
                     {value}
@@ -251,6 +269,16 @@ export default function TodaysRaceAdvisor() {
         {selectedTrack && analysis.ready ? (
           <div style={styles.analysisPanel}>
             <h3 style={styles.panelTitle}>Track Analysis — {selectedTrack.name}</h3>
+            {analysis.trackAnalysis?.trackTypeLabel ? (
+              <div style={styles.tagRow}>
+                <span style={styles.tag}>{analysis.trackAnalysis.trackTypeLabel}</span>
+                <span style={styles.tag}>{analysis.trackAnalysis.drivingStyleLabel}</span>
+              </div>
+            ) : null}
+            <TrackSurfaceWarning
+              warning={analysis.recommendationStatus?.warning}
+              message={analysis.recommendationStatus?.message}
+            />
             {analysis.trackAnalysis?.keyDemands?.length ? (
               <div style={styles.tagRow}>
                 {analysis.trackAnalysis.keyDemands.map((item) => (
@@ -392,7 +420,8 @@ export default function TodaysRaceAdvisor() {
           <p style={styles.emptyState}>
             {tracks.length === 0
               ? `No ${game.shortLabel} tracks available yet.`
-              : "Select a track and class to generate recommendations."}
+              : analysis.recommendationStatus?.message ??
+                "Select a track and class to generate recommendations."}
           </p>
         ) : (
           <div style={styles.resultsGrid}>
@@ -578,6 +607,10 @@ const styles = {
     background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
     borderColor: "#77a0ff",
     color: "#ffffff",
+  },
+  classChipDisabled: {
+    cursor: "not-allowed",
+    opacity: 0.45,
   },
   settingsGrid: {
     display: "grid",

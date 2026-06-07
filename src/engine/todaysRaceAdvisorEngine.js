@@ -11,13 +11,21 @@ import {
 import {
   appendCommunityConfidenceReason,
   blendRecommendationScore,
+  compareRecommendationRanking,
   getCommunityConfidence,
 } from "../utils/recommendationScoring.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import {
+  DRIVING_STYLE_LABELS,
+  TRACK_TYPE_LABELS,
+} from "../data/gt7/trackTypes.js";
+import { getTrackRecommendationStatus } from "../utils/trackClassification.js";
 import { loadALRRecords } from "../utils/alrStorage.js";
 import {
   analyzeCalendarDNA,
   analyzeDrivetrainSuitability,
+  getTrackDemandWeights,
+  getTrackProfileWeightPercents,
   recommendCarsForChampionship,
   scoreCarConsistency,
   scoreCarForTrack,
@@ -143,8 +151,12 @@ function getRaceLengthModifiers(raceLength) {
 }
 
 function getWeightedAttributeRating(car, track, field, raceSettings, extraWeight = 1) {
-  const carValue = Number(car?.[field] ?? 0);
-  const trackDemand = Number(track?.[field] ?? 5);
+  const carValue =
+    field === "rotation" ? getRotationValue(car) : Number(car?.[field] ?? 0);
+  const demands = getTrackDemandWeights(track, raceSettings);
+  const totalDemand = Object.values(demands).reduce((sum, value) => sum + value, 0);
+  const trackWeightShare =
+    totalDemand > 0 ? (demands[field] ?? 0) / totalDemand : 1 / 6;
   const raceWeight =
     field === "fuel"
       ? raceSettings.fuelMultiplier ?? 1
@@ -152,7 +164,7 @@ function getWeightedAttributeRating(car, track, field, raceSettings, extraWeight
         ? raceSettings.tyreMultiplier ?? 1
         : 1;
 
-  const weighted = carValue * (0.55 + trackDemand / 20) * raceWeight * extraWeight;
+  const weighted = carValue * (0.35 + trackWeightShare * 3.5) * raceWeight * extraWeight;
   return toRating((weighted / 10) * 100);
 }
 
@@ -256,6 +268,8 @@ function buildTrackAnalysis(track, raceSettings) {
     { key: "stability", label: "Stability" },
     { key: "rotation", label: "Rotation" },
   ];
+  const profileWeights = getTrackProfileWeightPercents(track, raceSettings);
+  const demandWeights = getTrackDemandWeights(track, raceSettings);
 
   const attributes = metrics.map((metric) => {
     const rawValue =
@@ -266,7 +280,9 @@ function buildTrackAnalysis(track, raceSettings) {
     return {
       ...metric,
       trackDemand: toRating((rawValue / 10) * 100),
-      percent: toRating((rawValue / 10) * 100),
+      percent: profileWeights[metric.key] ?? 0,
+      weightShare: profileWeights[metric.key] ?? 0,
+      demandWeight: Number((demandWeights[metric.key] ?? 0).toFixed(3)),
     };
   });
 
@@ -287,7 +303,13 @@ function buildTrackAnalysis(track, raceSettings) {
 
   return {
     track,
+    trackType: track.trackType,
+    drivingStyle: track.drivingStyle,
+    trackTypeLabel: TRACK_TYPE_LABELS[track.trackType] ?? track.trackType,
+    drivingStyleLabel:
+      DRIVING_STYLE_LABELS[track.drivingStyle] ?? track.drivingStyle,
     attributes,
+    profileWeights,
     dna,
     drivetrainRankings,
     keyDemands,
@@ -328,13 +350,74 @@ export function analyzeTodaysRace(input) {
   const lengthMods = getRaceLengthModifiers(raceLength);
   const compoundWear = getCompoundTyreModifier(tyreCompound);
   const unavailable = new Set(input.unavailableCarIds ?? []);
+  const requestedClass = input.carClass ?? "Gr.3";
+  const recommendationStatus = getTrackRecommendationStatus(track, requestedClass);
+
+  if (!recommendationStatus.enabled) {
+    return {
+      ready: true,
+      track,
+      trackAnalysis: buildTrackAnalysis(track, raceSettings),
+      recommendations: [],
+      topPick: null,
+      alternativeChoice: null,
+      strategyNotes: buildStrategyNotes(
+        track,
+        raceSettings,
+        tyreCompound,
+        raceLength,
+      ),
+      recommendationStatus,
+      raceContext: {
+        gameVersion,
+        carClass: requestedClass,
+        bopOn,
+        tyreCompound,
+        raceLength,
+        raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+        fuelMultiplier: raceSettings.fuelMultiplier,
+        tyreMultiplier: raceSettings.tyreMultiplier,
+      },
+    };
+  }
 
   const baseRecommendations = recommendCarsForChampionship(
     [track.id],
-    input.carClass ?? "Gr.3",
+    requestedClass,
     raceSettings,
     gameVersion,
   );
+
+  if (baseRecommendations.length === 0) {
+    return {
+      ready: true,
+      track,
+      trackAnalysis: buildTrackAnalysis(track, raceSettings),
+      recommendations: [],
+      topPick: null,
+      alternativeChoice: null,
+      strategyNotes: buildStrategyNotes(
+        track,
+        raceSettings,
+        tyreCompound,
+        raceLength,
+      ),
+      recommendationStatus: {
+        ...recommendationStatus,
+        message: recommendationStatus.message ?? "No supported recommendation yet",
+      },
+      raceContext: {
+        gameVersion,
+        carClass: requestedClass,
+        bopOn,
+        tyreCompound,
+        raceLength,
+        raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+        fuelMultiplier: raceSettings.fuelMultiplier,
+        tyreMultiplier: raceSettings.tyreMultiplier,
+      },
+    };
+  }
 
   const historicalScores = baseRecommendations.map((car) =>
     getCarALRHistoricalScore(car.id, gameVersion),
@@ -383,7 +466,12 @@ export function analyzeTodaysRace(input) {
       fuelRating,
       tyreRating,
       stabilityRating: getWeightedAttributeRating(car, track, "stability", raceSettings),
-      rotationRating: toRating((getRotationValue(car) / 10) * 100),
+      rotationRating: getWeightedAttributeRating(
+        car,
+        track,
+        "rotation",
+        raceSettings,
+      ),
       accelerationRating: toRating((getAccelerationValue(car) / 10) * 100),
       consistencyRating: toRating(consistencyScore),
       topSpeedRating: getWeightedAttributeRating(car, track, "topSpeed", raceSettings),
@@ -396,7 +484,7 @@ export function analyzeTodaysRace(input) {
     };
   });
 
-  enriched.sort((a, b) => b.overallScore - a.overallScore);
+  enriched.sort(compareRecommendationRanking);
 
   const eligibleEnriched = filterEligibleRecommendationResults(enriched);
   const top10 = filterEligibleRecommendationResults(
@@ -419,6 +507,7 @@ export function analyzeTodaysRace(input) {
     recommendations: top10,
     topPick,
     alternativeChoice,
+    recommendationStatus,
     strategyNotes: buildStrategyNotes(
       track,
       raceSettings,
@@ -427,7 +516,7 @@ export function analyzeTodaysRace(input) {
     ),
     raceContext: {
       gameVersion,
-      carClass: input.carClass ?? "Gr.3",
+      carClass: requestedClass,
       bopOn,
       tyreCompound,
       raceLength,

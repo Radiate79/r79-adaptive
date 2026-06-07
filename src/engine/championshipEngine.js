@@ -5,9 +5,11 @@ import {
   isCarEligibleForRecommendations,
 } from "../utils/carClassFilter.js";
 import { getRecommendableCarsForGame, getTracksForGame } from "../utils/gameData.js";
+import { getCalendarRecommendationStatus } from "../utils/trackClassification.js";
 import {
   appendCommunityConfidenceReason,
   blendRecommendationScore,
+  compareRecommendationRanking,
   getCommunityConfidence,
   getRecommendationHistoricalScore,
 } from "../utils/recommendationScoring.js";
@@ -58,36 +60,100 @@ function getCarAttribute(car, field) {
   return Number(car?.[field] ?? 0);
 }
 
-function getTrackDemandWeights(track, raceSettings = {}) {
+function computeRotationDemand(track) {
+  const topSpeed = Number(track?.topSpeed ?? 5);
+  const traction = Number(track?.traction ?? 5);
+  const stability = Number(track?.stability ?? 5);
+  const technicalBias =
+    traction * 0.5 + Math.max(0, 9 - topSpeed) * 0.35 + stability * 0.15;
+
+  return Math.min(10, Math.max(3, technicalBias));
+}
+
+function getAttributeDemandWeight(
+  trackValue,
+  raceWeight = 1,
+  emphasisBoost = 1,
+) {
+  const normalized = trackValue / 10;
+  const emphasis = 0.5 + normalized * 1.75;
+  const tierBoost =
+    trackValue >= 8
+      ? 1.6
+      : trackValue >= 6.5
+        ? 1.15
+        : trackValue <= 4.5
+          ? 0.7
+          : 1;
+
+  return (
+    normalized * normalized * emphasis * tierBoost * raceWeight * emphasisBoost
+  );
+}
+
+export function getTrackDemandWeights(track, raceSettings = {}) {
   const raceWeights = getScoreWeights(raceSettings);
   const kerbDifficulty = Math.max(0, 8 - Number(track?.kerbs ?? 6));
-  const isHighSpeed = track.topSpeed >= 8;
-  const isTechnical = track.traction >= 8;
-  const isFuelHeavy = track.fuel >= 8;
-  const isTyreHeavy = track.tyres >= 7;
-  const isDifficult = track.stability >= 7 || kerbDifficulty >= 3;
+  const attrs = {
+    topSpeed: Number(track?.topSpeed ?? 5),
+    traction: Number(track?.traction ?? 5),
+    fuel: Number(track?.fuel ?? 5),
+    tyres: Number(track?.tyres ?? 5),
+    stability: Number(track?.stability ?? 5),
+  };
+  const rotationValue = computeRotationDemand(track);
 
   return {
-    topSpeed:
-      (track.topSpeed / 10) * (isHighSpeed ? 2.2 : 1.1) * raceWeights.topSpeed,
-    traction:
-      (track.traction / 10) * (isTechnical ? 2.2 : 1.1) * raceWeights.traction,
-    fuel:
-      (track.fuel / 10) *
-      (isFuelHeavy ? (isHighSpeed ? 2.6 : 2.2) : 1.0) *
+    topSpeed: getAttributeDemandWeight(
+      attrs.topSpeed,
+      raceWeights.topSpeed,
+      attrs.topSpeed >= 8 ? 1.4 : 1,
+    ),
+    traction: getAttributeDemandWeight(
+      attrs.traction,
+      raceWeights.traction,
+      attrs.traction >= 8 ? 1.5 : 1,
+    ),
+    fuel: getAttributeDemandWeight(
+      attrs.fuel,
       raceWeights.fuel,
-    tyres:
-      (track.tyres / 10) * (isTyreHeavy ? 2.0 : 1.0) * raceWeights.tyres,
-    stability:
-      (track.stability / 10) *
-      (isDifficult || isHighSpeed ? 1.8 : 1.0) *
+      attrs.fuel >= 8 ? 1.7 : 1,
+    ),
+    tyres: getAttributeDemandWeight(
+      attrs.tyres,
+      raceWeights.tyres,
+      attrs.tyres >= 7 ? 1.5 : 1,
+    ),
+    stability: getAttributeDemandWeight(
+      attrs.stability,
       raceWeights.stability,
-    rotation:
-      (track.traction / 10) *
-      (isTechnical ? 2.0 : 0.9) *
-      (track.topSpeed <= 7 ? 1.3 : 1.0) *
+      attrs.stability >= 7 || kerbDifficulty >= 3 ? 1.35 : 1,
+    ),
+    rotation: getAttributeDemandWeight(
+      rotationValue,
       raceWeights.rotation,
+      attrs.traction >= 7.5 && attrs.topSpeed <= 8 ? 1.45 : 0.9,
+    ),
   };
+}
+
+export function getTrackProfileWeightPercents(track, raceSettings = {}) {
+  const demands = getTrackDemandWeights(track, raceSettings);
+  const total = SCORING_FIELDS.reduce(
+    (sum, field) => sum + (demands[field] ?? 0),
+    0,
+  );
+
+  if (total <= 0) {
+    return Object.fromEntries(SCORING_FIELDS.map((field) => [field, 0]));
+  }
+
+  return Object.fromEntries(
+    SCORING_FIELDS.map((field) => [
+      field,
+      Math.round(((demands[field] ?? 0) / total) * 100),
+    ]),
+  );
 }
 
 function getDrivetrainTrackBonus(car, track) {
@@ -95,7 +161,7 @@ function getDrivetrainTrackBonus(car, track) {
   let bonus = 0;
 
   if (drivetrain === "MR" && track.traction >= 8) {
-    bonus += 4;
+    bonus += 2;
   }
 
   const isBalanced =
@@ -106,15 +172,15 @@ function getDrivetrainTrackBonus(car, track) {
     track.fuel < 8;
 
   if (drivetrain === "FR" && isBalanced && track.stability >= 7) {
-    bonus += 2.5;
+    bonus += 1.5;
   }
 
   if (drivetrain === "4WD" && track.traction >= 7.5) {
-    bonus += 2;
+    bonus += 1;
   }
 
   if (drivetrain === "FF" && track.traction >= 8 && track.topSpeed <= 7) {
-    bonus += 2;
+    bonus += 1;
   }
 
   return bonus;
@@ -479,6 +545,15 @@ export function recommendCarsForChampionship(
   gameVersion = DEFAULT_GAME_VERSION,
 ) {
   const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
+  const recommendationStatus = getCalendarRecommendationStatus(
+    championshipTracks,
+    carClass,
+  );
+
+  if (!recommendationStatus.enabled) {
+    return [];
+  }
+
   const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
 
   const historicalScores = candidateCars.map((car) =>
@@ -512,7 +587,7 @@ export function recommendCarsForChampionship(
           reasons,
         };
       })
-      .sort((a, b) => b.score - a.score),
+      .sort(compareRecommendationRanking),
   );
 }
 
