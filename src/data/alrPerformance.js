@@ -10,6 +10,7 @@
  * @property {'blue' | 'white'} [division] - Tier 2 / Tier 4 split (optional)
  * @property {string} car - Car id from cars.js
  * @property {number} constructorsPosition - Final constructors championship position
+ * @property {string} [sourceName] - League or community source (e.g. ALR, GTWS)
  */
 
 /**

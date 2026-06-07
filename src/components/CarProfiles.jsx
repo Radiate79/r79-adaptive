@@ -90,7 +90,7 @@ export default function CarProfiles() {
         <h2 style={styles.title}>Car Profiles</h2>
         <p style={styles.subtitle}>
           Complete historical and performance profiles for {game.shortLabel} cars
-          using championship ratings. ALR constructor history remains linked to
+          using championship ratings. Imported race history remains linked to
           GT7 for now.
         </p>
         {!isGameDataReady(gameVersion) ? (
@@ -144,7 +144,7 @@ export default function CarProfiles() {
                   <span style={styles.carListName}>{car.name}</span>
                   <span style={styles.carListMeta}>
                     {car.manufacturer} · {car.drivetrain} · {car.category}
-                    {car.hasALRHistory ? " · ALR" : ""}
+                    {car.hasALRHistory ? " · Race Data" : ""}
                   </span>
                 </button>
               );
@@ -185,14 +185,14 @@ export default function CarProfiles() {
                   </div>
                   <p style={styles.heroHint}>
                     {profile.hasALRHistory
-                      ? `${profile.seasonsEntered} ALR season(s) on record`
-                      : "No ALR constructor history imported yet"}
+                      ? `${profile.seasonsEntered} championship season(s) on record`
+                      : "No race history imported yet"}
                   </p>
                 </div>
               </div>
 
               <div style={styles.statsGrid}>
-                <StatCard label="ALR Historical Score" value={profile.historicalScore.toFixed(1)} />
+                <StatCard label="Historical Score" value={profile.historicalScore.toFixed(1)} />
                 <StatCard label="Championship Wins" value={profile.championshipWins} />
                 <StatCard label="Constructors Podiums" value={profile.podiums} />
                 <StatCard
@@ -272,7 +272,7 @@ export default function CarProfiles() {
               <Panel title="Historical Timeline">
                 {profile.timeline.length === 0 ? (
                   <p style={styles.panelEmpty}>
-                    No ALR season entries recorded for this car.
+                    No championship season entries recorded for this car.
                   </p>
                 ) : (
                   <div style={styles.timeline}>

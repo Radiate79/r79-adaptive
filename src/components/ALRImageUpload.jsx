@@ -542,10 +542,10 @@ export default function ALRImageUpload({ onSaveRecords }) {
 
   return (
     <div style={styles.panel}>
-      <h3 style={styles.title}>Screenshot Import (OCR)</h3>
+      <h3 style={styles.title}>Race Data Import (OCR)</h3>
       <p style={styles.subtitle}>
-        Upload one screenshot, multiple images, or a championship pack ZIP.
-        OCR reads position and Team columns, merges results into a single review
+        Upload one screenshot, multiple images, or a race data pack ZIP. OCR
+        reads position and Team columns, merges results into a single review
         list, and skips duplicates.
       </p>
 
@@ -652,7 +652,7 @@ export default function ALRImageUpload({ onSaveRecords }) {
             disabled={isProcessing}
             style={styles.primaryButton}
           >
-            Import Championship Pack (.zip)
+            Import Race Data Pack (.zip)
           </button>
         </div>
       </div>
@@ -676,7 +676,7 @@ export default function ALRImageUpload({ onSaveRecords }) {
 
       {packSummary ? (
         <div style={styles.summaryPanel}>
-          <h4 style={styles.summaryTitle}>Championship Pack Import Summary</h4>
+          <h4 style={styles.summaryTitle}>Race Data Pack Import Summary</h4>
           <ul style={styles.summaryList}>
             <li style={styles.summaryItem}>
               Total images processed:{" "}
@@ -711,7 +711,7 @@ export default function ALRImageUpload({ onSaveRecords }) {
           {previewUrl ? (
             <figure style={styles.previewFigure}>
               <figcaption style={styles.previewCaption}>Original</figcaption>
-              <img src={previewUrl} alt="Uploaded ALR standings" style={styles.previewImage} />
+              <img src={previewUrl} alt="Uploaded race standings" style={styles.previewImage} />
             </figure>
           ) : null}
           {ocrPreviewUrl ? (

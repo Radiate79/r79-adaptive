@@ -72,9 +72,9 @@ export default function ALRHistoricalRankings() {
   return (
     <section style={styles.shell}>
       <div style={styles.header}>
-        <h2 style={styles.title}>ALR Historical Rankings</h2>
+        <h2 style={styles.title}>Historical Rankings</h2>
         <p style={styles.subtitle}>
-          Top 25 cars by ALR Historical Score with championship results,
+          Top 25 cars by historical race score with championship results,
           consistency trends, and filterable constructor history.
         </p>
       </div>
@@ -170,8 +170,8 @@ export default function ALRHistoricalRankings() {
 
         {rankings.length === 0 ? (
           <p style={styles.emptyState}>
-            No ALR historical records match these filters. Import standings in
-            ALR Data Entry to populate rankings.
+            No historical race records match these filters. Import standings in
+            Race Archive to populate rankings.
           </p>
         ) : (
           <div style={styles.tableWrap}>
@@ -180,7 +180,7 @@ export default function ALRHistoricalRankings() {
                 <tr>
                   <th style={styles.thRank}>#</th>
                   <th style={styles.th}>Car</th>
-                  <th style={styles.thNumeric}>ALR Score</th>
+                  <th style={styles.thNumeric}>Historical Score</th>
                   <th style={styles.thNumeric}>Wins</th>
                   <th style={styles.thNumeric}>Podiums</th>
                   <th style={styles.thNumeric}>Avg Pos</th>

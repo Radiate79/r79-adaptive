@@ -363,7 +363,7 @@ export default function TodaysRaceAdvisor() {
           <div style={styles.altMeta}>
             <span>Overall: {analysis.alternativeChoice.overallScore.toFixed(1)}</span>
             <span>
-              ALR: {analysis.alternativeChoice.historicalScore.toFixed(0)}
+              Historical: {analysis.alternativeChoice.historicalScore.toFixed(0)}
             </span>
             <span>
               Strength: {analysis.alternativeChoice.strengthRating}
@@ -425,7 +425,7 @@ export default function TodaysRaceAdvisor() {
                     </span>
                   </div>
                   <div style={styles.scoreCell}>
-                    <span style={styles.scoreLabel}>ALR</span>
+                    <span style={styles.scoreLabel}>Historical</span>
                     <span style={styles.scoreValue}>
                       {car.historicalScore.toFixed(0)}
                     </span>

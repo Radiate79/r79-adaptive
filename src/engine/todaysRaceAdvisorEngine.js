@@ -60,7 +60,7 @@ const CAR_REASONS = {
   tyres: "Excellent tyre life",
   stability: "Stable under braking",
   rotation: "Strong rotation and agility",
-  alr: "High ALR historical success",
+  alr: "Strong historical race success",
   technical: "Well suited to technical circuits",
   power: "Strong on power circuits",
 };

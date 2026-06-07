@@ -166,7 +166,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
           <h2 style={styles.title}>About R79</h2>
           <p style={styles.subtitle}>
             Radiate79&apos;s Gran Turismo race engineering toolkit — championship
-            analysis, ALR intelligence, and daily race strategy.
+            analysis, race intelligence, and daily race strategy.
           </p>
         </div>
 
@@ -182,7 +182,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
         <div style={styles.aboutPanel}>
           <p style={styles.aboutText}>
-            R79 combines track DNA analysis, historical ALR performance data, and
+            R79 combines track DNA analysis, historical race performance data, and
             multi-game architecture to help you pick the right car and strategy for
             every race.
           </p>

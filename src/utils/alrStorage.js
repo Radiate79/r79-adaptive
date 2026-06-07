@@ -4,8 +4,20 @@ import {
   ALR_IMPORT_SLOT_DEFINITIONS,
 } from "../data/alrImportSlots.js";
 import { alrPerformance } from "../data/alrPerformance.js";
+import { LEGACY_IMPORT_SOURCE_NAME } from "../data/raceArchiveMeta.js";
 
 const STORAGE_KEY = "r79-alr-performance";
+
+/**
+ * @param {ALRPerformanceRecord} record
+ * @returns {ALRPerformanceRecord}
+ */
+function normalizeRecord(record) {
+  return {
+    ...record,
+    sourceName: String(record.sourceName ?? LEGACY_IMPORT_SOURCE_NAME).trim(),
+  };
+}
 
 /**
  * @typedef {import("../data/alrPerformance.js").ALRPerformanceRecord} ALRPerformanceRecord
@@ -18,19 +30,22 @@ export function loadALRRecords() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        return parsed;
+        return parsed.map((record) => normalizeRecord(record));
       }
     }
   } catch {
     // fall through to seed
   }
 
-  return [...alrPerformance];
+  return alrPerformance.map((record) => normalizeRecord(record));
 }
 
 /** @param {ALRPerformanceRecord[]} records */
 export function saveALRRecords(records) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(records.map((record) => normalizeRecord(record))),
+  );
 }
 
 /** Remove all saved ALR records from localStorage. */
@@ -47,7 +62,7 @@ export function loadAllSavedALRRecords() {
  * @param {ALRPerformanceRecord[]} records
  * @param {string} [filename]
  */
-export function exportRecordsToJson(records, filename = "alr-performance.json") {
+export function exportRecordsToJson(records, filename = "race-data.json") {
   const payload = JSON.stringify(records, null, 2);
   const blob = new Blob([payload], { type: "application/json" });
   const url = URL.createObjectURL(blob);

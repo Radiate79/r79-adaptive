@@ -48,11 +48,11 @@ const PAGES = [
 
   { id: "shortlist", label: "Team Car Shortlist" },
 
-  { id: "rankings", label: "ALR Historical Rankings" },
+  { id: "rankings", label: "Historical Rankings" },
 
   { id: "profiles", label: "Car Profiles" },
 
-  { id: "alr", label: "ALR Data Entry" },
+  { id: "alr", label: "Race Archive" },
 
   { id: "archive", label: "R79 Archive" },
 
@@ -72,7 +72,7 @@ const PAGES = [
 
 
 
-const ALR_PAGES = new Set(["rankings", "alr"]);
+const RACE_DATA_PAGES = new Set(["rankings", "alr"]);
 
 const LOGO_CLICKS_REQUIRED = 5;
 
@@ -95,7 +95,8 @@ function AppShell() {
 
   const { gameVersion, setGameVersion, gameOptions } = useGameVersion();
 
-  const showAlrNotice = ALR_PAGES.has(page) && gameVersion !== "gt7";
+  const showRaceDataNotice =
+    RACE_DATA_PAGES.has(page) && gameVersion !== "gt7";
 
 
 
@@ -253,13 +254,13 @@ function AppShell() {
 
 
 
-      {showAlrNotice ? (
+      {showRaceDataNotice ? (
 
         <p style={styles.alrNotice}>
 
-          ALR historical data and OCR matching use the GT7 car database. Switch
+          Race Archive data and OCR matching use the GT7 car database. Switch to
 
-          to GT7 for full ALR tooling, or continue viewing GT7-linked ALR stats.
+          GT7 for full import tooling, or continue viewing GT7-linked race data.
 
         </p>
 

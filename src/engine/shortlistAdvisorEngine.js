@@ -44,7 +44,7 @@ const SLOT_PROFILES = [
       availabilityPenalty: 0.05,
     },
     whyLead:
-      "Primary team choice — strongest blend of championship pace, ALR pedigree, and calendar coverage.",
+      "Primary team choice — strongest blend of championship pace, race pedigree, and calendar coverage.",
   },
   {
     rank: 2,
@@ -266,10 +266,10 @@ function buildWhyThisPosition(car, metrics, slot, rank) {
 
   if (metrics.alrHistoricalScore > 0) {
     reasons.push(
-      `Proven ALR Tier ${metrics.tier} history (${metrics.alrHistoricalScore.toFixed(1)} historical score).`,
+      `Proven Tier ${metrics.tier} race history (${metrics.alrHistoricalScore.toFixed(1)} historical score).`,
     );
   } else {
-    reasons.push("Limited ALR history at this tier — pick based on raw pace and consistency.");
+    reasons.push("Limited race history at this tier — pick based on raw pace and consistency.");
   }
 
   if (metrics.consistencyScore >= 70) {

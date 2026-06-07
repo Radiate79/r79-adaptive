@@ -87,13 +87,13 @@ export default function TeamCarShortlistAdvisor() {
       <div style={styles.header}>
         <h2 style={styles.title}>Team Car Shortlist Advisor</h2>
         <p style={styles.subtitle}>
-          ALR teams submit a ranked 5-car list. R79 recommends the best
-          submission order using performance, ALR history, consistency,
+          Teams submit a ranked 5-car list. R79 recommends the best submission
+          order using performance, race history, consistency,
           availability risk, and fallback strength.
         </p>
         {!isGameDataReady(gameVersion) ? (
           <p style={styles.gameNotice}>
-            {game.shortLabel} car data is not available yet. ALR historical
+            {game.shortLabel} car data is not available yet. Historical race
             scores still use GT7 until GT8 data is added.
           </p>
         ) : null}
@@ -210,7 +210,7 @@ export default function TeamCarShortlistAdvisor() {
       <div style={styles.summaryPanel}>
         <h3 style={styles.summaryTitle}>5-Car Submission Strategy — {teamLabel}</h3>
         <p style={styles.summaryMeta}>
-          ALR Tier {tier} · {carClass} · Submit cars in ranked order below
+          Tier {tier} · {carClass} · Submit cars in ranked order below
         </p>
       </div>
 
@@ -308,7 +308,7 @@ function ScoreBreakdown({ entry }) {
         <strong style={styles.scoreValue}>{entry.performanceScore.toFixed(1)}</strong>
       </div>
       <div style={styles.scoreItem}>
-        <span style={styles.scoreLabel}>ALR Historical</span>
+        <span style={styles.scoreLabel}>Historical</span>
         <strong style={styles.scoreValue}>
           {entry.alrHistoricalScore.toFixed(1)}
         </strong>

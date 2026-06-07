@@ -88,5 +88,20 @@
       "gamesSupported": 2,
       "aiModulesCount": 9
     }
+  },
+  {
+    "id": "journal-2026-06-05-alpine-incident",
+    "date": "2026-06-05",
+    "title": "The Alpine Incident",
+    "text": "Today R79 reached another milestone.\n\nThe application continued to evolve with new branding, Pathfinder integration, community reporting tools and database refinement. During testing an incorrect recommendation appeared, placing the Alpine Vision Gran Turismo in Gr.3 recommendations.\n\nThe issue was spotted immediately through GT7 experience rather than code review, highlighting the importance of real racing knowledge alongside AI assistance.\n\nThe recommendation engine and database were audited, Alpine recommendations were removed pending verification, and a new Report Issue system was introduced to allow future users and Pathfinders to help identify incorrect data.\n\nThe deployment was rebuilt and published successfully, with verification confirming the Alpine no longer appears in recommendation results.\n\nToday's lesson:\n\nTrust is built one correction at a time.\n\nNo recommendation is above question.\n\nEvery improvement strengthens R79 for the racing community.\n\nSnapshot:\n\n* Recommendation integrity improved\n* Community reporting system added\n* Pathfinder philosophy expanded\n* Database audit completed\n* Deployment successful",
+    "buildVersion": "v1.0.0",
+    "tags": ["captains-log", "database", "pathfinder", "community", "integrity", "deployment"],
+    "snapshot": {
+      "carsIndexed": 100,
+      "tracksSupported": 42,
+      "historicalRecords": 0,
+      "gamesSupported": 2,
+      "aiModulesCount": 9
+    }
   }
 ]
