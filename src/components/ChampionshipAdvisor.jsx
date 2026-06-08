@@ -14,9 +14,9 @@ import {
   getTracksForGame,
   isGameDataReady,
 } from "../utils/gameData.js";
+import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 import {
   getCalendarRecommendationStatus,
-  getNonTarmacTracks,
   isCarClassSelectableForTrack,
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
@@ -200,19 +200,6 @@ export default function ChampionshipAdvisor() {
     [selectedTracks, carClass],
   );
 
-  const nonTarmacTracks = useMemo(
-    () => getNonTarmacTracks(selectedTracks),
-    [selectedTracks],
-  );
-
-  const classOptions = useMemo(() => {
-    const options = ["Gr.3", "Gr.4"];
-    if (nonTarmacTracks.some((track) => track.trackType === "dirt")) {
-      options.push("Gr.B");
-    }
-    return options;
-  }, [nonTarmacTracks]);
-
   const toggleTrack = (trackId) => {
     setSelectedTrackIds((current) =>
       current.includes(trackId)
@@ -220,12 +207,6 @@ export default function ChampionshipAdvisor() {
         : [...current, trackId],
     );
   };
-
-  useEffect(() => {
-    if (nonTarmacTracks.some((track) => track.trackType === "dirt")) {
-      setCarClass("Gr.B");
-    }
-  }, [nonTarmacTracks.length]);
 
   return (
     <section style={styles.shell}>
@@ -249,7 +230,7 @@ export default function ChampionshipAdvisor() {
       />
 
       <div style={styles.classRow}>
-        {classOptions.map((value) => {
+        {CAR_CLASS_OPTIONS.map((value) => {
           const isActive = carClass === value;
           const selectable = selectedTracks.every((track) =>
             isCarClassSelectableForTrack(value, track),

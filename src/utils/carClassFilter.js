@@ -1,3 +1,5 @@
+import { isSupportedCarClass } from "../data/carClasses.js";
+
 /**
  * Shared car class and eligibility filtering for all recommendation engines.
  * Uses the canonical `class` field only — never car names or ids for class matching.
@@ -87,7 +89,11 @@ export function filterRecommendationPool(cars, carClass) {
   const pool = Array.isArray(cars) ? cars : [];
   const classFiltered = carClass ? filterCarsByClass(pool, carClass) : pool;
 
-  return classFiltered.filter((car) => isCarEligibleForRecommendations(car));
+  return classFiltered.filter(
+    (car) =>
+      isCarEligibleForRecommendations(car) &&
+      isSupportedCarClass(car.class ?? car.carClass ?? car.category ?? car.group),
+  );
 }
 
 /**

@@ -7,6 +7,7 @@ import { ReportIssueButton } from "./ReportIssue.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 
 const TIERS = Object.keys(ALR_TIER_POINTS)
   .map(Number)
@@ -207,7 +208,7 @@ export default function TeamCarShortlistAdvisor() {
           <div style={styles.classBlock}>
             <span style={styles.classLabel}>Class</span>
             <div style={styles.classRow}>
-              {["Gr.3", "Gr.4"].map((value) => {
+              {CAR_CLASS_OPTIONS.map((value) => {
                 const isActive = carClass === value;
                 return (
                   <button

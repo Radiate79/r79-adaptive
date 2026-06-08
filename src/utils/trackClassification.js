@@ -16,8 +16,6 @@ export const STANDARD_RACE_CAR_CLASSES = ["Gr.1", "Gr.2", "Gr.3", "Gr.4"];
 export const NON_TARMAC_SURFACE_WARNING =
   "This circuit uses a non-tarmac surface. Standard race-car recommendations are disabled.";
 
-const DIRT_RECOMMENDATION_CLASS = "Gr.B";
-
 /**
  * @param {{ trackType?: string, surface?: string } | null | undefined} track
  */
@@ -143,13 +141,11 @@ export function getTrackRecommendationStatus(track, carClass) {
   }
 
   if (isDirtTrack(track)) {
-    const supported = carClass === DIRT_RECOMMENDATION_CLASS;
-
     return {
-      enabled: supported,
+      enabled: false,
       warning: NON_TARMAC_SURFACE_WARNING,
-      message: supported ? null : "No supported recommendation yet",
-      recommendedClass: DIRT_RECOMMENDATION_CLASS,
+      message: "No supported recommendation yet",
+      recommendedClass: null,
       trackTypeLabel,
       drivingStyleLabel,
     };
@@ -205,13 +201,11 @@ export function getCalendarRecommendationStatus(tracks, carClass) {
   }
 
   if (hasDirt) {
-    const supported = carClass === DIRT_RECOMMENDATION_CLASS;
-
     return {
-      enabled: supported,
+      enabled: false,
       warning: NON_TARMAC_SURFACE_WARNING,
-      message: supported ? null : "No supported recommendation yet",
-      recommendedClass: DIRT_RECOMMENDATION_CLASS,
+      message: "No supported recommendation yet",
+      recommendedClass: null,
     };
   }
 

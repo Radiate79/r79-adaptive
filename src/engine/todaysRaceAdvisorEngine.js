@@ -26,6 +26,7 @@ import {
   scoreCarConsistency,
   scoreCarForTrack,
 } from "./championshipEngine.js";
+import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 import {
   TYRE_COMPOUND_OPTIONS,
   getCompoundTyreModifier,
@@ -504,5 +505,4 @@ export function analyzeTodaysRace(input) {
   };
 }
 
-export { TYRE_COMPOUND_OPTIONS };
-export const CAR_CLASS_OPTIONS = ["Gr.1", "Gr.2", "Gr.3", "Gr.4", "Gr.B", "N"];
+export { TYRE_COMPOUND_OPTIONS, CAR_CLASS_OPTIONS };
