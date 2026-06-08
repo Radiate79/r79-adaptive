@@ -9,6 +9,7 @@ import {
 } from "../engine/championshipEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import {
+  getRecommendableCarsForGame,
   getSelectableTracksForClass,
   getTrackDisplayName,
   getTracksForGame,
@@ -28,7 +29,15 @@ export default function ChampionshipAdvisor() {
   const { gameVersion, game } = useGameVersion();
   const [selectedTrackIds, setSelectedTrackIds] = useState([]);
   const [carClass, setCarClass] = useState("Gr.3");
+  const [bannedCarNames, setBannedCarNames] = useState([]);
   const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
+  const classCars = useMemo(
+    () =>
+      [...getRecommendableCarsForGame(gameVersion, carClass)].sort((a, b) =>
+        a.name.localeCompare(b.name),
+      ),
+    [gameVersion, carClass],
+  );
   const selectableTracks = useMemo(
     () => getSelectableTracksForClass(gameVersion, carClass),
     [gameVersion, carClass],
@@ -53,6 +62,34 @@ export default function ChampionshipAdvisor() {
       ),
     );
   }, [selectableTracks]);
+
+  useEffect(() => {
+    const validNames = new Set(classCars.map((car) => car.name));
+    setBannedCarNames((current) =>
+      current.filter((name) => validNames.has(name)),
+    );
+  }, [classCars]);
+
+  const raceSettings = useMemo(
+    () => ({
+      fuelMultiplier,
+      tyreMultiplier,
+      bannedCarNames,
+    }),
+    [fuelMultiplier, tyreMultiplier, bannedCarNames],
+  );
+
+  const allCarsBanned =
+    classCars.length > 0 &&
+    classCars.every((car) => bannedCarNames.includes(car.name));
+
+  const toggleBannedCar = (carName) => {
+    setBannedCarNames((current) =>
+      current.includes(carName)
+        ? current.filter((name) => name !== carName)
+        : [...current, carName],
+    );
+  };
 
   const championshipSummary = useMemo(() => {
     if (selectedTracks.length === 0) {
@@ -119,20 +156,15 @@ export default function ChampionshipAdvisor() {
     return recommendCarsForChampionship(
       selectedTrackIds,
       carClass,
-      {
-        fuelMultiplier,
-        tyreMultiplier,
-      },
+      raceSettings,
       gameVersion,
     ).slice(0, 5);
-  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier, gameVersion]);
+  }, [selectedTrackIds, carClass, raceSettings, gameVersion]);
 
   const recommendationsWithTrackAnalysis = useMemo(() => {
     if (recommendations.length === 0 || selectedTracks.length === 0) {
       return [];
     }
-
-    const raceSettings = { fuelMultiplier, tyreMultiplier };
 
     return recommendations.map((car) => ({
       ...car,
@@ -142,7 +174,7 @@ export default function ChampionshipAdvisor() {
         raceSettings,
       ),
     }));
-  }, [recommendations, selectedTracks, fuelMultiplier, tyreMultiplier]);
+  }, [recommendations, selectedTracks, raceSettings]);
 
   const consistencyRankings = useMemo(() => {
     if (selectedTrackIds.length === 0) {
@@ -152,13 +184,10 @@ export default function ChampionshipAdvisor() {
     return rankCarsByChampionshipConsistency(
       selectedTrackIds,
       carClass,
-      {
-        fuelMultiplier,
-        tyreMultiplier,
-      },
+      raceSettings,
       gameVersion,
     ).slice(0, 5);
-  }, [selectedTrackIds, carClass, fuelMultiplier, tyreMultiplier, gameVersion]);
+  }, [selectedTrackIds, carClass, raceSettings, gameVersion]);
 
   const calendarAnalysis = useMemo(() => {
     const metricConfig = [
@@ -282,6 +311,32 @@ export default function ChampionshipAdvisor() {
         })}
       </div>
 
+      <div style={styles.bannedPanel}>
+        <h3 style={styles.bannedTitle}>Banned Cars (Optional)</h3>
+        <p style={styles.bannedHint}>
+          Select cars that are not allowed in this championship.
+        </p>
+        {classCars.length === 0 ? (
+          <p style={styles.bannedEmpty}>No cars available for {carClass}.</p>
+        ) : (
+          <div className="championship-banned-list">
+            {classCars.map((car) => {
+              const isBanned = bannedCarNames.includes(car.name);
+              return (
+                <label key={car.id} className="championship-banned-option">
+                  <input
+                    type="checkbox"
+                    checked={isBanned}
+                    onChange={() => toggleBannedCar(car.name)}
+                  />
+                  <span className="championship-banned-label">{car.name}</span>
+                </label>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {championshipSummary.length > 0 ? (
         <div style={styles.summaryPanel}>
           <h3 style={styles.summaryTitle}>Championship Summary</h3>
@@ -351,7 +406,11 @@ export default function ChampionshipAdvisor() {
 
       <div style={styles.resultsPanel}>
         <h3 style={styles.resultsTitle}>Top 5 Recommendations</h3>
-        {recommendationsWithTrackAnalysis.length === 0 ? (
+        {allCarsBanned && selectedTrackIds.length > 0 ? (
+          <p style={styles.emptyState}>
+            No eligible cars available. Remove at least one banned car.
+          </p>
+        ) : recommendationsWithTrackAnalysis.length === 0 ? (
           <p style={styles.emptyState}>
             {selectableTracks.length === 0
               ? `No ${game?.shortLabel ?? "GT7"} tracks available yet.`
@@ -427,7 +486,11 @@ export default function ChampionshipAdvisor() {
         <p style={styles.consistencyExplanation}>
           Higher scores indicate fewer weak tracks across the championship.
         </p>
-        {consistencyRankings.length === 0 ? (
+        {allCarsBanned && selectedTrackIds.length > 0 ? (
+          <p style={styles.emptyState}>
+            No eligible cars available. Remove at least one banned car.
+          </p>
+        ) : consistencyRankings.length === 0 ? (
           <p style={styles.emptyState}>
             Select one or more tracks to rank championship consistency.
           </p>
@@ -541,6 +604,29 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
     gap: "10px",
     marginBottom: "20px",
+  },
+  bannedPanel: {
+    background: "rgba(12, 18, 31, 0.88)",
+    border: "1px solid rgba(128, 160, 229, 0.25)",
+    borderRadius: "12px",
+    marginBottom: "16px",
+    padding: "12px",
+  },
+  bannedTitle: {
+    color: "#e4edff",
+    fontSize: "0.98rem",
+    margin: "0 0 6px",
+  },
+  bannedHint: {
+    color: "rgba(200, 214, 245, 0.85)",
+    fontSize: "0.85rem",
+    lineHeight: 1.45,
+    margin: "0 0 10px",
+  },
+  bannedEmpty: {
+    color: "rgba(200, 214, 245, 0.75)",
+    fontSize: "0.85rem",
+    margin: 0,
   },
   trackButton: {
     background: "rgba(17, 22, 35, 0.95)",

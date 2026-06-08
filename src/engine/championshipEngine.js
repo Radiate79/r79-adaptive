@@ -543,6 +543,16 @@ export function scoreCarConsistency(
   );
 }
 
+function applyBannedCarFilter(cars, raceSettings = {}) {
+  const bannedCarNames = raceSettings.bannedCarNames;
+  if (!Array.isArray(bannedCarNames) || bannedCarNames.length === 0) {
+    return cars;
+  }
+
+  const banned = new Set(bannedCarNames);
+  return cars.filter((car) => !banned.has(car.name));
+}
+
 export function rankCarsByChampionshipConsistency(
   selectedTrackIds,
   carClass,
@@ -550,7 +560,10 @@ export function rankCarsByChampionshipConsistency(
   gameVersion = DEFAULT_GAME_VERSION,
 ) {
   const championshipTracks = resolveTracksByIds(selectedTrackIds, gameVersion);
-  const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
+  const candidateCars = applyBannedCarFilter(
+    getRecommendableCarsForGame(gameVersion, carClass),
+    raceSettings,
+  );
 
   return filterEligibleRecommendationResults(
     candidateCars
@@ -582,7 +595,14 @@ export function recommendCarsForChampionship(
     return [];
   }
 
-  const candidateCars = getRecommendableCarsForGame(gameVersion, carClass);
+  const candidateCars = applyBannedCarFilter(
+    getRecommendableCarsForGame(gameVersion, carClass),
+    raceSettings,
+  );
+
+  if (candidateCars.length === 0) {
+    return [];
+  }
 
   const historicalScores = candidateCars.map((car) =>
     getRecommendationHistoricalScore(car.id, gameVersion),
