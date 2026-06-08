@@ -26,6 +26,16 @@ import {
   scoreCarConsistency,
   scoreCarForTrack,
 } from "./championshipEngine.js";
+import {
+  TYRE_COMPOUND_OPTIONS,
+  getCompoundTyreModifier,
+  normalizeTyreCompound,
+} from "../data/tyreCompounds.js";
+import {
+  formatRaceDistanceLabel,
+  getLapCountModifiers,
+  resolveLapCount,
+} from "../utils/raceDistance.js";
 
 const DEFAULT_ROTATION = {
   MR: 9,
@@ -33,23 +43,6 @@ const DEFAULT_ROTATION = {
   FR: 7,
   "4WD": 6,
   FF: 5,
-};
-
-const TYRE_COMPOUND_WEAR = {
-  SM: 1.35,
-  SS: 1.2,
-  S: 1.05,
-  M: 1,
-  H: 0.85,
-  IH: 0.75,
-  W: 0.9,
-  IM: 0.8,
-};
-
-const RACE_LENGTH_LABELS = {
-  sprint: "Sprint",
-  medium: "Medium",
-  endurance: "Endurance",
 };
 
 const TRACK_REASONS = {
@@ -82,6 +75,8 @@ const CAR_REASONS = {
  * @property {string} [tyreCompound]
  * @property {number} [fuelMultiplier]
  * @property {number} [tyreMultiplier]
+ * @property {number} [lapCount]
+ * @property {string} [raceFormatId]
  * @property {'sprint' | 'medium' | 'endurance'} [raceLength]
  * @property {string[]} [unavailableCarIds]
  */
@@ -100,24 +95,8 @@ function getAccelerationValue(car) {
   return Number(((traction + rotation) / 2).toFixed(1));
 }
 
-function getCompoundTyreModifier(tyreCompound) {
-  return TYRE_COMPOUND_WEAR[tyreCompound] ?? 1;
-}
-
 function getBopModifier(bopOn) {
   return bopOn ? 0.92 : 1;
-}
-
-function getRaceLengthModifiers(raceLength) {
-  if (raceLength === "sprint") {
-    return { fuelWeight: 0.85, tyreWeight: 0.9, strategyBias: "sprint" };
-  }
-
-  if (raceLength === "endurance") {
-    return { fuelWeight: 1.25, tyreWeight: 1.2, strategyBias: "endurance" };
-  }
-
-  return { fuelWeight: 1, tyreWeight: 1, strategyBias: "medium" };
 }
 
 function getWeightedAttributeRating(car, track, field, raceSettings, extraWeight = 1) {
@@ -178,9 +157,10 @@ function buildCarReasons(car, track, raceSettings, historicalScore) {
   return Array.from(new Set(reasons)).slice(0, 4);
 }
 
-function buildStrategyNotes(track, raceSettings, tyreCompound, raceLength) {
+function buildStrategyNotes(track, raceSettings, tyreCompound, lapCount) {
   const notes = [];
-  const lengthMods = getRaceLengthModifiers(raceLength);
+  const laps = resolveLapCount({ lapCount });
+  const lengthMods = getLapCountModifiers(laps);
   const compoundWear = getCompoundTyreModifier(tyreCompound);
   const effectiveTyreDemand =
     Number(track.tyres ?? 5) *
@@ -192,10 +172,10 @@ function buildStrategyNotes(track, raceSettings, tyreCompound, raceLength) {
     (raceSettings.fuelMultiplier ?? 1) *
     lengthMods.fuelWeight;
 
-  if (raceLength === "sprint") {
-    notes.push("Aggressive one-stop strategy viable on sprint distance.");
-  } else if (raceLength === "endurance") {
-    notes.push("Two-stop strategy likely required on endurance distance.");
+  if (laps <= 12) {
+    notes.push(`Aggressive one-stop strategy viable over ${laps} laps.`);
+  } else if (laps >= 30) {
+    notes.push(`Two-stop strategy likely required over ${laps} laps.`);
   } else if (effectiveTyreDemand >= 7.5 || effectiveFuelDemand >= 7.5) {
     notes.push("Two-stop viable depending on stint management.");
   } else {
@@ -218,12 +198,20 @@ function buildStrategyNotes(track, raceSettings, tyreCompound, raceLength) {
     notes.push("Drafting and slipstream can offset straight-line deficits.");
   }
 
-  if (tyreCompound === "SM" || tyreCompound === "SS") {
+  if (tyreCompound === "S") {
     notes.push("Soft compound — manage graining in opening laps.");
   }
 
-  if (tyreCompound === "H" || tyreCompound === "IH") {
+  if (tyreCompound === "H") {
     notes.push("Hard compound — longer stints possible with pace trade-off.");
+  }
+
+  if (tyreCompound === "IM") {
+    notes.push("Intermediate compound — suited to damp or mixed conditions.");
+  }
+
+  if (tyreCompound === "W") {
+    notes.push("Wet compound — required when standing water is present.");
   }
 
   return Array.from(new Set(notes)).slice(0, 5);
@@ -314,10 +302,12 @@ export function analyzeTodaysRace(input) {
     fuelMultiplier: input.fuelMultiplier ?? 1,
     tyreMultiplier: input.tyreMultiplier ?? 1,
   };
-  const raceLength = input.raceLength ?? "medium";
-  const tyreCompound = input.tyreCompound ?? "M";
+  const lapCount = resolveLapCount(input);
+  const raceFormatId = input.raceFormatId ?? "custom";
+  const tyreCompound = normalizeTyreCompound(input.tyreCompound);
   const bopOn = Boolean(input.bopOn);
-  const lengthMods = getRaceLengthModifiers(raceLength);
+  const lengthMods = getLapCountModifiers(lapCount);
+  const raceDistanceLabel = formatRaceDistanceLabel(lapCount, raceFormatId);
   const compoundWear = getCompoundTyreModifier(tyreCompound);
   const unavailable = new Set(input.unavailableCarIds ?? []);
   const requestedClass = input.carClass ?? "Gr.3";
@@ -335,7 +325,7 @@ export function analyzeTodaysRace(input) {
         track,
         raceSettings,
         tyreCompound,
-        raceLength,
+        lapCount,
       ),
       recommendationStatus,
       raceContext: {
@@ -343,8 +333,9 @@ export function analyzeTodaysRace(input) {
         carClass: requestedClass,
         bopOn,
         tyreCompound,
-        raceLength,
-        raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+        lapCount,
+        raceFormatId,
+        raceDistanceLabel,
         fuelMultiplier: raceSettings.fuelMultiplier,
         tyreMultiplier: raceSettings.tyreMultiplier,
       },
@@ -370,7 +361,7 @@ export function analyzeTodaysRace(input) {
         track,
         raceSettings,
         tyreCompound,
-        raceLength,
+        lapCount,
       ),
       recommendationStatus: {
         ...recommendationStatus,
@@ -381,8 +372,9 @@ export function analyzeTodaysRace(input) {
         carClass: requestedClass,
         bopOn,
         tyreCompound,
-        raceLength,
-        raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+        lapCount,
+        raceFormatId,
+        raceDistanceLabel,
         fuelMultiplier: raceSettings.fuelMultiplier,
         tyreMultiplier: raceSettings.tyreMultiplier,
       },
@@ -496,25 +488,21 @@ export function analyzeTodaysRace(input) {
       track,
       raceSettings,
       tyreCompound,
-      raceLength,
+      lapCount,
     ),
     raceContext: {
       gameVersion,
       carClass: requestedClass,
       bopOn,
       tyreCompound,
-      raceLength,
-      raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+      lapCount,
+      raceFormatId,
+      raceDistanceLabel,
       fuelMultiplier: raceSettings.fuelMultiplier,
       tyreMultiplier: raceSettings.tyreMultiplier,
     },
   };
 }
 
-export const TYRE_COMPOUND_OPTIONS = Object.keys(TYRE_COMPOUND_WEAR);
-export const RACE_LENGTH_OPTIONS = [
-  { id: "sprint", label: "Sprint (15–20 min)" },
-  { id: "medium", label: "Medium (30–40 min)" },
-  { id: "endurance", label: "Endurance (60+ min)" },
-];
+export { TYRE_COMPOUND_OPTIONS };
 export const CAR_CLASS_OPTIONS = ["Gr.1", "Gr.2", "Gr.3", "Gr.4", "Gr.B", "N"];

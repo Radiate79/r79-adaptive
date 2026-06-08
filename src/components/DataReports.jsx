@@ -10,7 +10,6 @@ import {
   loadDataReportsNewestFirst,
   updateDataReportStatus,
 } from "../utils/dataReportsStorage.js";
-
 /**
  * @param {{ onBack?: () => void, breadcrumb?: React.ReactNode }} props
  */
@@ -120,27 +119,27 @@ export default function DataReports({ onBack, breadcrumb = null }) {
                   <td style={styles.tdNote}>{report.userNote || "—"}</td>
                   <td style={styles.td}>{report.contactName || "—"}</td>
                   <td style={styles.td}>
-                    <select
-                      value={report.status}
-                      onChange={(event) =>
-                        handleStatusChange(
-                          report.id,
-                          /** @type {import("../data/dataReportsMeta.js").DataReportStatus} */ (
-                            event.target.value
-                          ),
-                        )
-                      }
-                      style={{
-                        ...styles.statusSelect,
-                        ...STATUS_STYLES[report.status],
-                      }}
-                    >
-                      {DATA_REPORT_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
+                      <select
+                        value={report.status}
+                        onChange={(event) =>
+                          handleStatusChange(
+                            report.id,
+                            /** @type {import("../data/dataReportsMeta.js").DataReportStatus} */ (
+                              event.target.value
+                            ),
+                          )
+                        }
+                        style={{
+                          ...styles.statusSelect,
+                          ...STATUS_STYLES[report.status],
+                        }}
+                      >
+                        {DATA_REPORT_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {status}
+                          </option>
+                        ))}
+                      </select>
                   </td>
                 </tr>
               ))}

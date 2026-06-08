@@ -299,17 +299,17 @@ export default function CarProfiles() {
                   <div style={styles.comparePicker}>
                     <label style={styles.field}>
                       Compare against
-                      <select
-                        value={compareCarId}
-                        onChange={(event) => setCompareCarId(event.target.value)}
-                        style={styles.select}
-                      >
-                        {searchResults.map((car) => (
-                          <option key={car.id} value={car.id}>
-                            {car.name}
-                          </option>
-                        ))}
-                      </select>
+                        <select
+                          value={compareCarId}
+                          onChange={(event) => setCompareCarId(event.target.value)}
+                          style={styles.select}
+                        >
+                          {searchResults.map((car) => (
+                            <option key={car.id} value={car.id}>
+                              {car.name}
+                            </option>
+                          ))}
+                        </select>
                     </label>
                   </div>
 

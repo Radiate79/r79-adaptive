@@ -329,17 +329,17 @@ export default function ALRDataEntry() {
           <div style={styles.formGrid}>
             <label style={styles.field}>
               Source
-              <select
-                value={sourceName}
-                onChange={(event) => setSourceName(event.target.value)}
-                style={styles.select}
-              >
-                {RACE_SOURCE_NAME_EXAMPLES.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={sourceName}
+                  onChange={(event) => setSourceName(event.target.value)}
+                  style={styles.select}
+                >
+                  {RACE_SOURCE_NAME_EXAMPLES.map((name) => (
+                    <option key={name} value={name}>
+                      {name}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.field}>
@@ -573,52 +573,52 @@ export default function ALRDataEntry() {
         <div style={styles.adminRow}>
           <label style={styles.field}>
             Season (for bulk delete)
-            <select
-              value={season}
-              onChange={(event) => setSeason(Number(event.target.value))}
-              style={styles.select}
-            >
-              {SEASONS.map((value) => (
-                <option key={value} value={value}>
-                  Season {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={season}
+                onChange={(event) => setSeason(Number(event.target.value))}
+                style={styles.select}
+              >
+                {SEASONS.map((value) => (
+                  <option key={value} value={value}>
+                    Season {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.field}>
             Tier (for bulk delete)
-            <select
-              value={tier}
-              onChange={(event) => {
-                const nextTier = Number(event.target.value);
-                setTier(nextTier);
-                if (!tierUsesDivision(nextTier)) {
-                  setDivision("");
-                }
-              }}
-              style={styles.select}
-            >
-              {TIERS.map((value) => (
-                <option key={value} value={value}>
-                  Tier {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={tier}
+                onChange={(event) => {
+                  const nextTier = Number(event.target.value);
+                  setTier(nextTier);
+                  if (!tierUsesDivision(nextTier)) {
+                    setDivision("");
+                  }
+                }}
+                style={styles.select}
+              >
+                {TIERS.map((value) => (
+                  <option key={value} value={value}>
+                    Tier {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           {tierUsesDivision(tier) ? (
             <label style={styles.field}>
               Division
-              <select
-                value={division}
-                onChange={(event) => setDivision(event.target.value)}
-                style={styles.select}
-              >
-                <option value="">— All —</option>
-                <option value="blue">Blue</option>
-                <option value="white">White</option>
-              </select>
+                <select
+                  value={division}
+                  onChange={(event) => setDivision(event.target.value)}
+                  style={styles.select}
+                >
+                  <option value="">— All —</option>
+                  <option value="blue">Blue</option>
+                  <option value="white">White</option>
+                </select>
             </label>
           ) : null}
         </div>

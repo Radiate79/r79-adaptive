@@ -4,7 +4,6 @@ import {
   DATA_REPORT_ISSUE_TYPES,
 } from "../data/dataReportsMeta.js";
 import { addDataReport } from "../utils/dataReportsStorage.js";
-
 /**
  * @typedef {Object} ReportIssueButtonProps
  * @property {string} sourcePage
@@ -140,18 +139,18 @@ function ReportIssueModal({
         <form onSubmit={handleSubmit} style={styles.form}>
           <label style={styles.field}>
             Issue Type
-            <select
-              value={issueType}
-              onChange={(event) => setIssueType(event.target.value)}
-              style={styles.select}
-              required
-            >
-              {DATA_REPORT_ISSUE_TYPES.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={issueType}
+                onChange={(event) => setIssueType(event.target.value)}
+                style={styles.select}
+                required
+              >
+                {DATA_REPORT_ISSUE_TYPES.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.field}>

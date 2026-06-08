@@ -318,64 +318,64 @@ export default function WheelSettingsHub({
 
           <label style={styles.fieldLabel}>
             Wheel Base
-            <select
-              value={wheelBase}
-              onChange={(event) => setWheelBase(event.target.value)}
-              style={styles.controlSelect}
-            >
-              {WHEEL_BASE_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={wheelBase}
+                onChange={(event) => setWheelBase(event.target.value)}
+                style={styles.controlSelect}
+              >
+                {WHEEL_BASE_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
             Car
-            <select
-              value={carId}
-              onChange={(event) => setCarId(event.target.value)}
-              style={styles.controlSelect}
-            >
-              <option value="">Select a car…</option>
-              {filteredCars.map((car) => (
-                <option key={car.id} value={car.id}>
-                  {car.name}
-                </option>
-              ))}
-            </select>
+              <select
+                value={carId}
+                onChange={(event) => setCarId(event.target.value)}
+                style={styles.controlSelect}
+              >
+                <option value="">Select a car…</option>
+                {filteredCars.map((car) => (
+                  <option key={car.id} value={car.id}>
+                    {car.name}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
             Track
-            <select
-              value={trackId}
-              onChange={(event) => setTrackId(event.target.value)}
-              style={styles.controlSelect}
-            >
-              <option value="">Select a track…</option>
-              {filteredTracks.map((track) => (
-                <option key={track.id} value={track.id}>
-                  {getTrackDisplayName(track)}
-                </option>
-              ))}
-            </select>
+              <select
+                value={trackId}
+                onChange={(event) => setTrackId(event.target.value)}
+                style={styles.controlSelect}
+              >
+                <option value="">Select a track…</option>
+                {filteredTracks.map((track) => (
+                  <option key={track.id} value={track.id}>
+                    {getTrackDisplayName(track)}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
             Tyre Compound
-            <select
-              value={tyreCompound}
-              onChange={(event) => setTyreCompound(event.target.value)}
-              style={styles.controlSelect}
-            >
-              {TYRE_COMPOUND_OPTIONS.map((compound) => (
-                <option key={compound} value={compound}>
-                  {compound}
-                </option>
-              ))}
-            </select>
+              <select
+                value={tyreCompound}
+                onChange={(event) => setTyreCompound(event.target.value)}
+                style={styles.controlSelect}
+              >
+                {TYRE_COMPOUND_OPTIONS.map((compound) => (
+                  <option key={compound} value={compound}>
+                    {compound}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
@@ -446,81 +446,81 @@ export default function WheelSettingsHub({
           <div style={styles.filtersGrid}>
             <label style={styles.fieldLabel}>
               Game
-              <select
-                value={requestGame}
-                onChange={(event) => setRequestGame(event.target.value)}
-                style={styles.controlSelect}
-              >
-                {gameOptions.map((version) => (
-                  <option key={version} value={version}>
-                    {GAME_CATALOG[version].shortLabel}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={requestGame}
+                  onChange={(event) => setRequestGame(event.target.value)}
+                  style={styles.controlSelect}
+                >
+                  {gameOptions.map((version) => (
+                    <option key={version} value={version}>
+                      {GAME_CATALOG[version].shortLabel}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.fieldLabel}>
               Wheel Base
-              <select
-                value={requestWheelBase}
-                onChange={(event) => setRequestWheelBase(event.target.value)}
-                style={styles.controlSelect}
-              >
-                {WHEEL_BASE_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={requestWheelBase}
+                  onChange={(event) => setRequestWheelBase(event.target.value)}
+                  style={styles.controlSelect}
+                >
+                  {WHEEL_BASE_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.fieldLabel}>
               Car
-              <select
-                value={requestCarId}
-                onChange={(event) => setRequestCarId(event.target.value)}
-                style={styles.controlSelect}
-                required
-              >
-                <option value="">Select a car…</option>
-                {requestCars.map((car) => (
-                  <option key={car.id} value={car.id}>
-                    {car.name}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={requestCarId}
+                  onChange={(event) => setRequestCarId(event.target.value)}
+                  style={styles.controlSelect}
+                  required
+                >
+                  <option value="">Select a car…</option>
+                  {requestCars.map((car) => (
+                    <option key={car.id} value={car.id}>
+                      {car.name}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.fieldLabel}>
               Track
-              <select
-                value={requestTrackId}
-                onChange={(event) => setRequestTrackId(event.target.value)}
-                style={styles.controlSelect}
-                required
-              >
-                <option value="">Select a track…</option>
-                {requestTracks.map((track) => (
-                  <option key={track.id} value={track.id}>
-                    {getTrackDisplayName(track)}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={requestTrackId}
+                  onChange={(event) => setRequestTrackId(event.target.value)}
+                  style={styles.controlSelect}
+                  required
+                >
+                  <option value="">Select a track…</option>
+                  {requestTracks.map((track) => (
+                    <option key={track.id} value={track.id}>
+                      {getTrackDisplayName(track)}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.fieldLabel}>
               Tyres
-              <select
-                value={requestTyres}
-                onChange={(event) => setRequestTyres(event.target.value)}
-                style={styles.controlSelect}
-              >
-                {TYRE_COMPOUND_OPTIONS.map((compound) => (
-                  <option key={compound} value={compound}>
-                    {compound}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={requestTyres}
+                  onChange={(event) => setRequestTyres(event.target.value)}
+                  style={styles.controlSelect}
+                >
+                  {TYRE_COMPOUND_OPTIONS.map((compound) => (
+                    <option key={compound} value={compound}>
+                      {compound}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <label style={styles.fieldLabel}>
@@ -652,23 +652,23 @@ export default function WheelSettingsHub({
                       <td style={styles.td}>{request.bopOn ? "On" : "Off"}</td>
                       <td style={styles.tdNote}>{request.notes || "—"}</td>
                       <td style={styles.td}>
-                        <select
-                          value={request.status}
-                          onChange={(event) => {
-                            updateWheelSetupRequestStatus(
-                              request.id,
-                              event.target.value,
-                            );
-                            refreshRequests();
-                          }}
-                          style={styles.statusSelect}
-                        >
-                          {WHEEL_SETUP_REQUEST_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
+                          <select
+                            value={request.status}
+                            onChange={(event) => {
+                              updateWheelSetupRequestStatus(
+                                request.id,
+                                event.target.value,
+                              );
+                              refreshRequests();
+                            }}
+                            style={styles.statusSelect}
+                          >
+                            {WHEEL_SETUP_REQUEST_STATUSES.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
                       </td>
                     </tr>
                   );

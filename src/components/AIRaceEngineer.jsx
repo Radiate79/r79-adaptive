@@ -6,7 +6,6 @@ import {
   analyzeAIRaceEngineer,
   DRIVER_STYLE_OPTIONS,
   ENGINEER_NOTES,
-  RACE_LENGTH_OPTIONS,
   TYRE_COMPOUND_OPTIONS,
   WEATHER_OPTIONS,
 } from "../engine/aiRaceEngineerEngine.js";
@@ -73,15 +72,17 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
   );
 
   const [trackId, setTrackId] = useState("");
-  const [raceLength, setRaceLength] = useState("medium");
   const {
     presetId,
+    lapCount,
     fuelMultiplier,
     tyreMultiplier,
     selectPreset,
+    setLapCount,
     setFuelMultiplier,
     setTyreMultiplier,
-  } = useRacePresetSettings();
+    raceSettings,
+  } = useRacePresetSettings("full_race");
   const [weather, setWeather] = useState("current");
   const [bopOn, setBopOn] = useState(true);
   const [tyresAvailable, setTyresAvailable] = useState(["M", "H", "S"]);
@@ -107,9 +108,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       analyzeAIRaceEngineer({
         gameVersion,
         trackId,
-        raceLength,
-        tyreMultiplier,
-        fuelMultiplier,
+        ...raceSettings,
         weather,
         bopOn,
         tyresAvailable,
@@ -120,9 +119,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
     [
       gameVersion,
       trackId,
-      raceLength,
-      tyreMultiplier,
-      fuelMultiplier,
+      raceSettings,
       weather,
       bopOn,
       tyresAvailable,
@@ -312,33 +309,18 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
 
           <label style={styles.fieldLabel}>
             Track
-            <select
-              value={trackId}
-              onChange={(event) => setTrackId(event.target.value)}
-              style={styles.select}
-            >
-              <option value="">Select a track…</option>
-              {selectableTracks.map((track) => (
-                <option key={track.id} value={track.id}>
-                  {getTrackDisplayName(track)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label style={styles.fieldLabel}>
-            Race Length
-            <select
-              value={raceLength}
-              onChange={(event) => setRaceLength(event.target.value)}
-              style={styles.select}
-            >
-              {RACE_LENGTH_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={trackId}
+                onChange={(event) => setTrackId(event.target.value)}
+                style={styles.select}
+              >
+                <option value="">Select a track…</option>
+                {selectableTracks.map((track) => (
+                  <option key={track.id} value={track.id}>
+                    {getTrackDisplayName(track)}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <RacePresetControls
@@ -348,22 +330,25 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
             tyreMultiplier={tyreMultiplier}
             onFuelMultiplierChange={setFuelMultiplier}
             onTyreMultiplierChange={setTyreMultiplier}
+            distanceMode
+            lapCount={lapCount}
+            onLapCountChange={setLapCount}
             style={styles.settingsGrid}
           />
 
           <label style={styles.fieldLabel}>
             Weather
-            <select
-              value={weather}
-              onChange={(event) => setWeather(event.target.value)}
-              style={styles.select}
-            >
-              {WEATHER_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <select
+                value={weather}
+                onChange={(event) => setWeather(event.target.value)}
+                style={styles.select}
+              >
+                {WEATHER_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
@@ -485,7 +470,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                   Track: {getTrackDisplayName(analysis.track)}
                 </span>
                 <span style={styles.reportMetaItem}>
-                  Race Profile: {analysis.raceContext.raceLengthLabel}
+                  Distance: {analysis.raceContext.raceDistanceLabel}
                 </span>
                 <span style={styles.reportMetaItem}>
                   Driving Style: {analysis.raceContext.driverStyle}
@@ -737,33 +722,33 @@ function LearningModeFeedback({
 
         <label style={styles.fieldLabel}>
           Car Used
-          <select
-            value={carUsed}
-            onChange={(event) => onCarUsedChange(event.target.value)}
-            style={styles.select}
-          >
-            <option value="">Select car…</option>
-            {cars.map((car) => (
-              <option key={car.id} value={car.name}>
-                {car.name}
-              </option>
-            ))}
-          </select>
+            <select
+              value={carUsed}
+              onChange={(event) => onCarUsedChange(event.target.value)}
+              style={styles.select}
+            >
+              <option value="">Select car…</option>
+              {cars.map((car) => (
+                <option key={car.id} value={car.name}>
+                  {car.name}
+                </option>
+              ))}
+            </select>
         </label>
 
         <label style={styles.fieldLabel}>
           Tyres Used
-          <select
-            value={tyresUsed}
-            onChange={(event) => onTyresUsedChange(event.target.value)}
-            style={styles.select}
-          >
-            {TYRE_COMPOUND_OPTIONS.map((compound) => (
-              <option key={compound} value={compound}>
-                {compound}
-              </option>
-            ))}
-          </select>
+            <select
+              value={tyresUsed}
+              onChange={(event) => onTyresUsedChange(event.target.value)}
+              style={styles.select}
+            >
+              {TYRE_COMPOUND_OPTIONS.map((compound) => (
+                <option key={compound} value={compound}>
+                  {compound}
+                </option>
+              ))}
+            </select>
         </label>
 
         <label style={{ ...styles.fieldLabel, ...styles.feedbackFieldWide }}>

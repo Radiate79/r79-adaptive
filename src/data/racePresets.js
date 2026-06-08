@@ -5,6 +5,7 @@ export const RACE_CONDITION_PRESET_CUSTOM_ID = "custom";
  * @property {string} label
  * @property {number} fuelMultiplier
  * @property {number} tyreMultiplier
+ * @property {number} [defaultLaps]
  * @property {string} [description]
  */
 
@@ -20,12 +21,14 @@ export const RACE_FORMATS = [
     label: "Custom",
     fuelMultiplier: 1,
     tyreMultiplier: 1,
+    defaultLaps: 20,
   },
   {
     id: "qualifying",
     label: "Qualifying",
     fuelMultiplier: 1,
     tyreMultiplier: 1,
+    defaultLaps: 3,
     description: "Short session — minimal wear",
   },
   {
@@ -33,6 +36,7 @@ export const RACE_FORMATS = [
     label: "Sprint",
     fuelMultiplier: 2,
     tyreMultiplier: 2,
+    defaultLaps: 10,
     description: "Short race — moderate wear",
   },
   {
@@ -40,6 +44,7 @@ export const RACE_FORMATS = [
     label: "Full Race",
     fuelMultiplier: 3,
     tyreMultiplier: 5,
+    defaultLaps: 20,
     description: "Standard race — Tyre x5, Fuel x3",
   },
   {
@@ -47,6 +52,7 @@ export const RACE_FORMATS = [
     label: "Endurance",
     fuelMultiplier: 6,
     tyreMultiplier: 8,
+    defaultLaps: 40,
     description: "Long stint — high wear",
   },
 ];
@@ -66,6 +72,15 @@ export function resolveRaceFormatId(id) {
  * @param {string} [id]
  * @returns {RaceConditionPreset}
  */
+/**
+ * @param {string} [presetId]
+ * @returns {number}
+ */
+export function getRaceFormatDefaultLaps(presetId) {
+  const preset = getRaceConditionPreset(presetId);
+  return preset.defaultLaps ?? 20;
+}
+
 export function getRaceConditionPreset(id) {
   const resolvedId = resolveRaceFormatId(id);
   return (

@@ -10,7 +10,6 @@ import {
 } from "../engine/alrOcr.js";
 import { parseConstructorStandings } from "../engine/alrStandingsParser.js";
 import { extractChampionshipPackImages } from "../utils/alrChampionshipPack.js";
-
 const SEASONS = Array.from({ length: 16 }, (_, index) => 20 + index);
 const TIERS = Object.keys(ALR_TIER_POINTS)
   .map(Number)
@@ -552,55 +551,55 @@ export default function ALRImageUpload({ onSaveRecords }) {
       <div style={styles.defaultsRow}>
         <label style={styles.field}>
           Default Season
-          <select
-            value={defaultSeason}
-            onChange={(event) => setDefaultSeason(Number(event.target.value))}
-            style={styles.select}
-            disabled={isProcessing}
-          >
-            {SEASONS.map((value) => (
-              <option key={value} value={value}>
-                Season {value}
-              </option>
-            ))}
-          </select>
+            <select
+              value={defaultSeason}
+              onChange={(event) => setDefaultSeason(Number(event.target.value))}
+              style={styles.select}
+              disabled={isProcessing}
+            >
+              {SEASONS.map((value) => (
+                <option key={value} value={value}>
+                  Season {value}
+                </option>
+              ))}
+            </select>
         </label>
 
         <label style={styles.field}>
           Default Tier
-          <select
-            value={defaultTier}
-            onChange={(event) => {
-              const nextTier = Number(event.target.value);
-              setDefaultTier(nextTier);
-              if (!tierUsesDivision(nextTier)) {
-                setDefaultDivision("");
-              }
-            }}
-            style={styles.select}
-            disabled={isProcessing}
-          >
-            {TIERS.map((value) => (
-              <option key={value} value={value}>
-                Tier {value}
-              </option>
-            ))}
-          </select>
+            <select
+              value={defaultTier}
+              onChange={(event) => {
+                const nextTier = Number(event.target.value);
+                setDefaultTier(nextTier);
+                if (!tierUsesDivision(nextTier)) {
+                  setDefaultDivision("");
+                }
+              }}
+              style={styles.select}
+              disabled={isProcessing}
+            >
+              {TIERS.map((value) => (
+                <option key={value} value={value}>
+                  Tier {value}
+                </option>
+              ))}
+            </select>
         </label>
 
         {tierUsesDivision(defaultTier) ? (
           <label style={styles.field}>
             Default Division
-            <select
-              value={defaultDivision}
-              onChange={(event) => setDefaultDivision(event.target.value)}
-              style={styles.select}
-              disabled={isProcessing}
-            >
-              <option value="">— Select —</option>
-              <option value="blue">Blue</option>
-              <option value="white">White</option>
-            </select>
+              <select
+                value={defaultDivision}
+                onChange={(event) => setDefaultDivision(event.target.value)}
+                style={styles.select}
+                disabled={isProcessing}
+              >
+                <option value="">— Select —</option>
+                <option value="blue">Blue</option>
+                <option value="white">White</option>
+              </select>
           </label>
         ) : null}
 
@@ -896,80 +895,80 @@ export default function ALRImageUpload({ onSaveRecords }) {
                         />
                       </td>
                       <td style={styles.td}>
-                        <select
-                          value={row.season}
-                          onChange={(event) =>
-                            updateRow(row.id, {
-                              season: Number(event.target.value),
-                            })
-                          }
-                          style={styles.tableSelect}
-                        >
-                          {SEASONS.map((value) => (
-                            <option key={value} value={value}>
-                              {value}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td style={styles.td}>
-                        <select
-                          value={row.tier}
-                          onChange={(event) => {
-                            const nextTier = Number(event.target.value);
-                            updateRow(row.id, {
-                              tier: nextTier,
-                              division: tierUsesDivision(nextTier)
-                                ? row.division
-                                : undefined,
-                            });
-                          }}
-                          style={styles.tableSelect}
-                        >
-                          {TIERS.map((value) => (
-                            <option key={value} value={value}>
-                              {value}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td style={styles.td}>
-                        {tierUsesDivision(row.tier) ? (
                           <select
-                            value={row.division ?? ""}
+                            value={row.season}
                             onChange={(event) =>
                               updateRow(row.id, {
-                                division: event.target.value || undefined,
+                                season: Number(event.target.value),
                               })
                             }
                             style={styles.tableSelect}
                           >
-                            <option value="">—</option>
-                            <option value="blue">Blue</option>
-                            <option value="white">White</option>
+                            {SEASONS.map((value) => (
+                              <option key={value} value={value}>
+                                {value}
+                              </option>
+                            ))}
                           </select>
+                      </td>
+                      <td style={styles.td}>
+                          <select
+                            value={row.tier}
+                            onChange={(event) => {
+                              const nextTier = Number(event.target.value);
+                              updateRow(row.id, {
+                                tier: nextTier,
+                                division: tierUsesDivision(nextTier)
+                                  ? row.division
+                                  : undefined,
+                              });
+                            }}
+                            style={styles.tableSelect}
+                          >
+                            {TIERS.map((value) => (
+                              <option key={value} value={value}>
+                                {value}
+                              </option>
+                            ))}
+                          </select>
+                      </td>
+                      <td style={styles.td}>
+                        {tierUsesDivision(row.tier) ? (
+                            <select
+                              value={row.division ?? ""}
+                              onChange={(event) =>
+                                updateRow(row.id, {
+                                  division: event.target.value || undefined,
+                                })
+                              }
+                              style={styles.tableSelect}
+                            >
+                              <option value="">—</option>
+                              <option value="blue">Blue</option>
+                              <option value="white">White</option>
+                            </select>
                         ) : (
                           "—"
                         )}
                       </td>
                       <td style={styles.td}>
-                        <select
-                          value={row.car}
-                          onChange={(event) =>
-                            updateRow(row.id, {
-                              car: event.target.value,
-                              warnings: [],
-                            })
-                          }
-                          style={styles.tableSelect}
-                        >
-                          <option value="">— Select car —</option>
-                          {sortedCars.map((carOption) => (
-                            <option key={carOption.id} value={carOption.id}>
-                              {carOption.name}
-                            </option>
-                          ))}
-                        </select>
+                          <select
+                            value={row.car}
+                            onChange={(event) =>
+                              updateRow(row.id, {
+                                car: event.target.value,
+                                warnings: [],
+                              })
+                            }
+                            style={styles.tableSelect}
+                          >
+                            <option value="">— Select car —</option>
+                            {sortedCars.map((carOption) => (
+                              <option key={carOption.id} value={carOption.id}>
+                                {carOption.name}
+                              </option>
+                            ))}
+                          </select>
                         {car ? (
                           <span style={styles.carHint}>{car.class}</span>
                         ) : null}

@@ -159,31 +159,31 @@ export default function TeamCarShortlistAdvisor() {
           <div style={styles.driverGrid}>
             <label style={styles.field}>
               Driver 1
-              <select
-                value={driver1}
-                onChange={(event) => setDriver1(event.target.value)}
-                style={styles.select}
-              >
-                {driverStyles.map((style) => (
-                  <option key={style} value={style}>
-                    {style}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={driver1}
+                  onChange={(event) => setDriver1(event.target.value)}
+                  style={styles.select}
+                >
+                  {driverStyles.map((style) => (
+                    <option key={style} value={style}>
+                      {style}
+                    </option>
+                  ))}
+                </select>
             </label>
             <label style={styles.field}>
               Driver 2
-              <select
-                value={driver2}
-                onChange={(event) => setDriver2(event.target.value)}
-                style={styles.select}
-              >
-                {driverStyles.map((style) => (
-                  <option key={style} value={style}>
-                    {style}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={driver2}
+                  onChange={(event) => setDriver2(event.target.value)}
+                  style={styles.select}
+                >
+                  {driverStyles.map((style) => (
+                    <option key={style} value={style}>
+                      {style}
+                    </option>
+                  ))}
+                </select>
             </label>
           </div>
         )}
@@ -191,17 +191,17 @@ export default function TeamCarShortlistAdvisor() {
         <div style={styles.controlsRow}>
           <label style={styles.field}>
             Championship Tier
-            <select
-              value={tier}
-              onChange={(event) => setTier(Number(event.target.value))}
-              style={styles.select}
-            >
-              {TIERS.map((value) => (
-                <option key={value} value={value}>
-                  Tier {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={tier}
+                onChange={(event) => setTier(Number(event.target.value))}
+                style={styles.select}
+              >
+                {TIERS.map((value) => (
+                  <option key={value} value={value}>
+                    Tier {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <div style={styles.classBlock}>

@@ -1,5 +1,4 @@
 import { RACE_FORMATS, resolveRaceFormatId } from "../data/racePresets.js";
-
 /**
  * @param {Object} props
  * @param {string} props.presetId
@@ -8,6 +7,9 @@ import { RACE_FORMATS, resolveRaceFormatId } from "../data/racePresets.js";
  * @param {number} props.tyreMultiplier
  * @param {(value: number) => void} props.onFuelMultiplierChange
  * @param {(value: number) => void} props.onTyreMultiplierChange
+ * @param {boolean} [props.distanceMode]
+ * @param {number} [props.lapCount]
+ * @param {(value: number) => void} [props.onLapCountChange]
  * @param {import("react").CSSProperties} [props.style]
  */
 export default function RacePresetControls({
@@ -17,6 +19,9 @@ export default function RacePresetControls({
   tyreMultiplier,
   onFuelMultiplierChange,
   onTyreMultiplierChange,
+  distanceMode = false,
+  lapCount = 20,
+  onLapCountChange,
   style,
 }) {
   const resolvedId = resolveRaceFormatId(presetId);
@@ -25,7 +30,7 @@ export default function RacePresetControls({
   return (
     <div style={{ ...styles.wrap, ...style }}>
       <label style={styles.presetField}>
-        Race format
+        {distanceMode ? "Distance" : "Race format"}
         <select
           value={resolvedId}
           onChange={(event) => onPresetChange(event.target.value)}
@@ -37,6 +42,22 @@ export default function RacePresetControls({
             </option>
           ))}
         </select>
+        {distanceMode ? (
+          <>
+            <span style={styles.lapLabel}>Number of laps</span>
+            <input
+              type="number"
+              min="1"
+              max="999"
+              step="1"
+              value={lapCount}
+              onChange={(event) =>
+                onLapCountChange?.(Number(event.target.value))
+              }
+              style={styles.lapInput}
+            />
+          </>
+        ) : null}
         {selectedPreset?.description ? (
           <span style={styles.presetHint}>{selectedPreset.description}</span>
         ) : null}
@@ -83,6 +104,8 @@ const styles = {
   wrap: {
     display: "grid",
     gap: "10px",
+    maxWidth: "100%",
+    minWidth: 0,
   },
   presetField: {
     background: "rgba(12, 18, 31, 0.88)",
@@ -91,6 +114,8 @@ const styles = {
     color: "#dce9ff",
     display: "grid",
     gap: "6px",
+    maxWidth: "100%",
+    minWidth: 0,
     padding: "10px",
     fontSize: "0.85rem",
   },
@@ -106,10 +131,25 @@ const styles = {
     color: "rgba(180, 200, 240, 0.85)",
     fontSize: "0.8rem",
   },
+  lapLabel: {
+    color: "#dce9ff",
+    fontSize: "0.82rem",
+    fontWeight: 600,
+  },
+  lapInput: {
+    background: "rgba(8, 12, 22, 0.95)",
+    border: "1px solid rgba(128, 160, 229, 0.35)",
+    borderRadius: "8px",
+    color: "#eef4ff",
+    fontSize: "0.88rem",
+    padding: "8px 10px",
+  },
   multiplierRow: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "10px",
+    maxWidth: "100%",
+    minWidth: 0,
   },
   multiplierField: {
     background: "rgba(12, 18, 31, 0.88)",
@@ -118,10 +158,14 @@ const styles = {
     color: "#dce9ff",
     display: "grid",
     gap: "6px",
+    maxWidth: "100%",
+    minWidth: 0,
     padding: "10px",
     fontSize: "0.85rem",
   },
   range: {
+    display: "block",
+    maxWidth: "100%",
     width: "100%",
   },
   rangeValue: {

@@ -22,6 +22,16 @@ import {
 } from "./championshipEngine.js";
 import { findWheelSetupForRaceEngineer } from "./wheelSettingsEngine.js";
 import { loadWheelSettingsPreferences } from "../utils/wheelSetupsStorage.js";
+import {
+  TYRE_COMPOUND_OPTIONS,
+  TYRE_COMPOUND_WEAR,
+  normalizeTyreCompound,
+} from "../data/tyreCompounds.js";
+import {
+  formatRaceDistanceLabel,
+  getLapCountModifiers,
+  resolveLapCount,
+} from "../utils/raceDistance.js";
 
 const DEFAULT_ROTATION = {
   MR: 9,
@@ -29,23 +39,6 @@ const DEFAULT_ROTATION = {
   FR: 7,
   "4WD": 6,
   FF: 5,
-};
-
-const TYRE_COMPOUND_WEAR = {
-  SM: 1.35,
-  SS: 1.2,
-  S: 1.05,
-  M: 1,
-  H: 0.85,
-  IH: 0.75,
-  W: 0.9,
-  IM: 0.8,
-};
-
-const RACE_LENGTH_LABELS = {
-  sprint: "Sprint",
-  medium: "Medium",
-  endurance: "Endurance",
 };
 
 /** @type {Record<string, Record<string, number>>} */
@@ -127,13 +120,7 @@ export const ENGINEER_NOTES = [
   "Never stop improving.",
 ];
 
-export const TYRE_COMPOUND_OPTIONS = Object.keys(TYRE_COMPOUND_WEAR);
-
-export const RACE_LENGTH_OPTIONS = [
-  { id: "sprint", label: "Sprint (15–20 min)" },
-  { id: "medium", label: "Medium (30–40 min)" },
-  { id: "endurance", label: "Endurance (60+ min)" },
-];
+export { TYRE_COMPOUND_OPTIONS };
 
 function toRating(value) {
   return Math.round(Math.min(100, Math.max(0, Number(value ?? 0))));
@@ -141,18 +128,6 @@ function toRating(value) {
 
 function getRotationValue(car) {
   return Number(car.rotation ?? DEFAULT_ROTATION[car.drivetrain] ?? 7);
-}
-
-function getRaceLengthModifiers(raceLength) {
-  if (raceLength === "sprint") {
-    return { fuelWeight: 0.85, tyreWeight: 0.9 };
-  }
-
-  if (raceLength === "endurance") {
-    return { fuelWeight: 1.25, tyreWeight: 1.2 };
-  }
-
-  return { fuelWeight: 1, tyreWeight: 1 };
 }
 
 function getBopModifier(bopOn) {
@@ -193,7 +168,9 @@ function scoreConsistency(car, track, raceSettings) {
 }
 
 function pickBestTyre(car, track, tyresAvailable, raceSettings, lengthMods) {
-  const compounds = tyresAvailable.length > 0 ? tyresAvailable : ["M"];
+  const compounds = (tyresAvailable.length > 0 ? tyresAvailable : ["M"]).filter(
+    (compound) => TYRE_COMPOUND_OPTIONS.includes(compound),
+  );
 
   let best = { compound: "M", score: -Infinity };
 
@@ -205,7 +182,7 @@ function pickBestTyre(car, track, tyresAvailable, raceSettings, lengthMods) {
       lengthMods.tyreWeight *
       wear;
     const carTyre = Number(car.tyres ?? 5);
-    const paceBonus = compound === "SM" || compound === "SS" ? 1.1 : 1;
+    const paceBonus = compound === "S" ? 1.1 : 1;
     const score = carTyre * paceBonus - tyreDemand * 0.35;
 
     if (score > best.score) {
@@ -396,25 +373,27 @@ function buildReasoning(car, track, historicalScore, styleId) {
   return points.slice(0, 6);
 }
 
-function buildTyreStrategy(track, raceLength, compound, raceSettings, lengthMods) {
+function buildTyreStrategy(track, lapCount, compound, raceSettings, lengthMods) {
+  const laps = resolveLapCount({ lapCount });
   const wear =
     Number(track.tyres ?? 5) *
     (raceSettings.tyreMultiplier ?? 1) *
     lengthMods.tyreWeight *
     (TYRE_COMPOUND_WEAR[compound] ?? 1);
 
-  if (raceLength === "sprint") {
-    return `Open on ${compound}. A single stop is viable; manage graining from lap six onward.`;
+  if (laps <= 12) {
+    return `Open on ${compound}. A single stop is viable over ${laps} laps; manage graining from lap six onward.`;
   }
 
-  if (raceLength === "endurance" || wear >= 7.5) {
-    return `Open on ${compound}. Two stops are likely; extend stint one and pit before mid-race pace degradation.`;
+  if (laps >= 30 || wear >= 7.5) {
+    return `Open on ${compound}. Two stops are likely over ${laps} laps; extend stint one and pit before mid-race pace degradation.`;
   }
 
   return `Open on ${compound}. One stop remains viable with measured tyre use through traffic.`;
 }
 
-function buildFuelStrategy(track, raceLength, raceSettings, lengthMods, styleId) {
+function buildFuelStrategy(track, lapCount, raceSettings, lengthMods, styleId) {
+  const laps = resolveLapCount({ lapCount });
   const demand =
     Number(track.fuel ?? 5) *
     (raceSettings.fuelMultiplier ?? 1) *
@@ -424,7 +403,7 @@ function buildFuelStrategy(track, raceLength, raceSettings, lengthMods, styleId)
     return "Adopt lift-and-coast on straights and short-shift from slow corners; target a modest per-lap fuel delta.";
   }
 
-  if (raceLength === "sprint") {
+  if (laps <= 12) {
     return "Prioritise pace throughout; reserve fuel saving for final-lap defence only.";
   }
 
@@ -467,21 +446,26 @@ function buildWheelSettings(car, track) {
   return "Balanced baseline setup — refine after practice laps once tyre behaviour is confirmed.";
 }
 
-function buildPitWindow(raceLength, track, raceSettings, lengthMods) {
+function buildPitWindow(lapCount, track, raceSettings, lengthMods) {
+  const laps = resolveLapCount({ lapCount });
   const tyreStress =
     Number(track.tyres ?? 5) *
     (raceSettings.tyreMultiplier ?? 1) *
     lengthMods.tyreWeight;
 
-  if (raceLength === "sprint") {
-    return tyreStress >= 7 ? "Lap 10–14 (one stop)" : "No stop expected";
+  if (laps <= 12) {
+    return tyreStress >= 7
+      ? `Lap ${Math.max(4, Math.round(laps * 0.55))}–${Math.max(6, Math.round(laps * 0.85))} (one stop)`
+      : "No stop expected";
   }
 
-  if (raceLength === "endurance") {
-    return "Stops around laps 12–16 and 28–34 depending on tyre cliff.";
+  if (laps >= 30) {
+    return `Stops around laps ${Math.round(laps * 0.3)}–${Math.round(laps * 0.4)} and ${Math.round(laps * 0.65)}–${Math.round(laps * 0.75)} depending on tyre cliff.`;
   }
 
-  return tyreStress >= 7 ? "Primary window: laps 14–18" : "Optional stop: laps 18–22";
+  return tyreStress >= 7
+    ? `Primary window: laps ${Math.round(laps * 0.5)}–${Math.round(laps * 0.65)}`
+    : `Optional stop: laps ${Math.round(laps * 0.7)}–${Math.round(laps * 0.85)}`;
 }
 
 function buildThingsToWatch(track) {
@@ -554,6 +538,8 @@ function computeConfidence(top, second, historicalPresent) {
  * @typedef {Object} AIRaceEngineerInput
  * @property {import("../data/gameVersions.js").GameVersion} [gameVersion]
  * @property {string} trackId
+ * @property {number} [lapCount]
+ * @property {string} [raceFormatId]
  * @property {'sprint' | 'medium' | 'endurance'} [raceLength]
  * @property {number} [tyreMultiplier]
  * @property {number} [fuelMultiplier]
@@ -590,11 +576,13 @@ export function analyzeAIRaceEngineer(input) {
     fuelMultiplier: input.fuelMultiplier ?? 1,
     tyreMultiplier: input.tyreMultiplier ?? 1,
   };
-  const raceLength = input.raceLength ?? "medium";
+  const lapCount = resolveLapCount(input);
+  const raceFormatId = input.raceFormatId ?? "custom";
+  const raceDistanceLabel = formatRaceDistanceLabel(lapCount, raceFormatId);
   const bopOn = Boolean(input.bopOn);
   const styleId = input.driverStyle ?? "balanced";
   const styleWeights = DRIVER_STYLE_WEIGHTS[styleId] ?? DRIVER_STYLE_WEIGHTS.balanced;
-  const lengthMods = getRaceLengthModifiers(raceLength);
+  const lengthMods = getLapCountModifiers(lapCount);
   const tyresAvailable = input.tyresAvailable ?? ["M", "H", "S"];
   const availableSet = new Set(
     (input.availableCarIds ?? []).filter((carId) => {
@@ -725,20 +713,20 @@ export function analyzeAIRaceEngineer(input) {
   const compound = topPick?.recommendedCompound ?? "M";
   const topCarData =
     candidateCars.find((car) => car.id === topPick?.id) ?? topPick ?? null;
-  const pitWindow = buildPitWindow(raceLength, track, raceSettings, lengthMods);
+  const pitWindow = buildPitWindow(lapCount, track, raceSettings, lengthMods);
   const strengths = topCarData
     ? buildStrengthPhrases(topCarData, track)
     : ["well-rounded race characteristics"];
   const tyreStrategy = buildTyreStrategy(
     track,
-    raceLength,
+    lapCount,
     compound,
     raceSettings,
     lengthMods,
   );
   const fuelStrategy = buildFuelStrategy(
     track,
-    raceLength,
+    lapCount,
     raceSettings,
     lengthMods,
     styleId,
@@ -815,8 +803,9 @@ export function analyzeAIRaceEngineer(input) {
     thingsToWatch,
     raceContext: {
       gameVersion,
-      raceLength,
-      raceLengthLabel: RACE_LENGTH_LABELS[raceLength] ?? raceLength,
+      lapCount,
+      raceFormatId,
+      raceDistanceLabel,
       bopOn,
       weather: input.weather ?? "current",
       driverStyle: styleLabel,

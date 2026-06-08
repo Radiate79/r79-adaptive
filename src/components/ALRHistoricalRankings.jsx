@@ -7,7 +7,6 @@ import {
   getALRHistoricalRankings,
   getAvailableRankingManufacturers,
 } from "../engine/alrRankingsEngine.js";
-
 const TIERS = Object.keys(ALR_TIER_POINTS)
   .map(Number)
   .sort((a, b) => a - b);
@@ -82,74 +81,74 @@ export default function ALRHistoricalRankings() {
         <div style={styles.filtersGrid}>
           <label style={styles.field}>
             Season
-            <select
-              value={season}
-              onChange={(event) =>
-                setSeason(
-                  event.target.value === "" ? "" : Number(event.target.value),
-                )
-              }
-              style={styles.select}
-            >
-              <option value="">All (20–22)</option>
-              {ALR_HISTORICAL_SEASONS.map((value) => (
-                <option key={value} value={value}>
-                  Season {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={season}
+                onChange={(event) =>
+                  setSeason(
+                    event.target.value === "" ? "" : Number(event.target.value),
+                  )
+                }
+                style={styles.select}
+              >
+                <option value="">All (20–22)</option>
+                {ALR_HISTORICAL_SEASONS.map((value) => (
+                  <option key={value} value={value}>
+                    Season {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.field}>
             Tier
-            <select
-              value={tier}
-              onChange={(event) =>
-                setTier(
-                  event.target.value === "" ? "" : Number(event.target.value),
-                )
-              }
-              style={styles.select}
-            >
-              <option value="">All Tiers</option>
-              {TIERS.map((value) => (
-                <option key={value} value={value}>
-                  Tier {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={tier}
+                onChange={(event) =>
+                  setTier(
+                    event.target.value === "" ? "" : Number(event.target.value),
+                  )
+                }
+                style={styles.select}
+              >
+                <option value="">All Tiers</option>
+                {TIERS.map((value) => (
+                  <option key={value} value={value}>
+                    Tier {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.field}>
             Manufacturer
-            <select
-              value={manufacturer}
-              onChange={(event) => setManufacturer(event.target.value)}
-              style={styles.select}
-            >
-              <option value="">All Manufacturers</option>
-              {manufacturerOptions.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={manufacturer}
+                onChange={(event) => setManufacturer(event.target.value)}
+                style={styles.select}
+              >
+                <option value="">All Manufacturers</option>
+                {manufacturerOptions.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.field}>
             Drivetrain
-            <select
-              value={drivetrain}
-              onChange={(event) => setDrivetrain(event.target.value)}
-              style={styles.select}
-            >
-              <option value="">All Drivetrains</option>
-              {DRIVETRAINS.map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
-              ))}
-            </select>
+              <select
+                value={drivetrain}
+                onChange={(event) => setDrivetrain(event.target.value)}
+                style={styles.select}
+              >
+                <option value="">All Drivetrains</option>
+                {DRIVETRAINS.map((value) => (
+                  <option key={value} value={value}>
+                    {value}
+                  </option>
+                ))}
+              </select>
           </label>
         </div>
 

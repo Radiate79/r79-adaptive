@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "./styles/r79Global.css";
 import App from "./App.jsx";
 
 const STARTUP_FALLBACK =

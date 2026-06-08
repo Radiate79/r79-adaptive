@@ -4,7 +4,6 @@ import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
   analyzeTodaysRace,
   CAR_CLASS_OPTIONS,
-  RACE_LENGTH_OPTIONS,
   TYRE_COMPOUND_OPTIONS,
 } from "../engine/todaysRaceAdvisorEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
@@ -87,8 +86,9 @@ export default function TodaysRaceAdvisor() {
     setFuelMultiplier,
     setTyreMultiplier,
     raceSettings,
-  } = useRacePresetSettings();
-  const [raceLength, setRaceLength] = useState("medium");
+    lapCount,
+    setLapCount,
+  } = useRacePresetSettings("full_race");
   const [unavailableCarIds, setUnavailableCarIds] = useState([]);
 
   const analysis = useMemo(
@@ -100,7 +100,6 @@ export default function TodaysRaceAdvisor() {
         bopOn,
         tyreCompound,
         ...raceSettings,
-        raceLength,
         unavailableCarIds,
       }),
     [
@@ -110,7 +109,6 @@ export default function TodaysRaceAdvisor() {
       bopOn,
       tyreCompound,
       raceSettings,
-      raceLength,
       unavailableCarIds,
     ],
   );
@@ -181,18 +179,18 @@ export default function TodaysRaceAdvisor() {
 
           <label style={styles.fieldLabel}>
             Track
-            <select
-              value={trackId}
-              onChange={(event) => setTrackId(event.target.value)}
-              style={styles.select}
-            >
-              <option value="">Select a track…</option>
-              {selectableTracks.map((track) => (
-                <option key={track.id} value={track.id}>
-                  {getTrackDisplayName(track)}
-                </option>
-              ))}
-            </select>
+              <select
+                value={trackId}
+                onChange={(event) => setTrackId(event.target.value)}
+                style={styles.select}
+              >
+                <option value="">Select a track…</option>
+                {selectableTracks.map((track) => (
+                  <option key={track.id} value={track.id}>
+                    {getTrackDisplayName(track)}
+                  </option>
+                ))}
+              </select>
           </label>
 
           <label style={styles.fieldLabel}>
@@ -249,32 +247,17 @@ export default function TodaysRaceAdvisor() {
 
             <label style={styles.fieldLabel}>
               Tyre Compound
-              <select
-                value={tyreCompound}
-                onChange={(event) => setTyreCompound(event.target.value)}
-                style={styles.select}
-              >
-                {TYRE_COMPOUND_OPTIONS.map((compound) => (
-                  <option key={compound} value={compound}>
-                    {compound}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label style={styles.fieldLabel}>
-              Race Length
-              <select
-                value={raceLength}
-                onChange={(event) => setRaceLength(event.target.value)}
-                style={styles.select}
-              >
-                {RACE_LENGTH_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={tyreCompound}
+                  onChange={(event) => setTyreCompound(event.target.value)}
+                  style={styles.select}
+                >
+                  {TYRE_COMPOUND_OPTIONS.map((compound) => (
+                    <option key={compound} value={compound}>
+                      {compound}
+                    </option>
+                  ))}
+                </select>
             </label>
 
             <RacePresetControls
@@ -284,6 +267,9 @@ export default function TodaysRaceAdvisor() {
               tyreMultiplier={tyreMultiplier}
               onFuelMultiplierChange={setFuelMultiplier}
               onTyreMultiplierChange={setTyreMultiplier}
+              distanceMode
+              lapCount={lapCount}
+              onLapCountChange={setLapCount}
             />
           </div>
         </div>
