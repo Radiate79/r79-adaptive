@@ -49,7 +49,8 @@ export default function ChampionshipAdvisor() {
     selectPreset,
     setFuelMultiplier,
     setTyreMultiplier,
-  } = useRacePresetSettings();
+    resetToPreset,
+  } = useRacePresetSettings("full_race");
   const selectedTracks = useMemo(
     () => allTracks.filter((track) => selectedTrackIds.includes(track.id)),
     [allTracks, selectedTrackIds],
@@ -237,6 +238,13 @@ export default function ChampionshipAdvisor() {
     );
   };
 
+  const resetAdvisor = () => {
+    setSelectedTrackIds([]);
+    setBannedCarNames([]);
+    setCarClass("Gr.3");
+    resetToPreset("full_race");
+  };
+
   return (
     <section style={styles.shell}>
       <div style={styles.header}>
@@ -282,33 +290,49 @@ export default function ChampionshipAdvisor() {
         })}
       </div>
 
-      <RacePresetControls
-        presetId={presetId}
-        onPresetChange={selectPreset}
-        fuelMultiplier={fuelMultiplier}
-        tyreMultiplier={tyreMultiplier}
-        onFuelMultiplierChange={setFuelMultiplier}
-        onTyreMultiplierChange={setTyreMultiplier}
-        style={styles.settingsRow}
-      />
+      <div style={styles.controlsRow}>
+        <RacePresetControls
+          presetId={presetId}
+          onPresetChange={selectPreset}
+          fuelMultiplier={fuelMultiplier}
+          tyreMultiplier={tyreMultiplier}
+          onFuelMultiplierChange={setFuelMultiplier}
+          onTyreMultiplierChange={setTyreMultiplier}
+          style={styles.settingsRow}
+        />
+        <button type="button" onClick={resetAdvisor} style={styles.resetButton}>
+          Reset Advisor
+        </button>
+      </div>
 
-      <div style={styles.trackGrid}>
-        {selectableTracks.map((track) => {
-          const selected = selectedTrackIds.includes(track.id);
-          return (
-            <button
-              key={track.id}
-              type="button"
-              onClick={() => toggleTrack(track.id)}
-              style={{
-                ...styles.trackButton,
-                ...(selected ? styles.trackButtonSelected : null),
-              }}
-            >
-              {getTrackDisplayName(track)}
-            </button>
-          );
-        })}
+      <div style={styles.trackPanel}>
+        <h3 style={styles.trackTitle}>Championship Tracks</h3>
+        <p style={styles.trackHint}>
+          Select the tracks in your championship calendar.
+        </p>
+        {selectableTracks.length === 0 ? (
+          <p style={styles.trackEmpty}>
+            No tracks available for {carClass} in {game.shortLabel}.
+          </p>
+        ) : (
+          <div className="championship-checkbox-grid">
+            {selectableTracks.map((track) => {
+              const selected = selectedTrackIds.includes(track.id);
+              return (
+                <label key={track.id} className="championship-checkbox-option">
+                  <input
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => toggleTrack(track.id)}
+                  />
+                  <span className="championship-checkbox-label">
+                    {getTrackDisplayName(track)}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div style={styles.bannedPanel}>
@@ -319,17 +343,17 @@ export default function ChampionshipAdvisor() {
         {classCars.length === 0 ? (
           <p style={styles.bannedEmpty}>No cars available for {carClass}.</p>
         ) : (
-          <div className="championship-banned-list">
+          <div className="championship-checkbox-grid">
             {classCars.map((car) => {
               const isBanned = bannedCarNames.includes(car.name);
               return (
-                <label key={car.id} className="championship-banned-option">
+                <label key={car.id} className="championship-checkbox-option">
                   <input
                     type="checkbox"
                     checked={isBanned}
                     onChange={() => toggleBannedCar(car.name)}
                   />
-                  <span className="championship-banned-label">{car.name}</span>
+                  <span className="championship-checkbox-label">{car.name}</span>
                 </label>
               );
             })}
@@ -575,11 +599,26 @@ const styles = {
     cursor: "not-allowed",
     opacity: 0.45,
   },
+  controlsRow: {
+    display: "grid",
+    gap: "10px",
+    marginBottom: "14px",
+  },
   settingsRow: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "10px",
-    marginBottom: "14px",
+  },
+  resetButton: {
+    background: "rgba(20, 28, 48, 0.9)",
+    border: "1px solid rgba(141, 169, 233, 0.35)",
+    borderRadius: "10px",
+    color: "#d8e3ff",
+    cursor: "pointer",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    justifySelf: "start",
+    padding: "8px 14px",
   },
   settingLabel: {
     background: "rgba(12, 18, 31, 0.88)",
@@ -599,11 +638,28 @@ const styles = {
     color: "#9bc0ff",
     fontSize: "0.9rem",
   },
-  trackGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-    gap: "10px",
-    marginBottom: "20px",
+  trackPanel: {
+    background: "rgba(12, 18, 31, 0.88)",
+    border: "1px solid rgba(128, 160, 229, 0.25)",
+    borderRadius: "12px",
+    marginBottom: "16px",
+    padding: "12px",
+  },
+  trackTitle: {
+    color: "#e4edff",
+    fontSize: "0.98rem",
+    margin: "0 0 6px",
+  },
+  trackHint: {
+    color: "rgba(200, 214, 245, 0.85)",
+    fontSize: "0.85rem",
+    lineHeight: 1.45,
+    margin: "0 0 10px",
+  },
+  trackEmpty: {
+    color: "rgba(200, 214, 245, 0.75)",
+    fontSize: "0.85rem",
+    margin: 0,
   },
   bannedPanel: {
     background: "rgba(12, 18, 31, 0.88)",
@@ -627,22 +683,6 @@ const styles = {
     color: "rgba(200, 214, 245, 0.75)",
     fontSize: "0.85rem",
     margin: 0,
-  },
-  trackButton: {
-    background: "rgba(17, 22, 35, 0.95)",
-    border: "1px solid rgba(138, 159, 212, 0.3)",
-    borderRadius: "10px",
-    color: "#dbe6ff",
-    cursor: "pointer",
-    fontSize: "0.88rem",
-    minHeight: "42px",
-    padding: "8px 10px",
-    textAlign: "left",
-  },
-  trackButtonSelected: {
-    background: "linear-gradient(135deg, rgba(45, 85, 180, 0.85), rgba(22, 42, 90, 0.95))",
-    borderColor: "#84acff",
-    color: "#ffffff",
   },
   resultsPanel: {
     background: "rgba(12, 16, 27, 0.85)",

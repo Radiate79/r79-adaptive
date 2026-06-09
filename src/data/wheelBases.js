@@ -1,5 +1,30 @@
 /** @typedef {'t598' | 'logitech_g923' | 'logitech_g_pro' | 'fanatec' | 'moza' | 'other'} WheelTemplateFamily */
 
+function buildPercentRange(step) {
+  const values = [];
+  for (let value = 0; value <= 100; value += step) {
+    values.push(`${value}%`);
+  }
+  return values;
+}
+
+/** Master T598 option ranges — GT7 in-game values. */
+export const T598_OPTION_RANGES = {
+  ffb: ["D", "1", "2", "3"],
+  master: buildPercentRange(5),
+  mode: ["B", "S", "P", "E"],
+  inertia: ["Off", "Mid", "High", "Extreme"],
+  friction: ["Off", "Low", "Mid", "High"],
+  boostLow: ["-2", "-1", "0", "+1", "+2"],
+  boostHigh: ["-2", "-1", "0", "+1", "+2"],
+  speed: ["Low", "Mid", "High", "Extreme"],
+  damper: buildPercentRange(10),
+  damperGain: ["Low", "Mid", "High", "Extreme"],
+  spring: buildPercentRange(5),
+  gearJolt: ["Off", "Low", "Medium", "High"],
+  endStop: ["Low", "Mid", "High"],
+};
+
 /**
  * @typedef {Object} WheelBaseOption
  * @property {string} id
@@ -40,8 +65,8 @@ export const WHEEL_TEMPLATE_FIELDS = {
     { key: "boostLow", label: "BOOST LOW" },
     { key: "boostHigh", label: "BOOST HIGH" },
     { key: "speed", label: "SPEED" },
-    { key: "damper", label: "DAMPER" },
-    { key: "damperGain", label: "DAMPER GAIN" },
+    { key: "damper", label: "WHEEL DAMPER" },
+    { key: "damperGain", label: "GAME DAMPER GAIN" },
     { key: "spring", label: "SPRING" },
     { key: "gearJolt", label: "GEAR JOLT" },
     { key: "endStop", label: "END STOP" },
@@ -123,4 +148,12 @@ export function getTemplateFamilyForWheelBase(wheelBaseId) {
 export function getTemplateFieldsForWheelBase(wheelBaseId) {
   const family = getTemplateFamilyForWheelBase(wheelBaseId);
   return WHEEL_TEMPLATE_FIELDS[family] ?? WHEEL_TEMPLATE_FIELDS.other;
+}
+
+/**
+ * @param {string} fieldKey
+ * @returns {string[] | null}
+ */
+export function getT598OptionsForField(fieldKey) {
+  return T598_OPTION_RANGES[fieldKey] ?? null;
 }

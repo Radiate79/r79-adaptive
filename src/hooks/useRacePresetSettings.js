@@ -4,6 +4,7 @@ import {
   getRaceConditionPresetValues,
   getRaceFormatDefaultLaps,
   matchRaceConditionPreset,
+  resolveRaceFormatId,
 } from "../data/racePresets.js";
 
 /**
@@ -72,6 +73,20 @@ export function useRacePresetSettings(
     setTyreMultiplierState(1);
   }, []);
 
+  const resetToPreset = useCallback((id = "full_race") => {
+    const resolvedId = resolveRaceFormatId(id);
+    setPresetId(resolvedId);
+    const values = getRaceConditionPresetValues(resolvedId);
+    if (values) {
+      setFuelMultiplierState(values.fuelMultiplier);
+      setTyreMultiplierState(values.tyreMultiplier);
+    } else {
+      setFuelMultiplierState(1);
+      setTyreMultiplierState(1);
+    }
+    setLapCountState(getRaceFormatDefaultLaps(resolvedId));
+  }, []);
+
   const raceSettings = useMemo(
     () => ({
       fuelMultiplier,
@@ -92,6 +107,7 @@ export function useRacePresetSettings(
     setFuelMultiplier,
     setTyreMultiplier,
     reset,
+    resetToPreset,
     raceSettings,
   };
 }
