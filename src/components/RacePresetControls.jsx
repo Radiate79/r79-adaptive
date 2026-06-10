@@ -1,13 +1,16 @@
 import { RACE_FORMATS, resolveRaceFormatId } from "../data/racePresets.js";
 /**
  * @param {Object} props
- * @param {string} props.presetId
- * @param {(id: string) => void} props.onPresetChange
+ * @param {string} [props.presetId]
+ * @param {(id: string) => void} [props.onPresetChange]
  * @param {number} props.fuelMultiplier
  * @param {number} props.tyreMultiplier
  * @param {(value: number) => void} props.onFuelMultiplierChange
  * @param {(value: number) => void} props.onTyreMultiplierChange
  * @param {boolean} [props.distanceMode]
+ * @param {boolean} [props.lapsOnly]
+ * @param {string} [props.lapInput]
+ * @param {(value: string) => void} [props.onLapInputChange]
  * @param {number} [props.lapCount]
  * @param {(value: number) => void} [props.onLapCountChange]
  * @param {import("react").CSSProperties} [props.style]
@@ -20,10 +23,73 @@ export default function RacePresetControls({
   onFuelMultiplierChange,
   onTyreMultiplierChange,
   distanceMode = false,
+  lapsOnly = false,
+  lapInput = "",
+  onLapInputChange,
   lapCount = 20,
   onLapCountChange,
   style,
 }) {
+  const wearSliders = (
+    <div style={styles.multiplierRow}>
+      <label style={styles.multiplierField}>
+        Tyre wear multiplier
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={tyreMultiplier}
+          onChange={(event) =>
+            onTyreMultiplierChange(Number(event.target.value))
+          }
+          style={styles.range}
+        />
+        <span style={styles.rangeValue}>x{tyreMultiplier}</span>
+      </label>
+
+      <label style={styles.multiplierField}>
+        Fuel wear multiplier
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value={fuelMultiplier}
+          onChange={(event) =>
+            onFuelMultiplierChange(Number(event.target.value))
+          }
+          style={styles.range}
+        />
+        <span style={styles.rangeValue}>x{fuelMultiplier}</span>
+      </label>
+    </div>
+  );
+
+  if (lapsOnly) {
+    return (
+      <div style={{ ...styles.wrap, ...style }}>
+        <label style={styles.presetField}>
+          Number of Laps
+          <input
+            type="text"
+            inputMode="numeric"
+            value={lapInput}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value === "" || /^\d{1,3}$/.test(value)) {
+                onLapInputChange?.(value);
+              }
+            }}
+            placeholder="Enter laps"
+            style={styles.lapInput}
+          />
+        </label>
+        {wearSliders}
+      </div>
+    );
+  }
+
   const resolvedId = resolveRaceFormatId(presetId);
   const selectedPreset = RACE_FORMATS.find((preset) => preset.id === resolvedId);
 
@@ -33,7 +99,7 @@ export default function RacePresetControls({
         {distanceMode ? "Distance" : "Race format"}
         <select
           value={resolvedId}
-          onChange={(event) => onPresetChange(event.target.value)}
+          onChange={(event) => onPresetChange?.(event.target.value)}
           style={styles.select}
         >
           {RACE_FORMATS.map((preset) => (
@@ -63,39 +129,7 @@ export default function RacePresetControls({
         ) : null}
       </label>
 
-      <div style={styles.multiplierRow}>
-        <label style={styles.multiplierField}>
-          Tyre wear multiplier
-          <input
-            type="range"
-            min="0"
-            max="10"
-            step="1"
-            value={tyreMultiplier}
-            onChange={(event) =>
-              onTyreMultiplierChange(Number(event.target.value))
-            }
-            style={styles.range}
-          />
-          <span style={styles.rangeValue}>x{tyreMultiplier}</span>
-        </label>
-
-        <label style={styles.multiplierField}>
-          Fuel wear multiplier
-          <input
-            type="range"
-            min="0"
-            max="10"
-            step="1"
-            value={fuelMultiplier}
-            onChange={(event) =>
-              onFuelMultiplierChange(Number(event.target.value))
-            }
-            style={styles.range}
-          />
-          <span style={styles.rangeValue}>x{fuelMultiplier}</span>
-        </label>
-      </div>
+      {wearSliders}
     </div>
   );
 }

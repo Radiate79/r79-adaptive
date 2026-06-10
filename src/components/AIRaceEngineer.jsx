@@ -295,7 +295,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       ) : null}
 
       <div style={styles.dashboardGrid}>
-        <div style={styles.inputPanel}>
+        <div className="r79-card" style={styles.inputPanel}>
           <h3 style={styles.panelTitle}>Race Inputs</h3>
 
           <label style={styles.fieldLabel}>
@@ -1003,7 +1003,7 @@ const styles = {
     fontSize: "0.72rem",
     fontWeight: 700,
     letterSpacing: "0.05em",
-    marginBottom: "10px",
+    margin: "4px 0 0",
     padding: "4px 12px",
     textTransform: "uppercase",
   },
@@ -1012,7 +1012,7 @@ const styles = {
     fontSize: "0.84rem",
     fontStyle: "italic",
     fontWeight: 600,
-    margin: "10px 0 0",
+    margin: "6px 0 0",
   },
   gameNotice: {
     background: "rgba(56, 44, 18, 0.45)",

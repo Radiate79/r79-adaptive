@@ -450,9 +450,13 @@ td:has(> select) {
 .r79-page-header {
   border-bottom: 1px solid rgba(34, 211, 238, 0.1);
   display: grid;
-  gap: 8px;
-  margin-bottom: 4px;
-  padding-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+}
+
+.r79-page-header .r79-page-title {
+  margin-top: 0;
 }
 
 .r79-page-header__hero {

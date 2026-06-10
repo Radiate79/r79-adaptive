@@ -240,6 +240,24 @@ export default function WheelSettingsHub({
     setTyreCompound("M");
     setBopOn(true);
     setSearchQuery("");
+    setRequestGame(contextGameVersion);
+    setRequestWheelBase("thrustmaster_t598");
+    setRequestCarId("");
+    setRequestTrackId("");
+    setRequestTyres("M");
+    setRequestBopOn(true);
+    setRequestNotes("");
+    setRequestMessage("");
+  };
+
+  const handleResetWheelSettings = () => {
+    if (
+      !window.confirm("Reset all wheel settings to their default values?")
+    ) {
+      return;
+    }
+
+    resetWheelSettings();
   };
 
   const statusCounts = useMemo(() => {
@@ -276,13 +294,6 @@ export default function WheelSettingsHub({
           <h3 className="r79-section-title" style={styles.panelTitle}>
             Filters
           </h3>
-          <button
-            type="button"
-            onClick={resetWheelSettings}
-            className="r79-btn-secondary"
-          >
-            Reset
-          </button>
         </div>
         <label style={styles.searchField}>
           Search setups, cars, or tracks
@@ -717,6 +728,16 @@ export default function WheelSettingsHub({
           </div>
         )}
       </div>
+
+      <div style={styles.resetRow}>
+        <button
+          type="button"
+          onClick={handleResetWheelSettings}
+          className="r79-btn-secondary"
+        >
+          Reset
+        </button>
+      </div>
     </section>
   );
 }
@@ -734,6 +755,12 @@ const styles = {
     gap: "10px",
     justifyContent: "space-between",
     marginBottom: "10px",
+  },
+  resetRow: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "4px",
+    paddingTop: "8px",
   },
   searchField: {
     color: "#dce9ff",

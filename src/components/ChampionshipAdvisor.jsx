@@ -22,7 +22,6 @@ import {
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
-import { getRaceConditionPreset, resolveRaceFormatId } from "../data/racePresets.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 import {
   R79_BTN_ACTIVE,
@@ -49,15 +48,26 @@ export default function ChampionshipAdvisor() {
     () => getSelectableTracksForClass(gameVersion, carClass),
     [gameVersion, carClass],
   );
+  const [lapInput, setLapInput] = useState("");
   const {
-    presetId,
     fuelMultiplier,
     tyreMultiplier,
-    selectPreset,
     setFuelMultiplier,
     setTyreMultiplier,
     resetToPreset,
   } = useRacePresetSettings();
+  const effectiveLapCount = useMemo(() => {
+    if (lapInput.trim() === "") {
+      return undefined;
+    }
+
+    const parsed = Number(lapInput);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return Math.max(1, Math.min(999, Math.round(parsed)));
+  }, [lapInput]);
   const selectedTracks = useMemo(
     () => allTracks.filter((track) => selectedTrackIds.includes(track.id)),
     [allTracks, selectedTrackIds],
@@ -141,15 +151,14 @@ export default function ChampionshipAdvisor() {
       labels.push("Mixed Calendar");
     }
 
-    const preset = getRaceConditionPreset(resolveRaceFormatId(presetId));
-    if (preset.id !== "custom") {
-      labels.push(preset.label);
+    if (effectiveLapCount) {
+      labels.push(`${effectiveLapCount} Laps`);
     }
     labels.push(`Fuel Multiplier x${fuelMultiplier}`);
     labels.push(`Tyre Multiplier x${tyreMultiplier}`);
 
     return Array.from(new Set(labels));
-  }, [selectedTracks, fuelMultiplier, tyreMultiplier, presetId]);
+  }, [selectedTracks, fuelMultiplier, tyreMultiplier, effectiveLapCount]);
 
   const drivetrainRankings = useMemo(
     () => analyzeDrivetrainSuitability(selectedTracks),
@@ -251,6 +260,7 @@ export default function ChampionshipAdvisor() {
     setSelectedTrackIds([]);
     setBannedCarNames([]);
     setCarClass("Gr.3");
+    setLapInput("");
     resetToPreset("custom");
   };
 
@@ -299,8 +309,9 @@ export default function ChampionshipAdvisor() {
 
       <div style={styles.controlsRow}>
         <RacePresetControls
-          presetId={presetId}
-          onPresetChange={selectPreset}
+          lapsOnly
+          lapInput={lapInput}
+          onLapInputChange={setLapInput}
           fuelMultiplier={fuelMultiplier}
           tyreMultiplier={tyreMultiplier}
           onFuelMultiplierChange={setFuelMultiplier}

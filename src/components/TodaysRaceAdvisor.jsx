@@ -562,14 +562,14 @@ const styles = {
   dashboardGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-    gap: "12px",
-    marginBottom: "12px",
+    gap: "14px",
+    marginBottom: "14px",
   },
   inputPanel: {
     ...R79_INNER_PANEL,
     display: "grid",
-    gap: "10px",
-    padding: "12px",
+    gap: "12px",
+    padding: "14px",
   },
   analysisPanel: {
     ...R79_INNER_PANEL,
