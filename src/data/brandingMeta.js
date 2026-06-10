@@ -1,6 +1,23 @@
-/** R79 branding — emblem path, copy, footers, and version formatting. */
+/** R79 branding — logo assets, copy, footers, and version formatting. */
 
+/** Logo 1: circular R79 icon — header, favicon, small branding. */
 export const R79_EMBLEM_SRC = "/r79-emblem.svg";
+
+/** Logo 2: Radiate79 wordmark — page headers, welcome panels, large branding. */
+export const R79_WORDMARK_SRC = "/r79-wordmark.svg";
+
+/** Consistent logo display sizes (px). */
+export const R79_LOGO_SIZES = {
+  headerIcon: 58,
+  pageIcon: 40,
+  splashIcon: 152,
+  errorIcon: 40,
+  badgeSmall: 44,
+  badgeMedium: 56,
+  badgeLarge: 72,
+};
+
+export const R79_APP_TAGLINE = "Premium Racing Assistant";
 
 export const R79_MOTTO = [
   "Race smarter.",

@@ -201,34 +201,132 @@ td:has(> select) {
   margin: 10px 0 0;
 }
 
-/* App chrome — sticky brand anchor */
-.r79-app-header {
-  align-items: center;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: var(--r79-glass);
-  border-bottom: 1px solid rgba(34, 211, 238, 0.18);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.35),
-    0 0 32px rgba(34, 211, 238, 0.06);
-  display: flex;
-  margin: 0 -14px 6px;
-  padding: 6px 12px;
-  position: sticky;
-  top: 0;
-  z-index: 20;
+/* App shell */
+.r79-app-shell {
+  font-family: var(--r79-font);
+  margin: 0 auto;
+  max-width: 980px;
+  padding: 0 14px 18px;
 }
 
-.r79-app-top-bar {
+.r79-app-chrome {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(
+    180deg,
+    rgba(6, 10, 20, 0.94) 0%,
+    rgba(6, 10, 20, 0.82) 100%
+  );
+  border-bottom: 1px solid rgba(34, 211, 238, 0.2);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(34, 211, 238, 0.07);
+  margin: 0 -14px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.r79-app-header {
+  align-items: center;
+  display: flex;
+  padding: 8px 12px 6px;
+}
+
+.r79-app-nav-shell {
   display: grid;
   gap: 8px;
-  margin-bottom: 10px;
+  padding: 0 12px 10px;
 }
 
 .r79-app-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.r79-nav-pill__short {
+  display: none;
+}
+
+.r79-nav-more {
+  position: relative;
+}
+
+.r79-nav-more__menu {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(4, 8, 16, 0.96);
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 14px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 0 28px rgba(139, 92, 246, 0.14);
+  display: grid;
+  gap: 4px;
+  left: 0;
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  padding: 8px;
+  position: absolute;
+  top: calc(100% + 6px);
+  width: min(280px, calc(100vw - 40px));
+  z-index: 40;
+}
+
+.r79-nav-more__item {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--r79-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 600;
+  min-height: var(--r79-touch);
+  padding: 10px 12px;
+  text-align: left;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+  width: 100%;
+}
+
+.r79-nav-more__item:hover {
+  background: rgba(34, 211, 238, 0.08);
+  border-color: rgba(34, 211, 238, 0.2);
+  color: var(--r79-text);
+}
+
+.r79-nav-more__item--active {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.35);
+  color: var(--r79-text);
+}
+
+/* Radiate79 wordmark */
+.r79-wordmark {
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.22));
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.r79-wordmark--header {
+  height: 26px;
+  width: auto;
+}
+
+.r79-wordmark--compact {
+  height: 20px;
+  width: auto;
+}
+
+.r79-wordmark--hero {
+  height: 36px;
+  width: auto;
 }
 
 .r79-app-game-selector {
@@ -312,13 +410,8 @@ td:has(> select) {
   letter-spacing: 0.08em;
 }
 
-.r79-brand-bar--app .r79-brand-strip__title {
-  font-size: 1.35rem;
-  letter-spacing: 0.06em;
-}
-
-.r79-brand-bar--app .r79-brand-strip__subtitle {
-  font-size: 0.72rem;
+.r79-brand-bar--app .r79-wordmark--header {
+  height: 28px;
 }
 
 /* Premium page shell */
@@ -355,46 +448,21 @@ td:has(> select) {
 
 /* Page header */
 .r79-page-header {
+  border-bottom: 1px solid rgba(34, 211, 238, 0.1);
   display: grid;
-  gap: 6px;
-  margin-bottom: 2px;
-}
-
-.r79-page-header > .r79-brand-bar {
-  margin-bottom: 2px;
-}
-
-.r79-brand-strip {
-  align-items: center;
-  display: inline-flex;
-  flex-wrap: wrap;
   gap: 8px;
-  width: fit-content;
+  margin-bottom: 4px;
+  padding-bottom: 10px;
 }
 
-.r79-brand-strip__title {
-  background: var(--r79-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-size: 0.92rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+.r79-page-header__hero {
+  align-items: center;
+  display: flex;
+  gap: 10px;
 }
 
-.r79-brand-strip__divider {
-  background: rgba(245, 200, 66, 0.55);
-  border-radius: 999px;
-  height: 4px;
-  width: 4px;
-}
-
-.r79-brand-strip__subtitle {
-  color: rgba(142, 232, 255, 0.88);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.r79-about-wordmark {
+  margin-bottom: 10px;
 }
 
 .r79-page-title {
@@ -402,10 +470,10 @@ td:has(> select) {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-size: 1.45rem;
+  font-size: 1.62rem;
   font-weight: 800;
   letter-spacing: 0.02em;
-  line-height: 1.15;
+  line-height: 1.12;
   margin: 0;
 }
 
@@ -426,6 +494,10 @@ td:has(> select) {
   line-height: 1.45;
   margin: 4px 0 0;
   padding: 8px 10px;
+}
+
+.r79-notice--wide {
+  margin: 0 0 12px;
 }
 
 /* Dashboard cards */
@@ -504,6 +576,114 @@ td:has(> select) {
   box-shadow: 0 0 16px rgba(34, 211, 238, 0.14);
 }
 
+/* Splash screen */
+.r79-splash {
+  align-items: center;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(34, 211, 238, 0.14), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 100% 20%, rgba(139, 92, 246, 0.16), transparent 55%),
+    rgba(3, 5, 8, 0.98);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px 20px 72px;
+  position: fixed;
+  z-index: 2000;
+}
+
+.r79-splash__panel {
+  animation: splashFadeIn 0.9s ease forwards;
+  max-width: 440px;
+  opacity: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.r79-splash__emblem {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.r79-splash__wordmark {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.r79-splash__wordmark .r79-wordmark--hero {
+  height: 42px;
+}
+
+.r79-splash__tagline {
+  color: rgba(245, 200, 66, 0.9);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+}
+
+.r79-splash__motto p {
+  color: rgba(220, 228, 255, 0.88);
+  font-size: 0.95rem;
+  font-style: italic;
+  line-height: 1.55;
+  margin: 0 0 4px;
+}
+
+.r79-splash__mantra {
+  display: grid;
+  gap: 6px;
+  margin: 18px 0 22px;
+}
+
+.r79-splash__mantra p {
+  color: #9bc0ff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin: 0;
+}
+
+.r79-splash__enter {
+  border-radius: 999px;
+  min-width: 200px;
+}
+
+.r79-splash__footer {
+  bottom: 28px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  text-align: center;
+}
+
+.r79-splash__footer p {
+  color: rgba(184, 205, 255, 0.5);
+  font-size: 0.72rem;
+  margin: 0 0 4px;
+}
+
+.r79-splash__footer p:last-child {
+  color: rgba(184, 205, 255, 0.38);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Inner dashboard panels */
+.r79-panel {
+  background: var(--r79-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(34, 211, 238, 0.14);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 0 18px rgba(34, 211, 238, 0.04);
+  padding: 14px;
+}
+
 @media (max-width: 560px) {
   .championship-checkbox-grid,
   .championship-banned-list {
@@ -515,26 +695,46 @@ td:has(> select) {
     padding: 10px 14px;
   }
 
-  .r79-app-header {
-    margin: 0 -14px 4px;
-    padding: 5px 10px;
+  .r79-app-chrome {
+    margin: 0 -14px 8px;
   }
 
-  .r79-app-top-bar {
+  .r79-app-header {
+    padding: 6px 10px 4px;
+  }
+
+  .r79-app-nav-shell {
     gap: 6px;
-    margin-bottom: 8px;
+    padding: 0 10px 8px;
   }
 
   .r79-app-game-selector {
     padding: 6px 10px;
   }
 
+  .r79-nav-pill__full {
+    display: none;
+  }
+
+  .r79-nav-pill__short {
+    display: inline;
+  }
+
+  .r79-nav-pill {
+    font-size: 0.78rem;
+    padding: 9px 12px;
+  }
+
   .r79-brand-bar__tagline {
     display: none;
   }
 
-  .r79-brand-bar--app .r79-brand-strip__title {
-    font-size: 1.2rem;
+  .r79-brand-bar--app .r79-wordmark--header {
+    height: 22px;
+  }
+
+  .r79-wordmark--hero {
+    height: 30px;
   }
 
   .r79-page {
@@ -548,6 +748,13 @@ td:has(> select) {
   }
 
   .r79-page-title {
-    font-size: 1.28rem;
+    font-size: 1.38rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .r79-app-nav-shell {
+    align-items: center;
+    grid-template-columns: 1fr auto;
   }
 }

@@ -40,7 +40,7 @@ export default function R79Emblem({
       >
         <img
           src={R79_EMBLEM_SRC}
-          alt="R79 emblem"
+          alt="R79 icon logo"
           style={{
             display: "block",
             height: "92%",

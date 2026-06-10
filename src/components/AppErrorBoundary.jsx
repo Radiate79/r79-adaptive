@@ -1,4 +1,6 @@
 import { Component } from "react";
+import { R79_LOGO_SIZES } from "../data/brandingMeta.js";
+import R79Emblem from "./branding/R79Emblem.jsx";
 
 const FALLBACK_MESSAGE =
   "R79 loaded but one module failed. Please report this issue.";
@@ -24,7 +26,9 @@ export default class AppErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div style={styles.panel}>
-          <p style={styles.title}>R79</p>
+          <div style={styles.logo}>
+            <R79Emblem size={R79_LOGO_SIZES.errorIcon} />
+          </div>
           <p style={styles.message}>{FALLBACK_MESSAGE}</p>
           {this.props.label ? (
             <p style={styles.detail}>Module: {this.props.label}</p>
@@ -53,10 +57,8 @@ const styles = {
     marginBottom: "16px",
     padding: "18px",
   },
-  title: {
-    fontSize: "1.1rem",
-    fontWeight: 700,
-    margin: "0 0 8px",
+  logo: {
+    margin: "0 0 10px",
   },
   message: {
     color: "#ffe6a8",

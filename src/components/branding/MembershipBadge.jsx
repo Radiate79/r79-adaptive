@@ -1,4 +1,7 @@
-import { MEMBERSHIP_BADGE_STYLES } from "../../data/brandingMeta.js";
+import {
+  MEMBERSHIP_BADGE_STYLES,
+  R79_LOGO_SIZES,
+} from "../../data/brandingMeta.js";
 import R79Emblem from "./R79Emblem.jsx";
 
 /**
@@ -6,7 +9,12 @@ import R79Emblem from "./R79Emblem.jsx";
  */
 export default function MembershipBadge({ tier, size = "medium" }) {
   const style = MEMBERSHIP_BADGE_STYLES[tier];
-  const emblemSize = size === "small" ? 44 : size === "large" ? 72 : 56;
+  const emblemSize =
+    size === "small"
+      ? R79_LOGO_SIZES.badgeSmall
+      : size === "large"
+        ? R79_LOGO_SIZES.badgeLarge
+        : R79_LOGO_SIZES.badgeMedium;
   const labelSize =
     size === "small" ? "0.72rem" : size === "large" ? "0.95rem" : "0.82rem";
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 52" role="img" aria-label="Radiate79">
+  <defs>
+    <linearGradient id="r79Wordmark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="38%" stop-color="#38bdf8"/>
+      <stop offset="68%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <filter id="r79WordmarkGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <text
+    x="0"
+    y="38"
+    font-family="Inter, Segoe UI, Roboto, system-ui, sans-serif"
+    font-size="34"
+    font-weight="800"
+    fill="url(#r79Wordmark)"
+    letter-spacing="3"
+    filter="url(#r79WordmarkGlow)"
+  >Radiate79</text>
+</svg>

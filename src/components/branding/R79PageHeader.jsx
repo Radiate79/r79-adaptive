@@ -1,7 +1,7 @@
-import R79BrandBar from "./R79BrandBar.jsx";
+import R79Wordmark from "./R79Wordmark.jsx";
 
 /**
- * Consistent R79 page header — logo, wordmark, title, subtitle.
+ * Branded page header — Radiate79 wordmark hero + page title.
  *
  * @param {Object} props
  * @param {string} props.title
@@ -11,7 +11,9 @@ import R79BrandBar from "./R79BrandBar.jsx";
 export default function R79PageHeader({ title, subtitle, children }) {
   return (
     <header className="r79-page-header">
-      <R79BrandBar variant="page" />
+      <div className="r79-page-header__hero">
+        <R79Wordmark variant="hero" />
+      </div>
       <h2 className="r79-page-title">{title}</h2>
       {subtitle ? <p className="r79-page-subtitle">{subtitle}</p> : null}
       {children}

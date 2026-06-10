@@ -19,6 +19,7 @@ import BrandVersionLabel from "./branding/BrandVersionLabel.jsx";
 import DataReports from "./DataReports.jsx";
 import R79Archive from "./R79Archive.jsx";
 import R79PageHeader from "./branding/R79PageHeader.jsx";
+import R79Wordmark from "./branding/R79Wordmark.jsx";
 
 const VIEWS = {
   settings: "settings",
@@ -169,7 +170,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
         />
 
         <div style={styles.aboutIdentity}>
-          <h3 style={styles.aboutIdentityTitle}>R79</h3>
+          <R79Wordmark variant="hero" className="r79-about-wordmark" />
           {R79_MOTTO.map((line) => (
             <p key={line} style={styles.aboutMottoLine}>
               {line}
@@ -383,15 +384,6 @@ const styles = {
     marginBottom: "16px",
     padding: "18px 16px",
     textAlign: "center",
-  },
-  aboutIdentityTitle: {
-    background: "linear-gradient(90deg, #dce9ff, #9bc0ff)",
-    backgroundClip: "text",
-    color: "transparent",
-    fontSize: "1.35rem",
-    fontWeight: 800,
-    letterSpacing: "0.1em",
-    margin: "0 0 10px",
   },
   aboutMottoLine: {
     color: "rgba(220, 228, 255, 0.9)",

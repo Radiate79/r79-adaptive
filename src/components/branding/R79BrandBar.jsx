@@ -1,12 +1,17 @@
+import {
+  R79_APP_TAGLINE,
+  R79_LOGO_SIZES,
+} from "../../data/brandingMeta.js";
 import R79Emblem from "./R79Emblem.jsx";
+import R79Wordmark from "./R79Wordmark.jsx";
 
 const EMBLEM_SIZES = {
-  app: 60,
-  page: 48,
+  app: R79_LOGO_SIZES.headerIcon,
+  page: R79_LOGO_SIZES.pageIcon,
 };
 
 /**
- * Shared R79 / Radiate79 identity bar — logo + wordmark.
+ * R79 identity bar — icon logo + Radiate79 wordmark.
  *
  * @param {Object} props
  * @param {"app" | "page"} [props.variant]
@@ -19,8 +24,8 @@ export default function R79BrandBar({
   onLogoClick = null,
 }) {
   const emblemSize = EMBLEM_SIZES[variant] ?? EMBLEM_SIZES.page;
-
   const emblem = <R79Emblem size={emblemSize} />;
+  const wordmarkVariant = variant === "app" ? "header" : "compact";
 
   return (
     <div className={`r79-brand-bar r79-brand-bar--${variant}`}>
@@ -41,13 +46,9 @@ export default function R79BrandBar({
       )}
 
       <div className="r79-brand-bar__copy">
-        <div className="r79-brand-strip">
-          <span className="r79-brand-strip__title">R79</span>
-          <span className="r79-brand-strip__divider" />
-          <span className="r79-brand-strip__subtitle">Radiate79</span>
-        </div>
+        <R79Wordmark variant={wordmarkVariant} />
         {showTagline ? (
-          <span className="r79-brand-bar__tagline">Premium Racing Assistant</span>
+          <span className="r79-brand-bar__tagline">{R79_APP_TAGLINE}</span>
         ) : null}
       </div>
     </div>

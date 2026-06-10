@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 
-import { GAME_CATALOG } from "./data/gameVersions.js";
 
 import { GameVersionProvider, useGameVersion } from "./context/GameVersionContext.jsx";
 
@@ -32,6 +31,7 @@ import SettingsHub from "./components/SettingsHub.jsx";
 
 import SplashScreen from "./components/SplashScreen.jsx";
 
+import R79AppNav from "./components/branding/R79AppNav.jsx";
 import R79BrandBar from "./components/branding/R79BrandBar.jsx";
 
 import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
@@ -225,92 +225,30 @@ function AppShell() {
 
   return (
 
-    <div style={styles.app}>
+    <div className="r79-app-shell">
+      <div className="r79-app-chrome">
+        <header className="r79-app-header">
+          <R79BrandBar
+            variant="app"
+            showTagline
+            onLogoClick={handleLogoClick}
+          />
+        </header>
 
-      <header className="r79-app-header">
-        <R79BrandBar
-          variant="app"
-          showTagline
-          onLogoClick={handleLogoClick}
+        <R79AppNav
+          page={page}
+          setPage={setPage}
+          gameVersion={gameVersion}
+          setGameVersion={setGameVersion}
+          gameOptions={gameOptions}
+          allPages={PAGES}
         />
-      </header>
-
-      <div className="r79-app-top-bar">
-        <nav className="r79-app-nav">
-
-          {PAGES.map((item) => {
-
-            const isActive = page === item.id;
-
-            return (
-
-              <button
-
-                key={item.id}
-
-                type="button"
-
-                onClick={() => setPage(item.id)}
-
-                className={isActive ? "r79-nav-pill r79-nav-pill--active" : "r79-nav-pill"}
-
-              >
-
-                {item.label}
-
-              </button>
-
-            );
-
-          })}
-
-        </nav>
-
-
-
-        <div className="r79-app-game-selector">
-          <span className="r79-app-game-label">Game</span>
-          <div className="r79-app-game-buttons">
-
-            {gameOptions.map((version) => {
-
-              const entry = GAME_CATALOG[version];
-
-              const isActive = gameVersion === version;
-
-              return (
-
-                <button
-
-                  key={version}
-
-                  type="button"
-
-                  onClick={() => setGameVersion(version)}
-
-                  className={isActive ? "r79-nav-pill r79-nav-pill--active" : "r79-nav-pill"}
-
-                >
-
-                  {entry.shortLabel}
-
-                </button>
-
-              );
-
-            })}
-
-          </div>
-
-        </div>
-
       </div>
 
 
 
       {showRaceDataNotice ? (
-
-        <p style={styles.alrNotice}>
+        <p className="r79-notice r79-notice--wide">
 
           Race Archive data and OCR matching use the GT7 car database. Switch to
 
@@ -356,40 +294,5 @@ export default function App() {
 
 
 
-const styles = {
-
-  app: {
-
-    fontFamily: "Inter, Segoe UI, Roboto, system-ui, sans-serif",
-
-    margin: "0 auto",
-
-    maxWidth: "980px",
-
-    padding: "2px 14px 18px",
-
-  },
-
-  alrNotice: {
-
-    background: "rgba(56, 44, 18, 0.45)",
-
-    border: "1px solid rgba(220, 180, 90, 0.35)",
-
-    borderRadius: "10px",
-
-    color: "#ffe6a8",
-
-    fontSize: "0.88rem",
-
-    lineHeight: 1.45,
-
-    margin: "0 0 14px",
-
-    padding: "10px 12px",
-
-  },
-
-};
 
 
