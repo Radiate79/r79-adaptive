@@ -26,6 +26,7 @@ import {
 import RacePresetControls from "./RacePresetControls.jsx";
 import { formatRaceConditionSummary } from "../data/racePresets.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 import ALRImageUpload from "./ALRImageUpload.jsx";
 import ALRImportProgress from "./ALRImportProgress.jsx";
 import {
@@ -307,11 +308,8 @@ export default function ALRDataEntry() {
   };
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Race Archive</h2>
-        <p style={styles.subtitle}>{RACE_ARCHIVE_INTRO}</p>
-      </div>
+    <section className="r79-page r79-page--wide">
+      <R79PageHeader title="Race Archive" subtitle={RACE_ARCHIVE_INTRO} />
 
       <div style={styles.sectionPanel}>
         <div style={styles.sectionHeader}>
@@ -738,15 +736,15 @@ export default function ALRDataEntry() {
 const styles = {
   shell: {
     background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     padding: "20px",
     maxWidth: "960px",
     margin: "0 auto",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
   },
   header: {
     marginBottom: "16px",
@@ -763,8 +761,8 @@ const styles = {
     lineHeight: 1.5,
   },
   sectionPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
@@ -850,7 +848,7 @@ const styles = {
     margin: "14px 0",
   },
   primaryButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",
@@ -882,8 +880,8 @@ const styles = {
     fontSize: "0.88rem",
   },
   summaryPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
@@ -942,8 +940,8 @@ const styles = {
     textAlign: "right",
   },
   tablePanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
     marginBottom: "14px",

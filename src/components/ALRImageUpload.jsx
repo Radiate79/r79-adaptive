@@ -1007,8 +1007,8 @@ export default function ALRImageUpload({ onSaveRecords }) {
 
 const styles = {
   panel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
@@ -1072,7 +1072,7 @@ const styles = {
     overflow: "hidden",
   },
   progressFill: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     height: "100%",
     transition: "width 0.2s ease",
   },
@@ -1295,7 +1295,7 @@ const styles = {
     gap: "8px",
   },
   primaryButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",

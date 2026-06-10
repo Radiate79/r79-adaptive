@@ -19,6 +19,13 @@ import {
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import {
+  R79_BTN_ACTIVE,
+  R79_BTN_CHIP,
+  R79_INNER_PANEL,
+  R79_SECTION_TITLE,
+} from "../styles/r79Theme.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 function ScoreExplanation({ car }) {
   if (!car?.scoreBreakdown && car?.technicalFitScore === undefined) {
@@ -145,23 +152,21 @@ export default function TodaysRaceAdvisor() {
   }, [trackId, carClass, selectedTrack]);
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Today&apos;s Race Advisor</h2>
-        <p style={styles.subtitle}>
-          Complete race engineer dashboard — car selection, strategy, and setup
-          guidance for your next race.
-        </p>
+    <section className="r79-page r79-page--wide">
+      <R79PageHeader
+        title="Today's Race Advisor"
+        subtitle="Complete race engineer dashboard — car selection, strategy, and setup guidance for your next race."
+      >
         {!isGameDataReady(gameVersion) ? (
-          <p style={styles.gameNotice}>
+          <p className="r79-notice">
             {game.shortLabel} car and track data is not available yet. Populate{" "}
             <code>src/data/gt8/</code> to enable recommendations.
           </p>
         ) : null}
-      </div>
+      </R79PageHeader>
 
       <div style={styles.dashboardGrid}>
-        <div style={styles.inputPanel}>
+        <div className="r79-card" style={styles.inputPanel}>
           <h3 style={styles.panelTitle}>Race Setup</h3>
 
           <label style={styles.fieldLabel}>
@@ -554,38 +559,6 @@ export default function TodaysRaceAdvisor() {
 }
 
 const styles = {
-  shell: {
-    background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
-    borderRadius: "16px",
-    color: "#f3f6ff",
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
-    padding: "20px",
-    maxWidth: "980px",
-    margin: "0 auto",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
-  },
-  header: {
-    marginBottom: "16px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.5rem",
-    letterSpacing: "0.02em",
-  },
-  subtitle: {
-    margin: "6px 0 0",
-    color: "rgba(220, 228, 255, 0.85)",
-    fontSize: "0.95rem",
-    lineHeight: 1.45,
-  },
-  gameNotice: {
-    margin: "10px 0 0",
-    color: "#ffe6a8",
-    fontSize: "0.88rem",
-    lineHeight: 1.45,
-  },
   dashboardGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -593,24 +566,16 @@ const styles = {
     marginBottom: "12px",
   },
   inputPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-    borderRadius: "12px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
     display: "grid",
-    gap: "12px",
+    gap: "10px",
+    padding: "12px",
   },
   analysisPanel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
-    borderRadius: "12px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
+    padding: "12px",
   },
-  panelTitle: {
-    margin: "0 0 10px",
-    fontSize: "1rem",
-    color: "#e8efff",
-  },
+  panelTitle: R79_SECTION_TITLE,
   fieldLabel: {
     color: "#dce9ff",
     display: "grid",
@@ -632,33 +597,24 @@ const styles = {
     gap: "8px",
   },
   toggleButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontWeight: 600,
+    ...R79_BTN_CHIP,
     padding: "7px 14px",
   },
   toggleButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
+    ...R79_BTN_ACTIVE,
+    padding: "7px 14px",
   },
   classChip: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
+    ...R79_BTN_CHIP,
     cursor: "pointer",
     fontSize: "0.82rem",
     fontWeight: 600,
     padding: "6px 12px",
   },
   classChipActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
+    ...R79_BTN_ACTIVE,
+    fontSize: "0.82rem",
+    padding: "6px 12px",
   },
   classChipDisabled: {
     cursor: "not-allowed",
@@ -738,8 +694,8 @@ const styles = {
     fontWeight: 700,
   },
   strategyPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
@@ -813,8 +769,8 @@ const styles = {
     marginBottom: "12px",
   },
   altPanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
@@ -835,8 +791,8 @@ const styles = {
     marginBottom: "8px",
   },
   resultsPanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
   },

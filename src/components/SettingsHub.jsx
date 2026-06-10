@@ -18,6 +18,7 @@ import { getFounderStats } from "../utils/founderStats.js";
 import BrandVersionLabel from "./branding/BrandVersionLabel.jsx";
 import DataReports from "./DataReports.jsx";
 import R79Archive from "./R79Archive.jsx";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 const VIEWS = {
   settings: "settings",
@@ -51,7 +52,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
   if (view === VIEWS.founder) {
     return (
-      <section style={styles.shell}>
+      <section className="r79-page r79-page--wide">
         <Breadcrumb
           items={[
             { label: "Settings", onClick: () => setView(VIEWS.settings) },
@@ -60,10 +61,10 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
           ]}
         />
 
-        <div style={styles.header}>
-          <h2 style={styles.title}>Founder Mode</h2>
-          <p style={styles.subtitle}>Project intelligence — live stats and roadmap.</p>
-        </div>
+        <R79PageHeader
+          title="Founder Mode"
+          subtitle="Project intelligence — live stats and roadmap."
+        />
 
         <div style={styles.statsGrid}>
           <StatCard label="Founder" value={FOUNDER_NAME} />
@@ -136,7 +137,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
   if (view === VIEWS.dataReports) {
     return (
-      <section style={styles.shell}>
+      <section className="r79-page r79-page--wide">
         <DataReports
           breadcrumb={
             <Breadcrumb
@@ -154,7 +155,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
   if (view === VIEWS.about) {
     return (
-      <section style={styles.shell}>
+      <section className="r79-page r79-page--wide">
         <Breadcrumb
           items={[
             { label: "Settings", onClick: () => setView(VIEWS.settings) },
@@ -162,13 +163,10 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
           ]}
         />
 
-        <div style={styles.header}>
-          <h2 style={styles.title}>About R79</h2>
-          <p style={styles.subtitle}>
-            Radiate79&apos;s Gran Turismo race engineering toolkit — championship
-            analysis, race intelligence, and daily race strategy.
-          </p>
-        </div>
+        <R79PageHeader
+          title="About R79"
+          subtitle="Radiate79's Gran Turismo race engineering toolkit — championship analysis, race intelligence, and daily race strategy."
+        />
 
         <div style={styles.aboutIdentity}>
           <h3 style={styles.aboutIdentityTitle}>R79</h3>
@@ -224,11 +222,11 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
   }
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Settings</h2>
-        <p style={styles.subtitle}>App preferences and project information.</p>
-      </div>
+    <section className="r79-page r79-page--wide">
+      <R79PageHeader
+        title="Settings"
+        subtitle="App preferences and project information."
+      />
 
       <button
         type="button"
@@ -294,15 +292,15 @@ function StatCard({ label, value, live = false, highlight = false }) {
 const styles = {
   shell: {
     background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     margin: "0 auto",
     maxWidth: "900px",
     padding: "20px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
   },
   breadcrumb: {
     display: "flex",
@@ -349,8 +347,8 @@ const styles = {
   },
   settingsRow: {
     alignItems: "center",
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     cursor: "pointer",
     display: "grid",
@@ -410,8 +408,8 @@ const styles = {
     margin: "10px 0 0",
   },
   aboutPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "16px",
     padding: "14px",
@@ -491,8 +489,8 @@ const styles = {
     marginBottom: "16px",
   },
   statCard: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "10px",
     display: "grid",
     gap: "6px",
@@ -521,8 +519,8 @@ const styles = {
     fontWeight: 700,
   },
   timelinePanel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
   },
@@ -565,7 +563,7 @@ const styles = {
     padding: "9px 10px",
   },
   timelineDotDone: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     borderRadius: "50%",
     flexShrink: 0,
     height: "8px",

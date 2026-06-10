@@ -10,15 +10,14 @@ import {
   ALR_CORNER_WHY_TEXT,
   ALR_CORNER_WHY_TITLE,
 } from "../data/alrCornerMeta.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 export default function ALRCorner() {
   return (
-    <section style={styles.shell}>
-      <header style={styles.header}>
+    <section className="r79-page r79-page--narrow">
+      <R79PageHeader title="ALR Corner" subtitle={ALR_CORNER_INTRO}>
         <p style={styles.eyebrow}>Featured league</p>
-        <h2 style={styles.title}>ALR Corner</h2>
-        <p style={styles.intro}>{ALR_CORNER_INTRO}</p>
-      </header>
+      </R79PageHeader>
 
       <article style={styles.independenceCard} aria-label="R79 independence note">
         <p style={styles.independenceText}>{ALR_CORNER_INDEPENDENCE_NOTE}</p>
@@ -59,10 +58,10 @@ export default function ALRCorner() {
 const styles = {
   shell: {
     background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     margin: "0 auto",

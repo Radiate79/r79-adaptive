@@ -30,10 +30,14 @@ export default function SplashScreen({ onEnter }) {
 
       <div style={styles.panel}>
         <div style={styles.emblemWrap}>
-          <R79Emblem size={128} pulse />
+          <R79Emblem size={148} pulse />
         </div>
 
-        <h1 style={styles.title}>{SPLASH_COPY.title}</h1>
+        <div className="r79-brand-strip" style={styles.splashBrandStrip}>
+          <span className="r79-brand-strip__title">{SPLASH_COPY.title}</span>
+          <span className="r79-brand-strip__divider" />
+          <span className="r79-brand-strip__subtitle">Radiate79</span>
+        </div>
 
         <div style={styles.mottoBlock}>
           {SPLASH_COPY.motto.map((line) => (
@@ -108,7 +112,11 @@ const styles = {
   emblemWrap: {
     display: "flex",
     justifyContent: "center",
-    marginBottom: "18px",
+    marginBottom: "14px",
+  },
+  splashBrandStrip: {
+    justifyContent: "center",
+    margin: "0 auto 14px",
   },
   title: {
     background: "linear-gradient(90deg, #dce9ff, #9bc0ff)",
@@ -142,7 +150,7 @@ const styles = {
     margin: 0,
   },
   enterButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",

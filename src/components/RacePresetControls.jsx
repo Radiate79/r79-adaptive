@@ -108,8 +108,8 @@ const styles = {
     minWidth: 0,
   },
   presetField: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(8, 12, 22, 0.82)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     color: "#dce9ff",
     display: "grid",
@@ -152,8 +152,8 @@ const styles = {
     minWidth: 0,
   },
   multiplierField: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(8, 12, 22, 0.82)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     color: "#dce9ff",
     display: "grid",
@@ -169,7 +169,7 @@ const styles = {
     width: "100%",
   },
   rangeValue: {
-    color: "#9bc0ff",
+    color: "#8ee8ff",
     fontSize: "0.82rem",
     fontVariantNumeric: "tabular-nums",
     fontWeight: 600,

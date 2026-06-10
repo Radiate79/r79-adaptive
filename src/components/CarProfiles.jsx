@@ -7,6 +7,7 @@ import {
 } from "../engine/carProfileEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 const TREND_STYLES = {
   Rising: { color: "#b8f5c6", background: "rgba(24, 56, 36, 0.55)" },
@@ -69,7 +70,7 @@ export default function CarProfiles() {
   }, [compareMode, selectedCarId, compareCarId, gameVersion]);
 
   return (
-    <section style={styles.shell}>
+    <section className="r79-page r79-page--wide">
       <style>{`
         @media (max-width: 860px) {
           .car-profiles-layout {
@@ -86,20 +87,17 @@ export default function CarProfiles() {
           }
         }
       `}</style>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Car Profiles</h2>
-        <p style={styles.subtitle}>
-          Complete historical and performance profiles for {game.shortLabel} cars
-          using championship ratings. Imported race history remains linked to
-          GT7 for now.
-        </p>
+      <R79PageHeader
+        title="Car Profiles"
+        subtitle={`Complete historical and performance profiles for ${game.shortLabel} cars using championship ratings. Imported race history remains linked to GT7 for now.`}
+      >
         {!isGameDataReady(gameVersion) ? (
-          <p style={styles.gameNotice}>
+          <p className="r79-notice">
             {game.shortLabel} profiles will appear once car and track data is
             added under <code>src/data/gt8/</code>.
           </p>
         ) : null}
-      </div>
+      </R79PageHeader>
 
       <div className="car-profiles-toolbar" style={styles.toolbar}>
         <label style={styles.searchField}>
@@ -425,13 +423,13 @@ function TrackGroup({ label, tracks, tone }) {
 const styles = {
   shell: {
     background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     padding: "20px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
   },
   header: {
     marginBottom: "16px",
@@ -490,8 +488,8 @@ const styles = {
     gridTemplateColumns: "minmax(240px, 280px) minmax(0, 1fr)",
   },
   sidebar: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     maxHeight: "72vh",
     overflow: "hidden",
@@ -543,8 +541,8 @@ const styles = {
     margin: 0,
   },
   heroCard: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     display: "grid",
     gap: "14px",
@@ -615,8 +613,8 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
   },
   statCard: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     display: "grid",
     gap: "6px",
@@ -633,8 +631,8 @@ const styles = {
     fontVariantNumeric: "tabular-nums",
   },
   panel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
   },
@@ -674,7 +672,7 @@ const styles = {
     overflow: "hidden",
   },
   progressFill: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     height: "100%",
   },
   twoColumn: {

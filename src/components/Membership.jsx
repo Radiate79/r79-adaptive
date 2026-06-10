@@ -6,6 +6,7 @@ import {
 import { MEMBERSHIP_FOOTER_LINES } from "../data/brandingMeta.js";
 import BrandFooter from "./branding/BrandFooter.jsx";
 import MembershipBadge from "./branding/MembershipBadge.jsx";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 const TIER_VARIANT_STYLES = {
   free: "tierCardFree",
@@ -15,11 +16,8 @@ const TIER_VARIANT_STYLES = {
 
 export default function Membership({ onOpenPathfinder }) {
   return (
-    <section style={styles.shell}>
-      <header style={styles.header}>
-        <h2 style={styles.title}>Membership</h2>
-        <p style={styles.subtitle}>{MEMBERSHIP_INTRO}</p>
-      </header>
+    <section className="r79-page r79-page--wide">
+      <R79PageHeader title="Membership" subtitle={MEMBERSHIP_INTRO} />
 
       <div style={styles.tierGrid}>
         {MEMBERSHIP_TIERS.map((tier) => (
@@ -77,10 +75,10 @@ function MembershipTierCard({ tier }) {
 const styles = {
   shell: {
     background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     margin: "0 auto",
@@ -110,8 +108,8 @@ const styles = {
     marginBottom: "16px",
   },
   tierCard: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     display: "grid",
     gap: "10px",

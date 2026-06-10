@@ -29,6 +29,7 @@ import {
   parseLogTags,
   updateArchiveJournalEntry,
 } from "../utils/archiveJournalStorage.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 function todayIsoDate() {
   const now = new Date();
@@ -151,7 +152,7 @@ export default function R79Archive({ onNavigate }) {
   };
 
   return (
-    <section style={styles.shell}>
+    <section className="r79-page r79-page--wide">
       <Breadcrumb
         items={[
           { label: "Settings", onClick: () => onNavigate("settings") },
@@ -160,11 +161,9 @@ export default function R79Archive({ onNavigate }) {
         ]}
       />
 
-      <header style={styles.museumHeader}>
+      <R79PageHeader title="R79 Archive" subtitle={ARCHIVE_INTRO}>
         <p style={styles.museumEyebrow}>Permanent Record · Digital Museum</p>
-        <h2 style={styles.museumTitle}>R79 Archive</h2>
-        <p style={styles.museumIntro}>{ARCHIVE_INTRO}</p>
-      </header>
+      </R79PageHeader>
 
       <MuseumSection title="Project" exhibit="01">
         <div style={styles.projectGrid}>
@@ -859,7 +858,7 @@ const styles = {
       "radial-gradient(ellipse at 50% -10%, rgba(45, 85, 160, 0.35), transparent 55%)",
       "radial-gradient(circle at bottom, rgba(12, 18, 32, 0.95), rgba(6, 9, 16, 0.98))",
     ].join(", "),
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
@@ -965,7 +964,7 @@ const styles = {
     margin: 0,
   },
   originsQuestion: {
-    background: "rgba(12, 18, 31, 0.88)",
+    background: "rgba(6, 10, 20, 0.72)",
     border: "1px solid rgba(132, 172, 255, 0.35)",
     borderRadius: "10px",
     color: "#e8efff",
@@ -1000,8 +999,8 @@ const styles = {
     margin: "0 0 8px",
   },
   section: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "16px",
@@ -1095,8 +1094,8 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   },
   fieldCard: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     display: "grid",
     gap: "6px",
@@ -1168,8 +1167,8 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
   },
   statCard: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     display: "grid",
     gap: "6px",
@@ -1354,7 +1353,7 @@ const styles = {
     fontWeight: 600,
   },
   addJournalButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",
@@ -1457,7 +1456,7 @@ const styles = {
     resize: "vertical",
   },
   journalButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",

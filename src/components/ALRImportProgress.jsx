@@ -54,8 +54,8 @@ export default function ALRImportProgress({ progress }) {
 
 const styles = {
   panel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",

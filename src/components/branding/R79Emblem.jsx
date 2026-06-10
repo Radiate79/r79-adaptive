@@ -5,8 +5,8 @@ import { R79_EMBLEM_SRC } from "../../data/brandingMeta.js";
  */
 export default function R79Emblem({
   size = 96,
-  glow = "rgba(62, 121, 255, 0.45)",
-  ring = "rgba(119, 160, 255, 0.5)",
+  glow = "rgba(34, 211, 238, 0.55)",
+  ring = "rgba(139, 92, 246, 0.65)",
   pulse = false,
 }) {
   return (
@@ -27,10 +27,10 @@ export default function R79Emblem({
         style={{
           alignItems: "center",
           animation: pulse ? "r79EmblemPulse 2.8s ease-in-out infinite" : undefined,
-          background: "rgba(9, 14, 24, 0.65)",
+          background: "rgba(4, 8, 16, 0.85)",
           border: `2px solid ${ring}`,
           borderRadius: "50%",
-          boxShadow: `0 0 20px ${glow}`,
+          boxShadow: `0 0 24px ${glow}, 0 0 40px rgba(139, 92, 246, 0.15)`,
           display: "flex",
           height: size,
           justifyContent: "center",

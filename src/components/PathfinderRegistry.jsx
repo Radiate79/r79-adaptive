@@ -100,7 +100,7 @@ function ProgrammeCompletePanel({ copy }) {
 
 const styles = {
   registry: {
-    background: "rgba(9, 14, 24, 0.88)",
+    background: "rgba(6, 10, 20, 0.72)",
     border: "1px solid rgba(180, 130, 255, 0.35)",
     borderRadius: "14px",
     marginBottom: "14px",

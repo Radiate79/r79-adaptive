@@ -24,6 +24,13 @@ import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
 import { getRaceConditionPreset, resolveRaceFormatId } from "../data/racePresets.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import {
+  R79_BTN_ACTIVE,
+  R79_BTN_CHIP,
+  R79_INNER_PANEL,
+  R79_SECTION_TITLE,
+} from "../styles/r79Theme.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 export default function ChampionshipAdvisor() {
   const { gameVersion, game } = useGameVersion();
@@ -248,20 +255,18 @@ export default function ChampionshipAdvisor() {
   };
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>R79 Championship Advisor</h2>
-        <p style={styles.subtitle}>
-          Select tracks and class to get the strongest championship car for{" "}
-          {game.shortLabel}.
-        </p>
+    <section className="r79-page">
+      <R79PageHeader
+        title="Championship Advisor"
+        subtitle={`Select tracks and class to get the strongest championship car for ${game.shortLabel}.`}
+      >
         {!isGameDataReady(gameVersion) ? (
-          <p style={styles.gameNotice}>
+          <p className="r79-notice">
             {game.shortLabel} car and track data is not available yet. Populate{" "}
             <code>src/data/gt8/</code> to enable recommendations.
           </p>
         ) : null}
-      </div>
+      </R79PageHeader>
 
       <TrackSurfaceWarning
         warning={calendarRecommendationStatus.warning}
@@ -302,12 +307,12 @@ export default function ChampionshipAdvisor() {
           onTyreMultiplierChange={setTyreMultiplier}
           style={styles.settingsRow}
         />
-        <button type="button" onClick={resetAdvisor} style={styles.resetButton}>
+        <button type="button" onClick={resetAdvisor} className="r79-btn-secondary">
           Reset Advisor
         </button>
       </div>
 
-      <div style={styles.trackPanel}>
+      <div className="r79-card" style={styles.trackPanel}>
         <h3 style={styles.trackTitle}>Championship Tracks</h3>
         <p style={styles.trackHint}>
           Select the tracks in your championship calendar.
@@ -337,7 +342,7 @@ export default function ChampionshipAdvisor() {
         )}
       </div>
 
-      <div style={styles.bannedPanel}>
+      <div className="r79-card" style={styles.bannedPanel}>
         <h3 style={styles.bannedTitle}>Banned Cars (Optional)</h3>
         <p style={styles.bannedHint}>
           Select cars that are not allowed in this championship.
@@ -432,11 +437,11 @@ export default function ChampionshipAdvisor() {
 
       <div style={styles.resultsPanel}>
         <h3 style={styles.resultsTitle}>Top 5 Recommendations</h3>
-        <details style={styles.infoDetails}>
-          <summary style={styles.infoSummary}>
+        <details className="r79-details">
+          <summary>
             How are these recommendations chosen?
           </summary>
-          <p style={styles.infoText}>
+          <p>
             R79 analyses every eligible car against your selected championship
             conditions, including selected tracks, BOP, fuel wear, tyre wear and
             lap count. It combines technical car characteristics with community
@@ -560,56 +565,13 @@ export default function ChampionshipAdvisor() {
 }
 
 const styles = {
-  shell: {
-    background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
-    borderRadius: "16px",
-    color: "#f3f6ff",
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
-    padding: "20px",
-    maxWidth: "900px",
-    margin: "0 auto",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
-  },
-  header: {
-    marginBottom: "16px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.4rem",
-    letterSpacing: "0.02em",
-  },
-  subtitle: {
-    margin: "6px 0 0",
-    color: "rgba(220, 228, 255, 0.85)",
-    fontSize: "0.95rem",
-  },
-  gameNotice: {
-    margin: "10px 0 0",
-    color: "#ffe6a8",
-    fontSize: "0.88rem",
-    lineHeight: 1.45,
-  },
   classRow: {
     display: "flex",
     gap: "10px",
     marginBottom: "16px",
   },
-  classButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontWeight: 600,
-    padding: "8px 14px",
-  },
-  classButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
-  },
+  classButton: R79_BTN_CHIP,
+  classButtonActive: R79_BTN_ACTIVE,
   classButtonDisabled: {
     cursor: "not-allowed",
     opacity: 0.45,
@@ -624,20 +586,9 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: "10px",
   },
-  resetButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "10px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontSize: "0.85rem",
-    fontWeight: 600,
-    justifySelf: "start",
-    padding: "8px 14px",
-  },
   settingLabel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     color: "#dce9ff",
     display: "grid",
@@ -654,16 +605,14 @@ const styles = {
     fontSize: "0.9rem",
   },
   trackPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
-    borderRadius: "12px",
-    marginBottom: "16px",
-    padding: "12px",
+    ...R79_INNER_PANEL,
+    marginBottom: "14px",
+    padding: "14px",
   },
   trackTitle: {
-    color: "#e4edff",
+    ...R79_SECTION_TITLE,
     fontSize: "0.98rem",
-    margin: "0 0 6px",
+    margin: "0 0 8px",
   },
   trackHint: {
     color: "rgba(200, 214, 245, 0.85)",
@@ -677,16 +626,14 @@ const styles = {
     margin: 0,
   },
   bannedPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
-    borderRadius: "12px",
-    marginBottom: "16px",
-    padding: "12px",
+    ...R79_INNER_PANEL,
+    marginBottom: "14px",
+    padding: "14px",
   },
   bannedTitle: {
-    color: "#e4edff",
+    ...R79_SECTION_TITLE,
     fontSize: "0.98rem",
-    margin: "0 0 6px",
+    margin: "0 0 8px",
   },
   bannedHint: {
     color: "rgba(200, 214, 245, 0.85)",
@@ -700,22 +647,18 @@ const styles = {
     margin: 0,
   },
   resultsPanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
-    borderRadius: "12px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
+    padding: "16px",
   },
   summaryPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-    borderRadius: "12px",
-    padding: "12px",
-    marginBottom: "12px",
+    ...R79_INNER_PANEL,
+    marginBottom: "14px",
+    padding: "14px",
   },
   summaryTitle: {
-    margin: "0 0 8px",
+    ...R79_SECTION_TITLE,
     fontSize: "0.98rem",
-    color: "#e4edff",
+    margin: "0 0 10px",
   },
   summaryTags: {
     display: "flex",
@@ -767,16 +710,14 @@ const styles = {
     fontVariantNumeric: "tabular-nums",
   },
   analysisPanel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
-    borderRadius: "12px",
-    padding: "12px",
-    marginBottom: "12px",
+    ...R79_INNER_PANEL,
+    marginBottom: "14px",
+    padding: "14px",
   },
   analysisTitle: {
-    margin: "0 0 10px",
+    ...R79_SECTION_TITLE,
     fontSize: "0.98rem",
-    color: "#e4edff",
+    margin: "0 0 10px",
   },
   analysisGrid: {
     display: "grid",
@@ -801,16 +742,13 @@ const styles = {
     fontVariantNumeric: "tabular-nums",
   },
   dnaPanel: {
-    background: "rgba(10, 16, 28, 0.9)",
-    border: "1px solid rgba(136, 168, 236, 0.35)",
-    borderRadius: "12px",
-    marginBottom: "12px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
+    marginBottom: "14px",
+    padding: "16px",
   },
   dnaTitle: {
-    margin: "0 0 6px",
-    fontSize: "1rem",
-    color: "#e8efff",
+    ...R79_SECTION_TITLE,
+    margin: "0 0 8px",
   },
   dnaType: {
     margin: "0 0 12px",
@@ -840,30 +778,7 @@ const styles = {
     fontWeight: 700,
     fontVariantNumeric: "tabular-nums",
   },
-  resultsTitle: {
-    margin: "0 0 10px",
-    fontSize: "1rem",
-    color: "#e8efff",
-  },
-  infoDetails: {
-    background: "rgba(18, 26, 45, 0.55)",
-    border: "1px solid rgba(113, 143, 209, 0.2)",
-    borderRadius: "8px",
-    marginBottom: "10px",
-    padding: "8px 10px",
-  },
-  infoSummary: {
-    color: "#9bc0ff",
-    cursor: "pointer",
-    fontSize: "0.84rem",
-    fontWeight: 600,
-  },
-  infoText: {
-    color: "rgba(205, 217, 255, 0.88)",
-    fontSize: "0.84rem",
-    lineHeight: 1.45,
-    margin: "8px 0 0",
-  },
+  resultsTitle: R79_SECTION_TITLE,
   emptyState: {
     margin: 0,
     color: "rgba(205, 217, 255, 0.8)",
@@ -969,17 +884,11 @@ const styles = {
     fontSize: "0.84rem",
   },
   consistencyPanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
-    borderRadius: "12px",
-    marginTop: "12px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
+    marginTop: "14px",
+    padding: "16px",
   },
-  consistencyTitle: {
-    margin: "0 0 6px",
-    fontSize: "1rem",
-    color: "#e8efff",
-  },
+  consistencyTitle: R79_SECTION_TITLE,
   consistencyExplanation: {
     margin: "0 0 10px",
     color: "rgba(205, 217, 255, 0.8)",

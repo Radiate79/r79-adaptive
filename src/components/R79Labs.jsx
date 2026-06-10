@@ -8,13 +8,14 @@ import {
   LABS_MANTRA,
   LABS_STATUS_COLORS,
 } from "../data/labsMeta.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 /**
  * @param {{ onOpenDataReports?: () => void }} props
  */
 export default function R79Labs({ onOpenDataReports }) {
   return (
-    <section style={styles.shell}>
+    <section className="r79-page r79-page--wide">
       <style>{`
         @keyframes labsIntroFadeIn {
           from {
@@ -38,10 +39,8 @@ export default function R79Labs({ onOpenDataReports }) {
         }
       `}</style>
 
-      <header style={styles.header}>
+      <R79PageHeader title="R79 Labs" subtitle="Experimental features and community tools.">
         <div style={styles.introPanel}>
-          <h2 style={styles.title}>🧪 R79 Labs</h2>
-
           <div style={styles.quotesBlock}>
             {LABS_INTRO_QUOTES.map((line) => (
               <p key={line} style={styles.quoteLine}>
@@ -69,7 +68,7 @@ export default function R79Labs({ onOpenDataReports }) {
 
           <p style={styles.closingLine}>{LABS_INTRO_CLOSING}</p>
         </div>
-      </header>
+      </R79PageHeader>
 
       <DevelopmentMantra />
 
@@ -207,11 +206,11 @@ const styles = {
   shell: {
     background: [
       "radial-gradient(ellipse at 50% -10%, rgba(55, 90, 160, 0.3), transparent 55%)",
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
     ].join(", "),
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     margin: "0 auto",
@@ -372,8 +371,8 @@ const styles = {
     marginTop: "8px",
   },
   card: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     display: "grid",
     gap: "12px",
@@ -435,7 +434,7 @@ const styles = {
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   },
   metaField: {
-    background: "rgba(12, 18, 31, 0.88)",
+    background: "rgba(6, 10, 20, 0.72)",
     border: "1px solid rgba(128, 160, 229, 0.22)",
     borderRadius: "8px",
     display: "grid",

@@ -27,6 +27,14 @@ import {
   saveWheelSettingsPreferences,
   updateWheelSetupRequestStatus,
 } from "../utils/wheelSetupsStorage.js";
+import {
+  R79_BTN_ACTIVE,
+  R79_BTN_CHIP,
+  R79_BTN_SECONDARY,
+  R79_INNER_PANEL,
+  R79_SECTION_TITLE,
+} from "../styles/r79Theme.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 /**
  * @typedef {Object} WheelSettingsPrefill
@@ -245,19 +253,17 @@ export default function WheelSettingsHub({
   }, [requests]);
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Wheel Settings Hub</h2>
-        <p style={styles.subtitle}>
-          Professional wheel-base settings for Gran Turismo 7.
-        </p>
-      </div>
+    <section className="r79-page">
+      <R79PageHeader
+        title="Wheel Settings"
+        subtitle="Professional wheel-base settings for Gran Turismo 7."
+      />
 
-      <details style={styles.infoDetails}>
-        <summary style={styles.infoSummary}>
+      <details className="r79-details">
+        <summary>
           Where does the wheel data come from?
         </summary>
-        <p style={styles.infoText}>
+        <p>
           R79 wheel profiles are built from GT7 testing, league racing
           experience, community feedback and continuous refinement. Settings are
           designed as strong starting points and may be adjusted to suit each
@@ -265,13 +271,15 @@ export default function WheelSettingsHub({
         </p>
       </details>
 
-      <div style={styles.filtersPanel}>
+      <div className="r79-card" style={styles.filtersPanel}>
         <div style={styles.filtersHeader}>
-          <h3 style={styles.panelTitle}>Filters</h3>
+          <h3 className="r79-section-title" style={styles.panelTitle}>
+            Filters
+          </h3>
           <button
             type="button"
             onClick={resetWheelSettings}
-            style={styles.resetButton}
+            className="r79-btn-secondary"
           >
             Reset
           </button>
@@ -714,49 +722,10 @@ export default function WheelSettingsHub({
 }
 
 const styles = {
-  shell: {
-    background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
-    borderRadius: "16px",
-    color: "#f3f6ff",
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
-    padding: "20px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
-  },
-  header: { marginBottom: "14px" },
-  title: { margin: 0, fontSize: "1.5rem" },
-  subtitle: {
-    margin: "6px 0 0",
-    color: "rgba(220, 228, 255, 0.85)",
-    fontSize: "0.95rem",
-    lineHeight: 1.45,
-  },
-  infoDetails: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
-    borderRadius: "12px",
-    marginBottom: "12px",
-    padding: "10px 12px",
-  },
-  infoSummary: {
-    color: "#9bc0ff",
-    cursor: "pointer",
-    fontSize: "0.86rem",
-    fontWeight: 600,
-  },
-  infoText: {
-    color: "rgba(205, 217, 255, 0.88)",
-    fontSize: "0.84rem",
-    lineHeight: 1.45,
-    margin: "8px 0 0",
-  },
   filtersPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-    borderRadius: "12px",
+    ...R79_INNER_PANEL,
     marginBottom: "12px",
-    padding: "14px",
+    padding: "12px",
   },
   filtersHeader: {
     alignItems: "center",
@@ -765,16 +734,6 @@ const styles = {
     gap: "10px",
     justifyContent: "space-between",
     marginBottom: "10px",
-  },
-  resetButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "10px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontSize: "0.85rem",
-    fontWeight: 600,
-    padding: "8px 14px",
   },
   searchField: {
     color: "#dce9ff",
@@ -814,9 +773,8 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   },
   panelTitle: {
+    ...R79_SECTION_TITLE,
     margin: 0,
-    fontSize: "1rem",
-    color: "#e8efff",
   },
   fieldLabel: {
     color: "#dce9ff",
@@ -846,25 +804,14 @@ const styles = {
   },
   toggleRow: { display: "flex", flexWrap: "wrap", gap: "8px" },
   toggleButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontWeight: 600,
+    ...R79_BTN_CHIP,
     padding: "7px 14px",
   },
-  toggleButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
-  },
+  toggleButtonActive: R79_BTN_ACTIVE,
   resultsPanel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
-    borderRadius: "12px",
+    ...R79_INNER_PANEL,
     marginBottom: "12px",
-    padding: "14px",
+    padding: "12px",
   },
   resultsHeader: {
     alignItems: "center",
@@ -921,8 +868,8 @@ const styles = {
     whiteSpace: "pre-wrap",
   },
   requestPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
@@ -939,12 +886,7 @@ const styles = {
     resize: "vertical",
   },
   primaryButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    border: "1px solid #77a0ff",
-    borderRadius: "999px",
-    color: "#ffffff",
-    cursor: "pointer",
-    fontWeight: 700,
+    ...R79_BTN_ACTIVE,
     justifySelf: "start",
     padding: "8px 16px",
   },
@@ -963,8 +905,8 @@ const styles = {
     margin: 0,
   },
   adminPanel: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
   },

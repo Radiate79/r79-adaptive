@@ -1,15 +1,15 @@
 import { THE_NORTH_STAR, THE_PROMISE } from "../data/promiseMeta.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 export default function ThePromise() {
   return (
-    <section style={styles.shell}>
-      <header style={styles.header}>
+    <section className="r79-page r79-page--narrow">
+      <R79PageHeader
+        title={THE_PROMISE.title}
+        subtitle="The principles that guide R79 forever — a permanent, read-only record."
+      >
         <p style={styles.eyebrow}>{THE_PROMISE.eyebrow}</p>
-        <h2 style={styles.title}>{THE_PROMISE.title}</h2>
-        <p style={styles.subtitle}>
-          The principles that guide R79 forever — a permanent, read-only record.
-        </p>
-      </header>
+      </R79PageHeader>
 
       <article style={styles.promiseCard} aria-label="The Promise">
         <div style={styles.principlesBlock}>
@@ -95,11 +95,11 @@ const styles = {
   shell: {
     background: [
       "radial-gradient(ellipse at 50% -10%, rgba(45, 85, 160, 0.35), transparent 55%)",
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
+      "radial-gradient(circle at top, rgba(34, 211, 238, 0.1), rgba(8, 11, 18, 0.98))",
     ].join(", "),
-    border: "1px solid rgba(122, 150, 220, 0.35)",
+    border: "1px solid rgba(34, 211, 238, 0.2)",
     borderRadius: "16px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
+    boxShadow: "0 10px 36px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(139, 92, 246, 0.08), 0 0 28px rgba(34, 211, 238, 0.06)",
     color: "#f3f6ff",
     fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
     margin: "0 auto",

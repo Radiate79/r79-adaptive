@@ -28,6 +28,12 @@ import {
 } from "../utils/gameData.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import {
+  R79_BTN_ACTIVE,
+  R79_BTN_CHIP,
+  R79_SECTION_TITLE,
+} from "../styles/r79Theme.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 function ConfidenceMeter({ value }) {
   return (
@@ -239,24 +245,22 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
   };
 
   return (
-    <section style={styles.shell}>
-      <header style={styles.header}>
-        <span style={styles.experimentalBadge}>🧪 Experimental</span>
-        <h2 style={styles.title}>🧠 AI Race Engineer</h2>
-        <p style={styles.subtitle}>
-          AI-assisted race recommendations using R79 car, track and historical
-          ranking data.
-        </p>
+    <section className="r79-page r79-page--wide">
+      <R79PageHeader
+        title="AI Race Engineer"
+        subtitle="AI-assisted race recommendations using R79 car, track and historical ranking data."
+      >
+        <span style={styles.experimentalBadge}>Experimental</span>
         <p style={styles.personalisationLine}>
           {analysis.personalisation?.label ?? PERSONALISATION_STATUS.label}
         </p>
         {!isGameDataReady(gameVersion) ? (
-          <p style={styles.gameNotice}>
+          <p className="r79-notice">
             {game.shortLabel} data is not fully available yet. GT8 architecture is
             ready — populate <code>src/data/gt8/</code> for full recommendations.
           </p>
         ) : null}
-      </header>
+      </R79PageHeader>
 
       <TrackSurfaceWarning
         warning={analysis.recommendationStatus?.warning}
@@ -990,22 +994,6 @@ function OutputRow({ icon, label, value, highlight = false }) {
 }
 
 const styles = {
-  shell: {
-    background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
-    borderRadius: "16px",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
-    color: "#f3f6ff",
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
-    margin: "0 auto",
-    maxWidth: "980px",
-    padding: "20px",
-  },
-  header: {
-    marginBottom: "16px",
-    textAlign: "center",
-  },
   experimentalBadge: {
     background: "rgba(56, 44, 18, 0.55)",
     border: "1px solid rgba(220, 180, 90, 0.4)",
@@ -1018,16 +1006,6 @@ const styles = {
     marginBottom: "10px",
     padding: "4px 12px",
     textTransform: "uppercase",
-  },
-  title: {
-    fontSize: "1.5rem",
-    margin: "0 0 8px",
-  },
-  subtitle: {
-    color: "rgba(220, 228, 255, 0.85)",
-    fontSize: "0.92rem",
-    lineHeight: 1.45,
-    margin: 0,
   },
   personalisationLine: {
     color: "#9bc0ff",
@@ -1067,7 +1045,7 @@ const styles = {
     margin: 0,
   },
   wheelSetupLink: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",
@@ -1130,7 +1108,7 @@ const styles = {
   },
   reportMetaItem: {
     background: "rgba(12, 18, 31, 0.75)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "999px",
     color: "#b8cdff",
     fontSize: "0.72rem",
@@ -1195,8 +1173,8 @@ const styles = {
     marginBottom: "4px",
   },
   detailSection: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     display: "grid",
     gap: "12px",
@@ -1232,18 +1210,14 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
   },
   inputPanel: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     display: "grid",
     gap: "12px",
     padding: "14px",
   },
-  panelTitle: {
-    color: "#e8efff",
-    fontSize: "1rem",
-    margin: "0 0 10px",
-  },
+  panelTitle: R79_SECTION_TITLE,
   fieldLabel: {
     color: "#dce9ff",
     display: "grid",
@@ -1272,19 +1246,14 @@ const styles = {
     gap: "8px",
   },
   toggleButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
-    cursor: "pointer",
+    ...R79_BTN_CHIP,
     fontSize: "0.82rem",
-    fontWeight: 600,
     padding: "7px 14px",
   },
   toggleButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
+    ...R79_BTN_ACTIVE,
+    fontSize: "0.82rem",
+    padding: "7px 14px",
   },
   settingsGrid: {
     display: "grid",
@@ -1335,7 +1304,7 @@ const styles = {
     padding: "8px 10px",
   },
   styleChipActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     borderColor: "#77a0ff",
     color: "#ffffff",
   },
@@ -1403,8 +1372,8 @@ const styles = {
     lineHeight: 1.5,
   },
   confidenceBlock: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.25)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "10px",
     padding: "12px",
   },
@@ -1461,8 +1430,8 @@ const styles = {
     lineHeight: 1.5,
   },
   summaryCard: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
@@ -1474,15 +1443,15 @@ const styles = {
     margin: "0 0 10px",
   },
   watchCard: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
   },
   engineerNotesCard: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
@@ -1506,7 +1475,7 @@ const styles = {
     fontWeight: 600,
   },
   learningCard: {
-    background: "rgba(9, 14, 24, 0.88)",
+    background: "rgba(6, 10, 20, 0.72)",
     border: "1px solid rgba(123, 153, 219, 0.35)",
     borderRadius: "12px",
     marginBottom: "14px",
@@ -1571,7 +1540,7 @@ const styles = {
     margin: "0 0 10px",
   },
   saveFeedbackButton: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     border: "1px solid #77a0ff",
     borderRadius: "999px",
     color: "#ffffff",
@@ -1581,8 +1550,8 @@ const styles = {
     padding: "9px 18px",
   },
   historyCard: {
-    background: "rgba(9, 14, 24, 0.88)",
-    border: "1px solid rgba(123, 153, 219, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",

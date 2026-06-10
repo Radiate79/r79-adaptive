@@ -8,6 +8,13 @@ import RacePresetControls from "./RacePresetControls.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
+import {
+  R79_BTN_ACTIVE,
+  R79_BTN_CHIP,
+  R79_INNER_PANEL,
+  R79_SECTION_TITLE,
+} from "../styles/r79Theme.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 const TIERS = Object.keys(ALR_TIER_POINTS)
   .map(Number)
@@ -105,21 +112,18 @@ export default function TeamCarShortlistAdvisor() {
   const submissionOrder = shortlist.slice(1);
 
   return (
-    <section style={styles.shell}>
-      <div style={styles.header}>
-        <h2 style={styles.title}>Team Car Shortlist Advisor</h2>
-        <p style={styles.subtitle}>
-          Teams submit a ranked 5-car list. R79 recommends the best submission
-          order using performance, race history, consistency,
-          availability risk, and fallback strength.
-        </p>
+    <section className="r79-page">
+      <R79PageHeader
+        title="Team Car Shortlist Advisor"
+        subtitle="Teams submit a ranked 5-car list. R79 recommends the best submission order using performance, race history, consistency, availability risk, and fallback strength."
+      >
         {!isGameDataReady(gameVersion) ? (
-          <p style={styles.gameNotice}>
+          <p className="r79-notice">
             {game.shortLabel} car data is not available yet. Historical race
             scores still use GT7 until GT8 data is added.
           </p>
         ) : null}
-      </div>
+      </R79PageHeader>
 
       <div style={styles.formPanel}>
         <div style={styles.modeRow}>
@@ -436,44 +440,10 @@ function InsightBlock({ title, text }) {
 }
 
 const styles = {
-  shell: {
-    background:
-      "radial-gradient(circle at top, rgba(30, 63, 120, 0.45), rgba(9, 12, 20, 0.95))",
-    border: "1px solid rgba(122, 150, 220, 0.35)",
-    borderRadius: "16px",
-    color: "#f3f6ff",
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
-    padding: "20px",
-    maxWidth: "900px",
-    margin: "0 auto",
-    boxShadow: "0 16px 32px rgba(0, 0, 0, 0.35)",
-  },
-  header: {
-    marginBottom: "16px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.4rem",
-    letterSpacing: "0.02em",
-  },
-  subtitle: {
-    margin: "6px 0 0",
-    color: "rgba(220, 228, 255, 0.85)",
-    fontSize: "0.95rem",
-    lineHeight: 1.45,
-  },
-  gameNotice: {
-    color: "#ffe6a8",
-    fontSize: "0.88rem",
-    lineHeight: 1.45,
-    margin: "10px 0 0",
-  },
   formPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-    borderRadius: "12px",
-    marginBottom: "14px",
-    padding: "14px",
+    ...R79_INNER_PANEL,
+    marginBottom: "12px",
+    padding: "12px",
   },
   modeRow: {
     display: "flex",
@@ -491,7 +461,7 @@ const styles = {
     padding: "8px 14px",
   },
   modeButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     borderColor: "#77a0ff",
     color: "#ffffff",
   },
@@ -545,31 +515,18 @@ const styles = {
     flexWrap: "wrap",
     gap: "8px",
   },
-  classButton: {
-    background: "rgba(20, 28, 48, 0.9)",
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-    borderRadius: "999px",
-    color: "#d8e3ff",
-    cursor: "pointer",
-    fontWeight: 600,
-    padding: "8px 14px",
-  },
-  classButtonActive: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-    borderColor: "#77a0ff",
-    color: "#ffffff",
-  },
+  classButton: R79_BTN_CHIP,
+  classButtonActive: R79_BTN_ACTIVE,
   summaryPanel: {
-    background: "rgba(12, 18, 31, 0.88)",
-    border: "1px solid rgba(128, 160, 229, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.18)",
     borderRadius: "12px",
     marginBottom: "14px",
     padding: "14px",
   },
   summaryTitle: {
-    margin: "0 0 4px",
-    color: "#e8efff",
-    fontSize: "1rem",
+    ...R79_SECTION_TITLE,
+    margin: "0 0 6px",
   },
   summaryMeta: {
     margin: 0,
@@ -664,8 +621,8 @@ const styles = {
     gap: "12px",
   },
   shortlistCard: {
-    background: "rgba(12, 16, 27, 0.85)",
-    border: "1px solid rgba(140, 166, 224, 0.3)",
+    background: "rgba(6, 10, 20, 0.72)",
+    border: "1px solid rgba(34, 211, 238, 0.16)",
     borderRadius: "12px",
     padding: "14px",
   },
@@ -683,7 +640,7 @@ const styles = {
     gap: "8px",
   },
   rankBadge: {
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
+    background: "linear-gradient(135deg, #22d3ee 0%, #6366f1 55%, #8b5cf6 100%)",
     borderRadius: "999px",
     color: "#ffffff",
     display: "inline-block",

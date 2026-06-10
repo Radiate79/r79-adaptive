@@ -32,7 +32,7 @@ import SettingsHub from "./components/SettingsHub.jsx";
 
 import SplashScreen from "./components/SplashScreen.jsx";
 
-import R79Emblem from "./components/branding/R79Emblem.jsx";
+import R79BrandBar from "./components/branding/R79BrandBar.jsx";
 
 import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
 
@@ -43,6 +43,7 @@ import WheelSettingsHub from "./components/WheelSettingsHub.jsx";
 import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 
 import { hasSeenSplash } from "./utils/splashStorage.js";
+
 
 
 
@@ -226,33 +227,16 @@ function AppShell() {
 
     <div style={styles.app}>
 
-      <div style={styles.brandRow}>
+      <header className="r79-app-header">
+        <R79BrandBar
+          variant="app"
+          showTagline
+          onLogoClick={handleLogoClick}
+        />
+      </header>
 
-        <button
-
-          type="button"
-
-          onClick={handleLogoClick}
-
-          style={styles.logoButton}
-
-          aria-label="R79"
-
-          title="R79"
-
-        >
-
-          <R79Emblem size={40} />
-
-        </button>
-
-      </div>
-
-
-
-      <div style={styles.topBar}>
-
-        <nav style={styles.nav}>
+      <div className="r79-app-top-bar">
+        <nav className="r79-app-nav">
 
           {PAGES.map((item) => {
 
@@ -268,13 +252,7 @@ function AppShell() {
 
                 onClick={() => setPage(item.id)}
 
-                style={{
-
-                  ...styles.navButton,
-
-                  ...(isActive ? styles.navButtonActive : null),
-
-                }}
+                className={isActive ? "r79-nav-pill r79-nav-pill--active" : "r79-nav-pill"}
 
               >
 
@@ -290,11 +268,9 @@ function AppShell() {
 
 
 
-        <div style={styles.gameSelector}>
-
-          <span style={styles.gameSelectorLabel}>Game</span>
-
-          <div style={styles.gameSelectorButtons}>
+        <div className="r79-app-game-selector">
+          <span className="r79-app-game-label">Game</span>
+          <div className="r79-app-game-buttons">
 
             {gameOptions.map((version) => {
 
@@ -312,13 +288,7 @@ function AppShell() {
 
                   onClick={() => setGameVersion(version)}
 
-                  style={{
-
-                    ...styles.gameButton,
-
-                    ...(isActive ? styles.gameButtonActive : null),
-
-                  }}
+                  className={isActive ? "r79-nav-pill r79-nav-pill--active" : "r79-nav-pill"}
 
                 >
 
@@ -390,173 +360,13 @@ const styles = {
 
   app: {
 
-    fontFamily: "Inter, Segoe UI, Roboto, sans-serif",
+    fontFamily: "Inter, Segoe UI, Roboto, system-ui, sans-serif",
 
     margin: "0 auto",
 
     maxWidth: "980px",
 
-    padding: "12px 16px 32px",
-
-  },
-
-  brandRow: {
-
-    alignItems: "center",
-
-    display: "flex",
-
-    marginBottom: "12px",
-
-    position: "sticky",
-
-    top: 0,
-
-    zIndex: 10,
-
-    paddingBottom: "4px",
-
-    background: "rgba(9, 12, 20, 0.92)",
-
-  },
-
-  logoButton: {
-
-    alignItems: "center",
-
-    background: "rgba(12, 18, 31, 0.88)",
-
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-
-    borderRadius: "999px",
-
-    cursor: "pointer",
-
-    display: "inline-flex",
-
-    justifyContent: "center",
-
-    padding: "6px",
-
-  },
-
-  topBar: {
-
-    display: "grid",
-
-    gap: "12px",
-
-    marginBottom: "16px",
-
-  },
-
-  nav: {
-
-    display: "flex",
-
-    flexWrap: "wrap",
-
-    gap: "10px",
-
-  },
-
-  navButton: {
-
-    background: "rgba(20, 28, 48, 0.9)",
-
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-
-    borderRadius: "999px",
-
-    color: "#d8e3ff",
-
-    cursor: "pointer",
-
-    fontWeight: 600,
-
-    padding: "8px 14px",
-
-  },
-
-  navButtonActive: {
-
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-
-    borderColor: "#77a0ff",
-
-    color: "#ffffff",
-
-  },
-
-  gameSelector: {
-
-    alignItems: "center",
-
-    background: "rgba(12, 18, 31, 0.88)",
-
-    border: "1px solid rgba(128, 160, 229, 0.3)",
-
-    borderRadius: "12px",
-
-    display: "flex",
-
-    flexWrap: "wrap",
-
-    gap: "10px",
-
-    padding: "10px 12px",
-
-  },
-
-  gameSelectorLabel: {
-
-    color: "#b8cdff",
-
-    fontSize: "0.82rem",
-
-    fontWeight: 700,
-
-    letterSpacing: "0.04em",
-
-    textTransform: "uppercase",
-
-  },
-
-  gameSelectorButtons: {
-
-    display: "flex",
-
-    flexWrap: "wrap",
-
-    gap: "8px",
-
-  },
-
-  gameButton: {
-
-    background: "rgba(20, 28, 48, 0.9)",
-
-    border: "1px solid rgba(141, 169, 233, 0.35)",
-
-    borderRadius: "999px",
-
-    color: "#d8e3ff",
-
-    cursor: "pointer",
-
-    fontWeight: 600,
-
-    padding: "7px 14px",
-
-  },
-
-  gameButtonActive: {
-
-    background: "linear-gradient(90deg, #2b56c8, #3e79ff)",
-
-    borderColor: "#77a0ff",
-
-    color: "#ffffff",
+    padding: "2px 14px 18px",
 
   },
 

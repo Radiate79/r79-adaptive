@@ -10,6 +10,7 @@ import {
   loadDataReportsNewestFirst,
   updateDataReportStatus,
 } from "../utils/dataReportsStorage.js";
+import R79PageHeader from "./branding/R79PageHeader.jsx";
 /**
  * @param {{ onBack?: () => void, breadcrumb?: React.ReactNode }} props
  */
@@ -55,27 +56,23 @@ export default function DataReports({ onBack, breadcrumb = null }) {
   };
 
   return (
-    <section style={styles.shell}>
+    <section className="r79-page r79-page--wide">
       {breadcrumb}
 
-      <div style={styles.header}>
-        <div>
-          <h2 style={styles.title}>Data Reports</h2>
-          <p style={styles.subtitle}>
-            Review user and Pathfinder reports of incorrect car, track, class,
-            scoring or recommendation data.
-          </p>
-          <p style={styles.tagline}>{DATA_CORRECTION_TAGLINE}</p>
-        </div>
+      <R79PageHeader
+        title="Data Reports"
+        subtitle="Review user and Pathfinder reports of incorrect car, track, class, scoring or recommendation data."
+      >
+        <p style={styles.tagline}>{DATA_CORRECTION_TAGLINE}</p>
         <div style={styles.headerActions}>
-          <button type="button" onClick={refresh} style={styles.secondaryButton}>
+          <button type="button" onClick={refresh} className="r79-btn-secondary">
             Refresh
           </button>
-          <button type="button" onClick={handleExport} style={styles.primaryButton}>
+          <button type="button" onClick={handleExport} className="r79-btn-primary">
             Export JSON
           </button>
         </div>
-      </div>
+      </R79PageHeader>
 
       {exportMessage ? <p style={styles.exportMessage}>{exportMessage}</p> : null}
 
