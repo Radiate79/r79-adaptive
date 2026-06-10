@@ -20,10 +20,10 @@ export function useRacePresetSettings(
     getRaceFormatDefaultLaps(initialPresetId),
   );
   const [fuelMultiplier, setFuelMultiplierState] = useState(
-    initialValues?.fuelMultiplier ?? 1,
+    initialValues?.fuelMultiplier ?? 0,
   );
   const [tyreMultiplier, setTyreMultiplierState] = useState(
-    initialValues?.tyreMultiplier ?? 1,
+    initialValues?.tyreMultiplier ?? 0,
   );
 
   const selectPreset = useCallback((id) => {
@@ -69,8 +69,8 @@ export function useRacePresetSettings(
   const reset = useCallback(() => {
     setPresetId(RACE_CONDITION_PRESET_CUSTOM_ID);
     setLapCountState(getRaceFormatDefaultLaps(RACE_CONDITION_PRESET_CUSTOM_ID));
-    setFuelMultiplierState(1);
-    setTyreMultiplierState(1);
+    setFuelMultiplierState(0);
+    setTyreMultiplierState(0);
   }, []);
 
   const resetToPreset = useCallback((id = "full_race") => {
@@ -81,8 +81,8 @@ export function useRacePresetSettings(
       setFuelMultiplierState(values.fuelMultiplier);
       setTyreMultiplierState(values.tyreMultiplier);
     } else {
-      setFuelMultiplierState(1);
-      setTyreMultiplierState(1);
+      setFuelMultiplierState(0);
+      setTyreMultiplierState(0);
     }
     setLapCountState(getRaceFormatDefaultLaps(resolvedId));
   }, []);

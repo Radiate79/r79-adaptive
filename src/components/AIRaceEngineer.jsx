@@ -27,7 +27,6 @@ import {
   isGameDataReady,
 } from "../utils/gameData.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
-import RacePresetControls from "./RacePresetControls.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
 
 function ConfidenceMeter({ value }) {
@@ -72,17 +71,26 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
   );
 
   const [trackId, setTrackId] = useState("");
+  const [lapInput, setLapInput] = useState("");
   const {
-    presetId,
-    lapCount,
     fuelMultiplier,
     tyreMultiplier,
-    selectPreset,
-    setLapCount,
     setFuelMultiplier,
     setTyreMultiplier,
     raceSettings,
-  } = useRacePresetSettings("full_race");
+  } = useRacePresetSettings();
+  const effectiveLapCount = useMemo(() => {
+    if (lapInput.trim() === "") {
+      return undefined;
+    }
+
+    const parsed = Number(lapInput);
+    if (!Number.isFinite(parsed)) {
+      return undefined;
+    }
+
+    return Math.max(1, Math.min(999, Math.round(parsed)));
+  }, [lapInput]);
   const [weather, setWeather] = useState("current");
   const [bopOn, setBopOn] = useState(true);
   const [tyresAvailable, setTyresAvailable] = useState(["M", "H", "S"]);
@@ -109,6 +117,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
         gameVersion,
         trackId,
         ...raceSettings,
+        lapCount: effectiveLapCount,
         weather,
         bopOn,
         tyresAvailable,
@@ -120,6 +129,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       gameVersion,
       trackId,
       raceSettings,
+      effectiveLapCount,
       weather,
       bopOn,
       tyresAvailable,
@@ -323,18 +333,54 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               </select>
           </label>
 
-          <RacePresetControls
-            presetId={presetId}
-            onPresetChange={selectPreset}
-            fuelMultiplier={fuelMultiplier}
-            tyreMultiplier={tyreMultiplier}
-            onFuelMultiplierChange={setFuelMultiplier}
-            onTyreMultiplierChange={setTyreMultiplier}
-            distanceMode
-            lapCount={lapCount}
-            onLapCountChange={setLapCount}
-            style={styles.settingsGrid}
-          />
+          <label style={styles.fieldLabel}>
+            Laps
+            <input
+              type="text"
+              inputMode="numeric"
+              value={lapInput}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === "" || /^\d{1,3}$/.test(value)) {
+                  setLapInput(value);
+                }
+              }}
+              placeholder="Enter laps"
+              style={styles.select}
+            />
+          </label>
+
+          <label style={styles.fieldLabel}>
+            Tyre wear multiplier
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={tyreMultiplier}
+              onChange={(event) =>
+                setTyreMultiplier(Number(event.target.value))
+              }
+              style={styles.range}
+            />
+            <span style={styles.rangeValue}>x{tyreMultiplier}</span>
+          </label>
+
+          <label style={styles.fieldLabel}>
+            Fuel wear multiplier
+            <input
+              type="range"
+              min="0"
+              max="10"
+              step="1"
+              value={fuelMultiplier}
+              onChange={(event) =>
+                setFuelMultiplier(Number(event.target.value))
+              }
+              style={styles.range}
+            />
+            <span style={styles.rangeValue}>x{fuelMultiplier}</span>
+          </label>
 
           <label style={styles.fieldLabel}>
             Weather

@@ -142,9 +142,9 @@ function scoreAttribute(car, track, field, raceSettings, styleWeights, extra = 1
   );
   const raceWeight =
     field === "fuel"
-      ? raceSettings.fuelMultiplier ?? 1
+      ? raceSettings.fuelMultiplier ?? 0
       : field === "tyres"
-        ? raceSettings.tyreMultiplier ?? 1
+        ? raceSettings.tyreMultiplier ?? 0
         : 1;
   const styleWeight = styleWeights[field] ?? 1;
   const weighted =
@@ -178,7 +178,7 @@ function pickBestTyre(car, track, tyresAvailable, raceSettings, lengthMods) {
     const wear = TYRE_COMPOUND_WEAR[compound] ?? 1;
     const tyreDemand =
       Number(track.tyres ?? 5) *
-      (raceSettings.tyreMultiplier ?? 1) *
+      (raceSettings.tyreMultiplier ?? 0) *
       lengthMods.tyreWeight *
       wear;
     const carTyre = Number(car.tyres ?? 5);
@@ -377,7 +377,7 @@ function buildTyreStrategy(track, lapCount, compound, raceSettings, lengthMods) 
   const laps = resolveLapCount({ lapCount });
   const wear =
     Number(track.tyres ?? 5) *
-    (raceSettings.tyreMultiplier ?? 1) *
+    (raceSettings.tyreMultiplier ?? 0) *
     lengthMods.tyreWeight *
     (TYRE_COMPOUND_WEAR[compound] ?? 1);
 
@@ -396,7 +396,7 @@ function buildFuelStrategy(track, lapCount, raceSettings, lengthMods, styleId) {
   const laps = resolveLapCount({ lapCount });
   const demand =
     Number(track.fuel ?? 5) *
-    (raceSettings.fuelMultiplier ?? 1) *
+    (raceSettings.fuelMultiplier ?? 0) *
     lengthMods.fuelWeight;
 
   if (styleId === "fuelSaver" || demand >= 7.5) {
@@ -450,7 +450,7 @@ function buildPitWindow(lapCount, track, raceSettings, lengthMods) {
   const laps = resolveLapCount({ lapCount });
   const tyreStress =
     Number(track.tyres ?? 5) *
-    (raceSettings.tyreMultiplier ?? 1) *
+    (raceSettings.tyreMultiplier ?? 0) *
     lengthMods.tyreWeight;
 
   if (laps <= 12) {
@@ -573,8 +573,8 @@ export function analyzeAIRaceEngineer(input) {
   const recommendationStatus = getTrackRecommendationStatus(track, "Gr.3");
 
   const raceSettings = {
-    fuelMultiplier: input.fuelMultiplier ?? 1,
-    tyreMultiplier: input.tyreMultiplier ?? 1,
+    fuelMultiplier: input.fuelMultiplier ?? 0,
+    tyreMultiplier: input.tyreMultiplier ?? 0,
   };
   const lapCount = resolveLapCount(input);
   const raceFormatId = input.raceFormatId ?? "custom";

@@ -109,9 +109,9 @@ function getWeightedAttributeRating(car, track, field, raceSettings, extraWeight
     totalDemand > 0 ? (demands[field] ?? 0) / totalDemand : 1 / 6;
   const raceWeight =
     field === "fuel"
-      ? raceSettings.fuelMultiplier ?? 1
+      ? raceSettings.fuelMultiplier ?? 0
       : field === "tyres"
-        ? raceSettings.tyreMultiplier ?? 1
+        ? raceSettings.tyreMultiplier ?? 0
         : 1;
 
   const weighted = carValue * (0.35 + trackWeightShare * 3.5) * raceWeight * extraWeight;
@@ -165,12 +165,12 @@ function buildStrategyNotes(track, raceSettings, tyreCompound, lapCount) {
   const compoundWear = getCompoundTyreModifier(tyreCompound);
   const effectiveTyreDemand =
     Number(track.tyres ?? 5) *
-    (raceSettings.tyreMultiplier ?? 1) *
+    (raceSettings.tyreMultiplier ?? 0) *
     lengthMods.tyreWeight *
     compoundWear;
   const effectiveFuelDemand =
     Number(track.fuel ?? 5) *
-    (raceSettings.fuelMultiplier ?? 1) *
+    (raceSettings.fuelMultiplier ?? 0) *
     lengthMods.fuelWeight;
 
   if (laps <= 12) {
@@ -273,8 +273,8 @@ function buildTrackAnalysis(track, raceSettings) {
     drivetrainRankings,
     keyDemands,
     raceSettings: {
-      fuelMultiplier: raceSettings.fuelMultiplier ?? 1,
-      tyreMultiplier: raceSettings.tyreMultiplier ?? 1,
+      fuelMultiplier: raceSettings.fuelMultiplier ?? 0,
+      tyreMultiplier: raceSettings.tyreMultiplier ?? 0,
     },
   };
 }
@@ -300,8 +300,8 @@ export function analyzeTodaysRace(input) {
   }
 
   const raceSettings = {
-    fuelMultiplier: input.fuelMultiplier ?? 1,
-    tyreMultiplier: input.tyreMultiplier ?? 1,
+    fuelMultiplier: input.fuelMultiplier ?? 0,
+    tyreMultiplier: input.tyreMultiplier ?? 0,
   };
   const lapCount = resolveLapCount(input);
   const raceFormatId = input.raceFormatId ?? "custom";

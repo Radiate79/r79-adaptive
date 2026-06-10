@@ -68,7 +68,7 @@ export default function RacePresetControls({
           Tyre wear multiplier
           <input
             type="range"
-            min="1"
+            min="0"
             max="10"
             step="1"
             value={tyreMultiplier}
@@ -84,7 +84,7 @@ export default function RacePresetControls({
           Fuel wear multiplier
           <input
             type="range"
-            min="1"
+            min="0"
             max="10"
             step="1"
             value={fuelMultiplier}

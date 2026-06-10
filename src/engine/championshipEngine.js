@@ -42,9 +42,9 @@ const ATTRIBUTE_REASON_MAP = {
 function normalizeMultiplier(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
-    return 1;
+    return 0;
   }
-  return Math.min(10, Math.max(1, numeric));
+  return Math.min(10, Math.max(0, numeric));
 }
 
 function getScoreWeights(raceSettings = {}) {

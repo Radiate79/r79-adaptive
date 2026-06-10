@@ -224,6 +224,16 @@ export default function WheelSettingsHub({
     window.setTimeout(() => setExportMessage(""), 3000);
   };
 
+  const resetWheelSettings = () => {
+    setFilterGame(contextGameVersion);
+    setWheelBase("thrustmaster_t598");
+    setCarId("");
+    setTrackId("");
+    setTyreCompound("M");
+    setBopOn(true);
+    setSearchQuery("");
+  };
+
   const statusCounts = useMemo(() => {
     const counts = Object.fromEntries(
       WHEEL_SETUP_REQUEST_STATUSES.map((status) => [status, 0]),
@@ -243,8 +253,29 @@ export default function WheelSettingsHub({
         </p>
       </div>
 
+      <details style={styles.infoDetails}>
+        <summary style={styles.infoSummary}>
+          Where does the wheel data come from?
+        </summary>
+        <p style={styles.infoText}>
+          R79 wheel profiles are built from GT7 testing, league racing
+          experience, community feedback and continuous refinement. Settings are
+          designed as strong starting points and may be adjusted to suit each
+          driver&apos;s style, equipment and car choice.
+        </p>
+      </details>
+
       <div style={styles.filtersPanel}>
-        <h3 style={styles.panelTitle}>Filters</h3>
+        <div style={styles.filtersHeader}>
+          <h3 style={styles.panelTitle}>Filters</h3>
+          <button
+            type="button"
+            onClick={resetWheelSettings}
+            style={styles.resetButton}
+          >
+            Reset
+          </button>
+        </div>
         <label style={styles.searchField}>
           Search setups, cars, or tracks
           <input
@@ -701,12 +732,49 @@ const styles = {
     fontSize: "0.95rem",
     lineHeight: 1.45,
   },
+  infoDetails: {
+    background: "rgba(12, 18, 31, 0.88)",
+    border: "1px solid rgba(128, 160, 229, 0.25)",
+    borderRadius: "12px",
+    marginBottom: "12px",
+    padding: "10px 12px",
+  },
+  infoSummary: {
+    color: "#9bc0ff",
+    cursor: "pointer",
+    fontSize: "0.86rem",
+    fontWeight: 600,
+  },
+  infoText: {
+    color: "rgba(205, 217, 255, 0.88)",
+    fontSize: "0.84rem",
+    lineHeight: 1.45,
+    margin: "8px 0 0",
+  },
   filtersPanel: {
     background: "rgba(12, 18, 31, 0.88)",
     border: "1px solid rgba(128, 160, 229, 0.3)",
     borderRadius: "12px",
     marginBottom: "12px",
     padding: "14px",
+  },
+  filtersHeader: {
+    alignItems: "center",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    justifyContent: "space-between",
+    marginBottom: "10px",
+  },
+  resetButton: {
+    background: "rgba(20, 28, 48, 0.9)",
+    border: "1px solid rgba(141, 169, 233, 0.35)",
+    borderRadius: "10px",
+    color: "#d8e3ff",
+    cursor: "pointer",
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    padding: "8px 14px",
   },
   searchField: {
     color: "#dce9ff",
@@ -746,7 +814,7 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
   },
   panelTitle: {
-    margin: "0 0 10px",
+    margin: 0,
     fontSize: "1rem",
     color: "#e8efff",
   },

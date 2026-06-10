@@ -396,13 +396,27 @@ const styles = {
 
     maxWidth: "980px",
 
-    padding: "20px 16px 32px",
+    padding: "12px 16px 32px",
 
   },
 
   brandRow: {
 
+    alignItems: "center",
+
+    display: "flex",
+
     marginBottom: "12px",
+
+    position: "sticky",
+
+    top: 0,
+
+    zIndex: 10,
+
+    paddingBottom: "4px",
+
+    background: "rgba(9, 12, 20, 0.92)",
 
   },
 

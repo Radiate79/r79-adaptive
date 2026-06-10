@@ -50,7 +50,7 @@ export default function ChampionshipAdvisor() {
     setFuelMultiplier,
     setTyreMultiplier,
     resetToPreset,
-  } = useRacePresetSettings("full_race");
+  } = useRacePresetSettings();
   const selectedTracks = useMemo(
     () => allTracks.filter((track) => selectedTrackIds.includes(track.id)),
     [allTracks, selectedTrackIds],
@@ -159,7 +159,9 @@ export default function ChampionshipAdvisor() {
       carClass,
       raceSettings,
       gameVersion,
-    ).slice(0, 5);
+    )
+      .sort((a, b) => Number(b.score) - Number(a.score))
+      .slice(0, 5);
   }, [selectedTrackIds, carClass, raceSettings, gameVersion]);
 
   const recommendationsWithTrackAnalysis = useMemo(() => {
@@ -242,7 +244,7 @@ export default function ChampionshipAdvisor() {
     setSelectedTrackIds([]);
     setBannedCarNames([]);
     setCarClass("Gr.3");
-    resetToPreset("full_race");
+    resetToPreset("custom");
   };
 
   return (
@@ -430,6 +432,19 @@ export default function ChampionshipAdvisor() {
 
       <div style={styles.resultsPanel}>
         <h3 style={styles.resultsTitle}>Top 5 Recommendations</h3>
+        <details style={styles.infoDetails}>
+          <summary style={styles.infoSummary}>
+            How are these recommendations chosen?
+          </summary>
+          <p style={styles.infoText}>
+            R79 analyses every eligible car against your selected championship
+            conditions, including selected tracks, BOP, fuel wear, tyre wear and
+            lap count. It combines technical car characteristics with community
+            confidence, championship experience and race suitability to calculate
+            an Overall Score. The five highest scoring cars are recommended as
+            the Top 5.
+          </p>
+        </details>
         {allCarsBanned && selectedTrackIds.length > 0 ? (
           <p style={styles.emptyState}>
             No eligible cars available. Remove at least one banned car.
@@ -829,6 +844,25 @@ const styles = {
     margin: "0 0 10px",
     fontSize: "1rem",
     color: "#e8efff",
+  },
+  infoDetails: {
+    background: "rgba(18, 26, 45, 0.55)",
+    border: "1px solid rgba(113, 143, 209, 0.2)",
+    borderRadius: "8px",
+    marginBottom: "10px",
+    padding: "8px 10px",
+  },
+  infoSummary: {
+    color: "#9bc0ff",
+    cursor: "pointer",
+    fontSize: "0.84rem",
+    fontWeight: 600,
+  },
+  infoText: {
+    color: "rgba(205, 217, 255, 0.88)",
+    fontSize: "0.84rem",
+    lineHeight: 1.45,
+    margin: "8px 0 0",
   },
   emptyState: {
     margin: 0,

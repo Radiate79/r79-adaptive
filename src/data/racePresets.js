@@ -19,8 +19,8 @@ export const RACE_FORMATS = [
   {
     id: RACE_CONDITION_PRESET_CUSTOM_ID,
     label: "Custom",
-    fuelMultiplier: 1,
-    tyreMultiplier: 1,
+    fuelMultiplier: 0,
+    tyreMultiplier: 0,
     defaultLaps: 20,
   },
   {
