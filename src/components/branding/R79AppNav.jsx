@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { GAME_CATALOG } from "../../data/gameVersions.js";
 
 const PRIMARY_NAV = [
-  { id: "todays-race", label: "Today's Race", mobileLabel: "Today" },
-  { id: "ai-engineer", label: "AI Race Engineer", mobileLabel: "AI Engineer" },
-  { id: "wheel-settings", label: "Wheel Settings", mobileLabel: "Wheels" },
-  { id: "advisor", label: "Championship Advisor", mobileLabel: "Champ" },
+  { id: "todays-race", label: "Today's Race" },
+  { id: "ai-engineer", label: "AI Race Engineer" },
+  { id: "wheel-settings", label: "Wheel Settings" },
+  { id: "advisor", label: "Championship Advisor" },
 ];
 
 /**
@@ -71,8 +71,7 @@ export default function R79AppNav({
                 isActive ? "r79-nav-pill r79-nav-pill--active" : "r79-nav-pill"
               }
             >
-              <span className="r79-nav-pill__full">{item.label}</span>
-              <span className="r79-nav-pill__short">{item.mobileLabel}</span>
+              {item.label}
             </button>
           );
         })}

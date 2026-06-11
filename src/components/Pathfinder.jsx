@@ -47,12 +47,7 @@ export default function Pathfinder() {
 
       <article style={styles.invitationCard} aria-label="Pathfinder invitation mockup">
         <div style={styles.invitationHeader}>
-          <R79Emblem
-            size={64}
-            glow="rgba(200, 160, 80, 0.5)"
-            ring="rgba(180, 130, 255, 0.65)"
-            pulse
-          />
+          <R79Emblem variant="badge-lg" pulse />
           <h3 style={styles.invitationTitle}>{PATHFINDER_INVITATION.title}</h3>
         </div>
         <p style={styles.invitationHeadline}>{PATHFINDER_INVITATION.headline}</p>

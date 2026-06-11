@@ -1,7 +1,6 @@
 import {
   BRAND_TAGLINE,
   R79_APP_TAGLINE,
-  R79_LOGO_SIZES,
   SPLASH_COPY,
   formatVersionLabel,
 } from "../data/brandingMeta.js";
@@ -33,7 +32,7 @@ export default function SplashScreen({ onEnter }) {
 
       <div className="r79-splash__panel">
         <div className="r79-splash__emblem">
-          <R79Emblem size={R79_LOGO_SIZES.splashIcon} pulse />
+          <R79Emblem variant="splash" pulse />
         </div>
 
         <div className="r79-splash__wordmark">

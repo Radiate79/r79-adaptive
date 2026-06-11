@@ -1,14 +1,6 @@
-import {
-  R79_APP_TAGLINE,
-  R79_LOGO_SIZES,
-} from "../../data/brandingMeta.js";
+import { R79_APP_TAGLINE } from "../../data/brandingMeta.js";
 import R79Emblem from "./R79Emblem.jsx";
 import R79Wordmark from "./R79Wordmark.jsx";
-
-const EMBLEM_SIZES = {
-  app: R79_LOGO_SIZES.headerIcon,
-  page: R79_LOGO_SIZES.pageIcon,
-};
 
 /**
  * R79 identity bar — icon logo + Radiate79 wordmark.
@@ -23,8 +15,8 @@ export default function R79BrandBar({
   showTagline = false,
   onLogoClick = null,
 }) {
-  const emblemSize = EMBLEM_SIZES[variant] ?? EMBLEM_SIZES.page;
-  const emblem = <R79Emblem size={emblemSize} />;
+  const logoVariant = variant === "app" ? "header" : "compact";
+  const emblem = <R79Emblem variant={logoVariant} />;
   const wordmarkVariant = variant === "app" ? "header" : "compact";
 
   return (

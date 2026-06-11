@@ -90,6 +90,7 @@ export default function TodaysRaceAdvisor() {
     tyreMultiplier,
     setFuelMultiplier,
     setTyreMultiplier,
+    reset,
     raceSettings,
   } = useRacePresetSettings();
   const effectiveLapCount = useMemo(() => {
@@ -150,6 +151,20 @@ export default function TodaysRaceAdvisor() {
       setTrackId("");
     }
   }, [trackId, carClass, selectedTrack]);
+
+  const resetPage = () => {
+    if (!window.confirm("Reset Today's Race inputs to defaults?")) {
+      return;
+    }
+
+    setTrackId("");
+    setCarClass("Gr.3");
+    setBopOn(true);
+    setTyreCompound("M");
+    setLapInput("");
+    setUnavailableCarIds([]);
+    reset();
+  };
 
   return (
     <section className="r79-page r79-page--wide">
@@ -554,11 +569,23 @@ export default function TodaysRaceAdvisor() {
           </div>
         )}
       </div>
+
+      <div style={styles.resetRow}>
+        <button type="button" onClick={resetPage} className="r79-btn-secondary">
+          Reset
+        </button>
+      </div>
     </section>
   );
 }
 
 const styles = {
+  resetRow: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "4px",
+    paddingTop: "8px",
+  },
   dashboardGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",

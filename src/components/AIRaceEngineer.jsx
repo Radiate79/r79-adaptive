@@ -7,7 +7,6 @@ import {
   DRIVER_STYLE_OPTIONS,
   ENGINEER_NOTES,
   TYRE_COMPOUND_OPTIONS,
-  WEATHER_OPTIONS,
 } from "../engine/aiRaceEngineerEngine.js";
 import {
   addRaceFeedbackEntry,
@@ -83,6 +82,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
     tyreMultiplier,
     setFuelMultiplier,
     setTyreMultiplier,
+    reset,
     raceSettings,
   } = useRacePresetSettings();
   const effectiveLapCount = useMemo(() => {
@@ -97,7 +97,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
 
     return Math.max(1, Math.min(999, Math.round(parsed)));
   }, [lapInput]);
-  const [weather, setWeather] = useState("current");
   const [bopOn, setBopOn] = useState(true);
   const [tyresAvailable, setTyresAvailable] = useState(["M", "H", "S"]);
   const [availableCarIds, setAvailableCarIds] = useState([]);
@@ -124,7 +123,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
         trackId,
         ...raceSettings,
         lapCount: effectiveLapCount,
-        weather,
         bopOn,
         tyresAvailable,
         availableCarIds,
@@ -136,7 +134,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       trackId,
       raceSettings,
       effectiveLapCount,
-      weather,
       bopOn,
       tyresAvailable,
       availableCarIds,
@@ -163,6 +160,20 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
 
   const selectedTrack =
     allTracks.find((track) => track.id === trackId) ?? null;
+
+  const resetPage = () => {
+    if (!window.confirm("Reset AI Race Engineer inputs to defaults?")) {
+      return;
+    }
+
+    setTrackId("");
+    setLapInput("");
+    setBopOn(true);
+    setTyresAvailable(["M", "H", "S"]);
+    setAvailableCarIds([]);
+    setDriverStyle("balanced");
+    reset();
+  };
 
   useEffect(() => {
     if (!trackId) {
@@ -221,7 +232,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
         recommendedCarName: analysis.recommendedCar.name,
         confidenceScore: analysis.confidenceScore,
         gameVersion,
-        driverStyle: analysis.raceContext.driverStyle,
+        driverStyle: analysis.raceContext?.driverStyle ?? "",
       },
       finishedPosition,
       fastestLap,
@@ -329,7 +340,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                 style={styles.select}
               >
                 <option value="">Select a track…</option>
-                {selectableTracks.map((track) => (
+                {(selectableTracks ?? []).map((track) => (
                   <option key={track.id} value={track.id}>
                     {getTrackDisplayName(track)}
                   </option>
@@ -384,21 +395,6 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               style={styles.range}
             />
             <span style={styles.rangeValue}>x{fuelMultiplier}</span>
-          </label>
-
-          <label style={styles.fieldLabel}>
-            Weather
-              <select
-                value={weather}
-                onChange={(event) => setWeather(event.target.value)}
-                style={styles.select}
-              >
-                {WEATHER_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
           </label>
 
           <label style={styles.fieldLabel}>
@@ -477,7 +473,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
               Select cars you can use. Leave empty to consider the full database.
             </p>
             <div style={styles.carPicker}>
-              {cars.map((car) => {
+              {(cars ?? []).map((car) => {
                 const isActive = availableCarIds.includes(car.id);
                 return (
                   <button
@@ -520,10 +516,10 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                   Track: {getTrackDisplayName(analysis.track)}
                 </span>
                 <span style={styles.reportMetaItem}>
-                  Distance: {analysis.raceContext.raceDistanceLabel}
+                  Distance: {analysis.raceContext?.raceDistanceLabel ?? "—"}
                 </span>
                 <span style={styles.reportMetaItem}>
-                  Driving Style: {analysis.raceContext.driverStyle}
+                  Driving Style: {analysis.raceContext?.driverStyle ?? "—"}
                 </span>
                 <span style={styles.reportMetaConfidence}>
                   Confidence: {analysis.confidenceScore}%
@@ -692,6 +688,12 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       )}
 
       <RaceFeedbackHistory entries={feedbackEntries} />
+
+      <div style={styles.resetRow}>
+        <button type="button" onClick={resetPage} className="r79-btn-secondary">
+          Reset
+        </button>
+      </div>
 
       <footer style={styles.footer}>
         {AI_ENGINEER_FOOTER_LINES.map((line, index) => (
@@ -1052,6 +1054,12 @@ const styles = {
     cursor: "pointer",
     fontWeight: 700,
     padding: "8px 14px",
+  },
+  resetRow: {
+    display: "flex",
+    justifyContent: "center",
+    marginTop: "4px",
+    paddingTop: "8px",
   },
   dashboardGrid: {
     display: "grid",

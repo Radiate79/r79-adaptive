@@ -245,10 +245,6 @@ td:has(> select) {
   gap: 8px;
 }
 
-.r79-nav-pill__short {
-  display: none;
-}
-
 .r79-nav-more {
   position: relative;
 }
@@ -372,28 +368,66 @@ td:has(> select) {
 .r79-brand-bar__logo,
 .r79-brand-bar__logo-btn {
   align-items: center;
-  background: rgba(4, 8, 16, 0.9);
-  border: 1px solid rgba(34, 211, 238, 0.38);
-  border-radius: 999px;
-  box-shadow:
-    0 0 22px rgba(34, 211, 238, 0.22),
-    0 0 36px rgba(139, 92, 246, 0.12);
+  background: transparent;
+  border: none;
   display: inline-flex;
   flex-shrink: 0;
   justify-content: center;
-  padding: 3px;
+  line-height: 0;
+  padding: 0;
 }
 
 .r79-brand-bar__logo-btn {
   cursor: pointer;
   font: inherit;
-  transition: box-shadow 0.2s ease;
 }
 
-.r79-brand-bar__logo-btn:hover {
-  box-shadow:
-    0 0 26px rgba(34, 211, 238, 0.3),
-    0 0 40px rgba(139, 92, 246, 0.18);
+/* R79 icon logo asset */
+.r79-brand-logo {
+  display: block;
+  flex-shrink: 0;
+  height: auto;
+  object-fit: contain;
+  width: 76px;
+}
+
+.r79-brand-logo--header {
+  width: 76px;
+}
+
+.r79-brand-logo--compact {
+  width: 44px;
+}
+
+.r79-brand-logo--splash {
+  width: min(152px, 72vw);
+}
+
+.r79-brand-logo--badge-sm {
+  width: 44px;
+}
+
+.r79-brand-logo--badge-md {
+  width: 56px;
+}
+
+.r79-brand-logo--badge-lg {
+  width: 72px;
+}
+
+.r79-brand-logo--pulse {
+  animation: r79LogoPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes r79LogoPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.25));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.4));
+  }
 }
 
 .r79-brand-bar__copy {
@@ -716,14 +750,6 @@ td:has(> select) {
     padding: 6px 10px;
   }
 
-  .r79-nav-pill__full {
-    display: none;
-  }
-
-  .r79-nav-pill__short {
-    display: inline;
-  }
-
   .r79-nav-pill {
     font-size: 0.78rem;
     padding: 9px 12px;
@@ -735,6 +761,11 @@ td:has(> select) {
 
   .r79-brand-bar--app .r79-wordmark--header {
     height: 22px;
+  }
+
+  .r79-brand-logo,
+  .r79-brand-logo--header {
+    width: 64px;
   }
 
   .r79-wordmark--hero {
@@ -760,5 +791,9 @@ td:has(> select) {
   .r79-app-nav-shell {
     align-items: center;
     grid-template-columns: 1fr auto;
+  }
+
+  .r79-brand-logo--header {
+    width: 80px;
   }
 }

@@ -108,10 +108,6 @@ export const DRIVER_STYLE_OPTIONS = [
   { id: "smooth", label: "Smooth" },
 ];
 
-export const WEATHER_OPTIONS = [
-  { id: "current", label: "Current (placeholder)" },
-];
-
 export const ENGINEER_NOTES = [
   "Today's recommendation is based on current R79 data and historical analysis.",
   "Review after qualifying if conditions change.",
@@ -543,7 +539,6 @@ function computeConfidence(top, second, historicalPresent) {
  * @property {'sprint' | 'medium' | 'endurance'} [raceLength]
  * @property {number} [tyreMultiplier]
  * @property {number} [fuelMultiplier]
- * @property {string} [weather]
  * @property {boolean} [bopOn]
  * @property {string[]} [tyresAvailable]
  * @property {string[]} [availableCarIds]
@@ -807,7 +802,6 @@ export function analyzeAIRaceEngineer(input) {
       raceFormatId,
       raceDistanceLabel,
       bopOn,
-      weather: input.weather ?? "current",
       driverStyle: styleLabel,
       fuelMultiplier: raceSettings.fuelMultiplier,
       tyreMultiplier: raceSettings.tyreMultiplier,

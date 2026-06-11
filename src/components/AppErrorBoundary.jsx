@@ -1,5 +1,4 @@
 import { Component } from "react";
-import { R79_LOGO_SIZES } from "../data/brandingMeta.js";
 import R79Emblem from "./branding/R79Emblem.jsx";
 
 const FALLBACK_MESSAGE =
@@ -27,7 +26,7 @@ export default class AppErrorBoundary extends Component {
       return (
         <div style={styles.panel}>
           <div style={styles.logo}>
-            <R79Emblem size={R79_LOGO_SIZES.errorIcon} />
+            <R79Emblem variant="compact" />
           </div>
           <p style={styles.message}>{FALLBACK_MESSAGE}</p>
           {this.props.label ? (
