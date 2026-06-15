@@ -78,7 +78,7 @@ export function parseChampionshipPackPath(zipPath) {
 
   const tierPatterns = [baseName, ...parts.slice(0, -1)];
   for (const segment of tierPatterns) {
-    const tierMatch = segment.match(/tier\s*(\d)\s*(blue|white)?/i);
+    const tierMatch = segment.match(/tier\s*(\d{1,2})\s*(blue|white)?/i);
     if (tierMatch) {
       tier = Number(tierMatch[1]);
       if (tierMatch[2]) {

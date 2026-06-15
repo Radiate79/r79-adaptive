@@ -1,4 +1,5 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import { buildRecommendationContext } from "../data/dailyRaceEvidence.js";
 import {
   DEFAULT_DRIVER_PROFILE,
   PERSONALISATION_STATUS,
@@ -313,10 +314,13 @@ function buildEngineerReportSections({
   };
 }
 
-function buildReasoning(car, track, historicalScore, styleId) {
+function buildReasoning(car, track, historicalScore, styleId, recommendationContext) {
   const points = [];
   const rotation = getRotationValue(car);
-  const communityReason = getCommunityConfidenceReason(car);
+  const communityReason = getCommunityConfidenceReason(
+    car,
+    recommendationContext,
+  );
 
   if (communityReason) {
     points.push(communityReason);
@@ -629,6 +633,13 @@ export function analyzeAIRaceEngineer(input) {
     getRecommendationHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
+  const recommendationContext = buildRecommendationContext({
+    trackId: track.id,
+    carClass: "Gr.3",
+    lapCount,
+    fuelMultiplier: raceSettings.fuelMultiplier,
+    tyreMultiplier: raceSettings.tyreMultiplier,
+  });
 
   const ranked = candidateCars.map((car) => {
     const historicalScore = getRecommendationHistoricalScore(
@@ -659,6 +670,7 @@ export function analyzeAIRaceEngineer(input) {
       car,
       historicalScore,
       maxHistorical,
+      recommendationContext,
     );
 
     return {
@@ -676,7 +688,13 @@ export function analyzeAIRaceEngineer(input) {
       recommendedCompound: compound,
       strengthRating: toRating(technicalScore),
       consistencyRating: toRating(consistency),
-      reasoning: buildReasoning(car, track, historicalScore, styleId),
+      reasoning: buildReasoning(
+        car,
+        track,
+        historicalScore,
+        styleId,
+        recommendationContext,
+      ),
     };
   });
 

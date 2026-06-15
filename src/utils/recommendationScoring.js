@@ -2,6 +2,10 @@ import {
   ALR_HISTORICAL_SEASON_FROM,
   ALR_HISTORICAL_SEASON_TO,
 } from "../data/alrChampionshipWeighting.js";
+import {
+  DAILY_RACE_EVIDENCE_REASON,
+  resolveDailyRaceEvidenceBoost,
+} from "../data/dailyRaceEvidence.js";
 import { getALRResultScore } from "../engine/alrPerformanceEngine.js";
 import { isCarEligibleForRecommendations } from "./carClassFilter.js";
 import { getCarsForGame } from "./gameData.js";
@@ -27,14 +31,20 @@ export const RACE_ARCHIVE_PODIUM_POINTS = 4;
 
 /**
  * @param {{ communityConfidence?: number }} car
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
-export function getCommunityConfidence(car) {
+export function getCommunityConfidence(car, recommendationContext = {}) {
   const value = Number(car?.communityConfidence);
-  if (!Number.isFinite(value)) {
-    return DEFAULT_COMMUNITY_CONFIDENCE;
-  }
+  const base = !Number.isFinite(value)
+    ? DEFAULT_COMMUNITY_CONFIDENCE
+    : Math.min(100, Math.max(0, value));
+  const dailyRace = resolveDailyRaceEvidenceBoost(
+    car?.id ?? "",
+    car?.class ?? recommendationContext.carClass ?? "",
+    recommendationContext,
+  );
 
-  return Math.min(100, Math.max(0, value));
+  return Math.min(100, base + dailyRace.confidenceBonus);
 }
 
 /**
@@ -83,21 +93,28 @@ export function passesCompetitiveUseGate(car, trackFitScore) {
 
 /**
  * @param {number} technicalScore
- * @param {{ communityConfidence?: number, recommendationPenalty?: number }} car
+ * @param {{ communityConfidence?: number, recommendationPenalty?: number, id?: string, class?: string }} car
  * @param {number} [historicalScore]
  * @param {number} [maxHistorical]
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
 export function buildRecommendationBreakdown(
   technicalScore,
   car,
   historicalScore = 0,
   maxHistorical = 1,
+  recommendationContext = {},
 ) {
   const trackFit = Number(technicalScore.toFixed(2));
   const technicalFit = Number(
     getAdjustedTechnicalScore(technicalScore, car).toFixed(2),
   );
-  const communityConfidence = getCommunityConfidence(car);
+  const dailyRace = resolveDailyRaceEvidenceBoost(
+    car?.id ?? "",
+    car?.class ?? recommendationContext.carClass ?? "",
+    recommendationContext,
+  );
+  const communityConfidence = getCommunityConfidence(car, recommendationContext);
   const communityModifier = getCommunityModifier(car);
   const historicalModifier = getHistoricalModifier(historicalScore, maxHistorical);
 
@@ -108,11 +125,13 @@ export function buildRecommendationBreakdown(
     communityModifier: Number(communityModifier.toFixed(2)),
     recommendationPenalty: getRecommendationPenalty(car),
     historicalModifier: Number(historicalModifier.toFixed(2)),
+    dailyRaceModifier: Number(dailyRace.scoreModifier.toFixed(2)),
     overallScore: blendRecommendationScore(
       technicalScore,
       car,
       historicalScore,
       maxHistorical,
+      recommendationContext,
     ),
   };
 }
@@ -153,24 +172,32 @@ export function getHistoricalModifier(historicalScore, maxHistorical) {
  * Track suitability is the primary score; community and history are small modifiers.
  *
  * @param {number} technicalScore
- * @param {{ communityConfidence?: number }} car
+ * @param {{ communityConfidence?: number, id?: string, class?: string }} car
  * @param {number} [historicalScore]
  * @param {number} [maxHistorical]
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
 export function blendRecommendationScore(
   technicalScore,
   car,
   historicalScore = 0,
   maxHistorical = 1,
+  recommendationContext = {},
 ) {
   const adjustedTechnical = getAdjustedTechnicalScore(technicalScore, car);
+  const dailyRace = resolveDailyRaceEvidenceBoost(
+    car?.id ?? "",
+    car?.class ?? recommendationContext.carClass ?? "",
+    recommendationContext,
+  );
 
   return Number(
     (
       adjustedTechnical +
       getCommunityModifier(car) +
       getHistoricalModifier(historicalScore, maxHistorical) +
-      getCompetitiveUseModifier(car)
+      getCompetitiveUseModifier(car) +
+      dailyRace.scoreModifier
     ).toFixed(2),
   );
 }
@@ -201,10 +228,24 @@ export function compareRecommendationRanking(a, b) {
 }
 
 /**
- * @param {{ communityConfidence?: number }} car
+ * @param {{ communityConfidence?: number, id?: string, class?: string }} car
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
-export function getCommunityConfidenceReason(car) {
-  if (getCommunityConfidence(car) >= COMMUNITY_CONFIDENCE_REASON_THRESHOLD) {
+export function getCommunityConfidenceReason(
+  car,
+  recommendationContext = {},
+) {
+  const dailyRace = resolveDailyRaceEvidenceBoost(
+    car?.id ?? "",
+    car?.class ?? recommendationContext.carClass ?? "",
+    recommendationContext,
+  );
+
+  if (dailyRace.scoreModifier > 0) {
+    return DAILY_RACE_EVIDENCE_REASON;
+  }
+
+  if (getCommunityConfidence(car, recommendationContext) >= COMMUNITY_CONFIDENCE_REASON_THRESHOLD) {
     return COMMUNITY_CONFIDENCE_REASON;
   }
 
@@ -212,11 +253,19 @@ export function getCommunityConfidenceReason(car) {
 }
 
 /**
- * @param {{ communityConfidence?: number }} car
+ * @param {{ communityConfidence?: number, id?: string, class?: string }} car
  * @param {string[]} reasons
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
-export function appendCommunityConfidenceReason(car, reasons) {
-  const communityReason = getCommunityConfidenceReason(car);
+export function appendCommunityConfidenceReason(
+  car,
+  reasons,
+  recommendationContext = {},
+) {
+  const communityReason = getCommunityConfidenceReason(
+    car,
+    recommendationContext,
+  );
   if (!communityReason) {
     return reasons;
   }

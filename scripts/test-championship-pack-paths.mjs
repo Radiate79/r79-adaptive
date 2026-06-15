@@ -31,6 +31,18 @@ const cases = [
     tier: 6,
     division: undefined,
   },
+  {
+    path: "Season22/Tier7.jpg",
+    season: 22,
+    tier: 7,
+    division: undefined,
+  },
+  {
+    path: "Season22/Tier10.jpg",
+    season: 22,
+    tier: 10,
+    division: undefined,
+  },
 ];
 
 let failed = 0;

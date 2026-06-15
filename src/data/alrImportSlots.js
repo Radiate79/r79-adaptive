@@ -23,6 +23,10 @@ export const ALR_IMPORT_SLOT_DEFINITIONS = [
   { tier: 4, division: "white", label: "Tier 4 White" },
   { tier: 5, label: "Tier 5" },
   { tier: 6, label: "Tier 6" },
+  { tier: 7, label: "Tier 7" },
+  { tier: 8, label: "Tier 8" },
+  { tier: 9, label: "Tier 9" },
+  { tier: 10, label: "Tier 10" },
 ];
 
 /**

@@ -1,10 +1,10 @@
 /** R79 branding — logo assets, copy, footers, and version formatting. */
 
-/** R79 icon logo — place your uploaded logo at `public/assets/r79-logo.png`. */
-export const R79_EMBLEM_SRC = "/assets/r79-logo.png";
+/** R79 icon logo — official Radiate79 Sun emblem. */
+export const R79_EMBLEM_SRC = "/assets/r79-sun-logo.png";
 
-/** Fallback if the uploaded asset is not present yet. */
-export const R79_EMBLEM_FALLBACK_SRC = "/r79-emblem.svg";
+/** Fallback if the PNG fails to load. */
+export const R79_EMBLEM_FALLBACK_SRC = "/assets/r79-sun-logo.svg";
 
 /** Logo 2: Radiate79 wordmark — page headers, welcome panels, large branding. */
 export const R79_WORDMARK_SRC = "/r79-wordmark.svg";

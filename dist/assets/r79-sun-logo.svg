@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Radiate79 sun logo">
+  <defs>
+    <radialGradient id="r79SunCore" cx="50%" cy="46%" r="52%">
+      <stop offset="0%" stop-color="#fff7d6"/>
+      <stop offset="35%" stop-color="#fbbf24"/>
+      <stop offset="72%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </radialGradient>
+    <linearGradient id="r79SunRay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="45%" stop-color="#38bdf8"/>
+      <stop offset="72%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <filter id="r79SunGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#r79SunGlow)">
+    <g fill="url(#r79SunRay)" opacity="0.95">
+      <path d="M100 8 L106 38 L100 32 L94 38 Z"/>
+      <path d="M100 192 L106 162 L100 168 L94 162 Z"/>
+      <path d="M8 100 L38 106 L32 100 L38 94 Z"/>
+      <path d="M192 100 L162 106 L168 100 L162 94 Z"/>
+      <path d="M35 35 L58 58 L52 52 L46 46 Z"/>
+      <path d="M165 35 L142 58 L148 52 L154 46 Z"/>
+      <path d="M35 165 L58 142 L52 148 L46 154 Z"/>
+      <path d="M165 165 L142 142 L148 148 L154 154 Z"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(45 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(90 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(135 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(180 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(225 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(270 100 100)"/>
+      <path d="M100 18 L108 46 L100 40 L92 46 Z" transform="rotate(315 100 100)"/>
+    </g>
+    <circle cx="100" cy="100" r="58" fill="none" stroke="url(#r79SunRay)" stroke-width="3" opacity="0.85"/>
+    <circle cx="100" cy="100" r="46" fill="url(#r79SunCore)" stroke="rgba(255,247,214,0.45)" stroke-width="1.5"/>
+    <circle cx="88" cy="88" r="10" fill="rgba(255,255,255,0.35)"/>
+  </g>
+</svg>

@@ -25,9 +25,8 @@ export function extractSeasonAndTier(text) {
     text.match(/\bALR\s+(\d{2})\b/i);
 
   const tierMatch =
-    text.match(/tier\s*[#: ]?\s*(\d)\b/i) ||
-    text.match(/\bT(?:IER)?\s*(\d)\b/i) ||
-    text.match(/\bTIER\s*(\d)\b/i);
+    text.match(/tier\s*[#: ]?\s*(\d{1,2})\b/i) ||
+    text.match(/\bT(?:IER)?\s*(\d{1,2})\b/i);
 
   return {
     season: seasonMatch ? Number(seasonMatch[1]) : null,

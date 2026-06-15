@@ -12,6 +12,10 @@ export const ALR_TIER_POINTS = {
   4: 70,
   5: 60,
   6: 50,
+  7: 45,
+  8: 40,
+  9: 35,
+  10: 30,
 };
 
 /** @type {Record<number, number>} */

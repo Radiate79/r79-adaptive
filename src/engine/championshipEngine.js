@@ -1,4 +1,5 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import { buildRecommendationContext } from "../data/dailyRaceEvidence.js";
 import {
   filterEligibleRecommendationResults,
   filterRecommendationPool,
@@ -608,6 +609,14 @@ export function recommendCarsForChampionship(
     getRecommendationHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
+  const recommendationContext = buildRecommendationContext({
+    carClass,
+    trackId:
+      championshipTracks.length === 1 ? championshipTracks[0]?.id : undefined,
+    fuelMultiplier: raceSettings.fuelMultiplier ?? 0,
+    tyreMultiplier: raceSettings.tyreMultiplier ?? 0,
+    lapCount: raceSettings.lapCount,
+  });
 
   return filterEligibleRecommendationResults(
     candidateCars
@@ -620,12 +629,14 @@ export function recommendCarsForChampionship(
         const reasons = appendCommunityConfidenceReason(
           car,
           generateCarReasons(car, championshipTracks, raceSettings, 3),
+          recommendationContext,
         );
         const scoreBreakdown = buildRecommendationBreakdown(
           technicalScore,
           car,
           historicalScores[index],
           maxHistorical,
+          recommendationContext,
         );
 
         return {

@@ -1,4 +1,5 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import { buildRecommendationContext } from "../data/dailyRaceEvidence.js";
 import { isCarEligibleForRecommendations } from "../utils/carClassFilter.js";
 import {
   getCarsForGame,
@@ -428,6 +429,12 @@ export function recommendTeamCarShortlist(input) {
     ...candidates.map((entry) => entry.metrics.alrHistoricalScore),
     1,
   );
+  const recommendationContext = buildRecommendationContext({
+    carClass,
+    trackId: championshipTracks[0]?.id,
+    fuelMultiplier: input.raceSettings?.fuelMultiplier ?? 0,
+    tyreMultiplier: input.raceSettings?.tyreMultiplier ?? 0,
+  });
 
   candidates.forEach((entry) => {
     entry.metrics.performanceScore = blendRecommendationScore(
@@ -435,6 +442,7 @@ export function recommendTeamCarShortlist(input) {
       entry.car,
       entry.metrics.alrHistoricalScore,
       maxHistorical,
+      recommendationContext,
     );
   });
 
@@ -524,7 +532,7 @@ export function recommendTeamCarShortlist(input) {
       drivetrain: car.drivetrain,
       whyThisPosition: buildWhyThisPosition(car, metrics, slot, slot.rank),
       performanceScore: metrics.performanceScore,
-      communityConfidence: getCommunityConfidence(car),
+      communityConfidence: getCommunityConfidence(car, recommendationContext),
       alrHistoricalScore: metrics.alrHistoricalScore,
       consistencyScore: metrics.consistencyScore,
       drivetrainFitScore: metrics.drivetrainFitScore,

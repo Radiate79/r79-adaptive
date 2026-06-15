@@ -22,7 +22,7 @@ function normalizeCarId(car) {
 }
 
 /**
- * Tier championship weight (1 = 100, 2 = 90, …, 6 = 50).
+ * Tier championship weight (1 = 100, 2 = 90, …, 10 = 30).
  * @param {number} tier
  */
 export function getTierPoints(tier) {

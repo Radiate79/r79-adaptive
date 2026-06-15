@@ -1,4 +1,5 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import { buildRecommendationContext } from "../data/dailyRaceEvidence.js";
 import {
   filterEligibleRecommendationResults,
   pickEligibleRecommendation,
@@ -386,6 +387,13 @@ export function analyzeTodaysRace(input) {
     getRecommendationHistoricalScore(car.id, gameVersion),
   );
   const maxHistorical = Math.max(...historicalScores, 1);
+  const recommendationContext = buildRecommendationContext({
+    trackId: track.id,
+    carClass: requestedClass,
+    lapCount,
+    fuelMultiplier: raceSettings.fuelMultiplier,
+    tyreMultiplier: raceSettings.tyreMultiplier,
+  });
 
   const enriched = baseRecommendations.map((car) => {
     const trackScore = scoreCarForTrack(car, track, raceSettings);
@@ -417,6 +425,7 @@ export function analyzeTodaysRace(input) {
       car,
       historicalScore,
       maxHistorical,
+      recommendationContext,
     );
     const overallScore = scoreBreakdown.overallScore;
     const adjustedTechnicalScore = getAdjustedTechnicalScore(
@@ -453,6 +462,7 @@ export function analyzeTodaysRace(input) {
       reasons: appendCommunityConfidenceReason(
         car,
         buildCarReasons(car, track, raceSettings, historicalScore),
+        recommendationContext,
       ),
       engineReasons: car.reasons ?? [],
       unavailable: unavailable.has(car.id),
