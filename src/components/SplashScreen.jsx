@@ -31,12 +31,14 @@ export default function SplashScreen({ onEnter }) {
       `}</style>
 
       <div className="r79-splash__panel">
-        <div className="r79-splash__emblem">
-          <R79Emblem variant="splash" pulse />
-        </div>
+        <div className="r79-splash__brand">
+          <div className="r79-splash__emblem">
+            <R79Emblem variant="splash" pulse />
+          </div>
 
-        <div className="r79-splash__wordmark">
-          <R79Wordmark variant="hero" />
+          <div className="r79-splash__wordmark">
+            <R79Wordmark variant="hero" />
+          </div>
         </div>
 
         <p className="r79-splash__tagline">{R79_APP_TAGLINE}</p>

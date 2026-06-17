@@ -6,6 +6,7 @@ const PRIMARY_NAV = [
   { id: "ai-engineer", label: "AI Race Engineer" },
   { id: "wheel-settings", label: "Wheel Settings" },
   { id: "advisor", label: "Championship Advisor" },
+  { id: "pitstop-strategy", label: "🏁 Pitstop Strategy" },
 ];
 
 /**

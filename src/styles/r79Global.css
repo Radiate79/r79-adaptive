@@ -230,6 +230,7 @@ td:has(> select) {
 .r79-app-header {
   align-items: center;
   display: flex;
+  justify-content: center;
   padding: 8px 12px 6px;
 }
 
@@ -362,7 +363,9 @@ td:has(> select) {
 }
 
 .r79-brand-bar--app {
-  gap: 12px;
+  align-items: center;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .r79-brand-bar__logo,
@@ -431,10 +434,16 @@ td:has(> select) {
 }
 
 .r79-brand-bar__copy {
+  align-items: center;
   display: grid;
   gap: 2px;
   line-height: 1.1;
   min-width: 0;
+  text-align: center;
+}
+
+.r79-brand-bar--app .r79-brand-bar__copy {
+  width: 100%;
 }
 
 .r79-brand-bar__tagline {
@@ -445,7 +454,9 @@ td:has(> select) {
 }
 
 .r79-brand-bar--app .r79-wordmark--header {
-  height: 28px;
+  height: auto;
+  max-width: 76px;
+  width: 76px;
 }
 
 /* Premium page shell */
@@ -637,20 +648,29 @@ td:has(> select) {
   width: 100%;
 }
 
+.r79-splash__brand {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .r79-splash__emblem {
   display: flex;
   justify-content: center;
-  margin-bottom: 12px;
 }
 
 .r79-splash__wordmark {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  width: 100%;
 }
 
 .r79-splash__wordmark .r79-wordmark--hero {
-  height: 42px;
+  height: auto;
+  max-width: min(152px, 72vw);
+  width: min(152px, 72vw);
 }
 
 .r79-splash__tagline {
@@ -760,7 +780,8 @@ td:has(> select) {
   }
 
   .r79-brand-bar--app .r79-wordmark--header {
-    height: 22px;
+    max-width: 64px;
+    width: 64px;
   }
 
   .r79-brand-logo,
@@ -768,8 +789,9 @@ td:has(> select) {
     width: 64px;
   }
 
-  .r79-wordmark--hero {
-    height: 30px;
+  .r79-splash__wordmark .r79-wordmark--hero {
+    max-width: min(132px, 68vw);
+    width: min(132px, 68vw);
   }
 
   .r79-page {
@@ -791,6 +813,11 @@ td:has(> select) {
   .r79-app-nav-shell {
     align-items: center;
     grid-template-columns: 1fr auto;
+  }
+
+  .r79-brand-bar--app .r79-wordmark--header {
+    max-width: 80px;
+    width: 80px;
   }
 
   .r79-brand-logo--header {

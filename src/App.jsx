@@ -31,6 +31,8 @@ import SettingsHub from "./components/SettingsHub.jsx";
 
 import SplashScreen from "./components/SplashScreen.jsx";
 
+import PitstopStrategy from "./components/PitstopStrategy.jsx";
+
 import R79AppNav from "./components/branding/R79AppNav.jsx";
 import R79BrandBar from "./components/branding/R79BrandBar.jsx";
 
@@ -132,6 +134,8 @@ function AppShell() {
         );
       case "advisor":
         return wrap("Championship Advisor", <ChampionshipAdvisor />);
+      case "pitstop-strategy":
+        return wrap("Pitstop Strategy", <PitstopStrategy />);
       case "shortlist":
         return wrap("Team Car Shortlist", <TeamCarShortlistAdvisor />);
       case "rankings":
