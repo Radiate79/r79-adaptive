@@ -17,6 +17,35 @@ const T598_BASE_VALUES = {
   endStop: "Mid",
 };
 
+/** Gr.1 — higher stability, controlled damping, high-speed confidence. */
+const T598_GR1_STARTER = {
+  ...T598_BASE_VALUES,
+  damper: "35%",
+  inertia: "High",
+  friction: "Mid",
+  speed: "High",
+  brakeBalance: "54% front / 46% rear",
+};
+
+/** Gr.2 — sharp but stable, strong corner entry, balanced rotation. */
+const T598_GR2_STARTER = {
+  ...T598_BASE_VALUES,
+  damper: "35%",
+  inertia: "Mid",
+  friction: "Mid",
+  brakeBalance: "52% front / 48% rear",
+};
+
+/** Gr.4 — smoother, forgiving, lower snappiness, good traction. */
+const T598_GR4_STARTER = {
+  ...T598_BASE_VALUES,
+  damper: "25%",
+  inertia: "Mid",
+  friction: "Low",
+  speed: "Mid",
+  brakeBalance: "51% front / 49% rear",
+};
+
 /**
  * @typedef {Object} WheelSetupRecord
  * @property {string} id
@@ -348,6 +377,153 @@ export const STARTER_WHEEL_SETUPS = [
       mechanicalFriction: 15,
       brakeBalance: "51% front / 49% rear",
       notes: "Brands Hatch GP — balanced road sensitivity for elevation changes.",
+    },
+  },
+  // —— Gr.1 starter T598 profiles ——
+  {
+    id: "starter_t598_gr1_spa_ferrari499p",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "ferrari_499p_23",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      notes:
+        "Gr.1 starter — high-speed stability for Eau Rouge and Kemmel. Refine from testing.",
+    },
+  },
+  {
+    id: "starter_t598_gr1_lemans_toyota_gr010",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "toyota_gr010_hybrid_21",
+    trackId: "le_mans",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      damper: "40%",
+      notes:
+        "Gr.1 starter — controlled damping for Le Mans kinks and long straights.",
+    },
+  },
+  {
+    id: "starter_t598_gr1_monza_porsche963",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "porsche_963_23",
+    trackId: "monza",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      brakeBalance: "53% front / 47% rear",
+      notes: "Gr.1 starter — Monza high-speed confidence with stable FFB.",
+    },
+  },
+  // —— Gr.2 starter T598 profiles ——
+  {
+    id: "starter_t598_gr2_spa_porsche_rsr",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "porsche_911_rsr_gte_17",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      notes:
+        "Gr.2 starter — sharp corner entry with stable traction through Pouhon.",
+    },
+  },
+  {
+    id: "starter_t598_gr2_monza_ferrari488gte",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "ferrari_488_gte_evo_20",
+    trackId: "monza",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      brakeBalance: "51% front / 49% rear",
+      notes: "Gr.2 starter — balanced rotation for Ascari and Parabolica.",
+    },
+  },
+  {
+    id: "starter_t598_gr2_suzuka_bmw_m8gte",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "bmw_m8_gte_18",
+    trackId: "suzuka",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      damper: "30%",
+      notes: "Gr.2 starter — strong braking stability through Spoon and 130R.",
+    },
+  },
+  // —— Gr.4 starter T598 profiles ——
+  {
+    id: "starter_t598_gr4_brands_cayman_gt4",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "porsche_cayman_gt4_clubsport_gr4",
+    trackId: "brands_hatch",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR4_STARTER,
+      notes:
+        "Gr.4 starter — forgiving traction for undulating Brands Hatch sectors.",
+    },
+  },
+  {
+    id: "starter_t598_gr4_sardegna_citroen_gr4",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "gt_by_citroen_gr4",
+    trackId: "sardegna_road_track_b",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR4_STARTER,
+      notes: "Gr.4 starter — smooth inputs for Sardegna B linked corners.",
+    },
+  },
+  {
+    id: "starter_t598_gr4_monza_genesis_g70",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "genesis_g70_gr4",
+    trackId: "monza",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR4_STARTER,
+      friction: "Mid",
+      notes: "Gr.4 starter — lower snappiness for Monza kerb stability.",
     },
   },
 ];

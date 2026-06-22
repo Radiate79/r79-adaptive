@@ -205,6 +205,10 @@ export default function PitstopStrategy() {
                 />
                 <StrategyRow label="Pit Lap" value={strategy.pitLapsLabel} />
                 <StrategyRow label="Tyres" value={strategy.tyreStrategy} />
+                <StrategyRow
+                  label="Pit Lane Loss"
+                  value={strategy.pitLaneLoss ?? "TBC"}
+                />
               </div>
 
               <div style={styles.altPanel}>

@@ -13,6 +13,10 @@ import {
 } from "../engine/wheelSettingsEngine.js";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
+  CAR_CLASS_OPTIONS,
+  DEFAULT_CAR_CLASS,
+} from "../data/carClasses.js";
+import {
   getCarsForGame,
   getSelectableTracksForClass,
   getTrackDisplayName,
@@ -59,6 +63,9 @@ export default function WheelSettingsHub({
   const [filterGame, setFilterGame] = useState(
     prefill?.gameVersion ?? savedPrefs.gameVersion ?? contextGameVersion,
   );
+  const [carClass, setCarClass] = useState(
+    prefill?.carClass ?? savedPrefs.carClass ?? DEFAULT_CAR_CLASS,
+  );
   const [wheelBase, setWheelBase] = useState(
     prefill?.wheelBase ?? savedPrefs.wheelBase ?? "thrustmaster_t598",
   );
@@ -74,6 +81,7 @@ export default function WheelSettingsHub({
   );
 
   const [requestGame, setRequestGame] = useState(filterGame);
+  const [requestCarClass, setRequestCarClass] = useState(carClass);
   const [requestWheelBase, setRequestWheelBase] = useState(wheelBase);
   const [requestCarId, setRequestCarId] = useState(carId);
   const [requestTrackId, setRequestTrackId] = useState(trackId);
@@ -90,13 +98,15 @@ export default function WheelSettingsHub({
 
   const cars = useMemo(
     () =>
-      (getCarsForGame(filterGame) ?? []).filter((car) => car?.class === "Gr.3"),
-    [filterGame],
+      (getCarsForGame(filterGame) ?? []).filter(
+        (car) => car?.class === carClass,
+      ),
+    [filterGame, carClass],
   );
   const allTracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);
   const tracks = useMemo(
-    () => getSelectableTracksForClass(filterGame, "Gr.3"),
-    [filterGame],
+    () => getSelectableTracksForClass(filterGame, carClass),
+    [filterGame, carClass],
   );
   const searchMatches = useMemo(
     () => searchWheelSetups(searchQuery, filterGame) ?? [],
@@ -121,12 +131,13 @@ export default function WheelSettingsHub({
     );
   }, [tracks, searchQuery]);
   const requestCars = useMemo(
-    () => getCarsForGame(requestGame).filter((car) => car.class === "Gr.3"),
-    [requestGame],
+    () =>
+      getCarsForGame(requestGame).filter((car) => car.class === requestCarClass),
+    [requestGame, requestCarClass],
   );
   const requestTracks = useMemo(
-    () => getSelectableTracksForClass(requestGame, "Gr.3"),
-    [requestGame],
+    () => getSelectableTracksForClass(requestGame, requestCarClass),
+    [requestGame, requestCarClass],
   );
 
   useEffect(() => {
@@ -145,10 +156,22 @@ export default function WheelSettingsHub({
   }, [prefill, onPrefillConsumed]);
 
   useEffect(() => {
+    if (carId && !cars.some((car) => car.id === carId)) {
+      setCarId("");
+    }
+  }, [carId, cars]);
+
+  useEffect(() => {
     if (trackId && !tracks.some((track) => track.id === trackId)) {
       setTrackId("");
     }
   }, [trackId, tracks]);
+
+  useEffect(() => {
+    if (requestCarId && !requestCars.some((car) => car.id === requestCarId)) {
+      setRequestCarId("");
+    }
+  }, [requestCarId, requestCars]);
 
   useEffect(() => {
     if (
@@ -162,13 +185,14 @@ export default function WheelSettingsHub({
   useEffect(() => {
     saveWheelSettingsPreferences({
       gameVersion: filterGame,
+      carClass,
       wheelBase,
       carId,
       trackId,
       tyreCompound,
       bopOn,
     });
-  }, [filterGame, wheelBase, carId, trackId, tyreCompound, bopOn]);
+  }, [filterGame, carClass, wheelBase, carId, trackId, tyreCompound, bopOn]);
 
   const lookup = useMemo(
     () =>
@@ -234,6 +258,7 @@ export default function WheelSettingsHub({
 
   const resetWheelSettings = () => {
     setFilterGame(contextGameVersion);
+    setCarClass(DEFAULT_CAR_CLASS);
     setWheelBase("thrustmaster_t598");
     setCarId("");
     setTrackId("");
@@ -241,6 +266,7 @@ export default function WheelSettingsHub({
     setBopOn(true);
     setSearchQuery("");
     setRequestGame(contextGameVersion);
+    setRequestCarClass(DEFAULT_CAR_CLASS);
     setRequestWheelBase("thrustmaster_t598");
     setRequestCarId("");
     setRequestTrackId("");
@@ -367,6 +393,32 @@ export default function WheelSettingsHub({
           </label>
 
           <label style={styles.fieldLabel}>
+            Car Class
+            <div style={styles.toggleRow}>
+              {CAR_CLASS_OPTIONS.map((value) => {
+                const isActive = carClass === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => {
+                      setCarClass(value);
+                      setCarId("");
+                      setTrackId("");
+                    }}
+                    style={{
+                      ...styles.toggleButton,
+                      ...(isActive ? styles.toggleButtonActive : null),
+                    }}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
+            </div>
+          </label>
+
+          <label style={styles.fieldLabel}>
             Wheel Base
               <select
                 value={wheelBase}
@@ -469,7 +521,7 @@ export default function WheelSettingsHub({
         ) : lookup.setup ? (
           <>
             <p style={styles.contextLine}>
-              {GAME_CATALOG[filterGame]?.shortLabel} · {wheelLabel} ·{" "}
+              {GAME_CATALOG[filterGame]?.shortLabel} · {carClass} · {wheelLabel} ·{" "}
               {selectedCar?.name} · {getTrackDisplayName(selectedTrack)} · {tyreCompound} · BOP{" "}
               {bopOn ? "On" : "Off"}
             </p>
@@ -507,6 +559,32 @@ export default function WheelSettingsHub({
                     </option>
                   ))}
                 </select>
+            </label>
+
+            <label style={styles.fieldLabel}>
+              Car Class
+              <div style={styles.toggleRow}>
+                {CAR_CLASS_OPTIONS.map((value) => {
+                  const isActive = requestCarClass === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setRequestCarClass(value);
+                        setRequestCarId("");
+                        setRequestTrackId("");
+                      }}
+                      style={{
+                        ...styles.toggleButton,
+                        ...(isActive ? styles.toggleButtonActive : null),
+                      }}
+                    >
+                      {value}
+                    </button>
+                  );
+                })}
+              </div>
             </label>
 
             <label style={styles.fieldLabel}>

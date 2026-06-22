@@ -1,7 +1,11 @@
 import {
   buildPitstopStrategyContext,
-  resolvePitstopStrategyEvidence,
+  resolvePitstopStrategySignals,
 } from "../data/pitstopStrategyEvidence.js";
+import {
+  getPitLaneCalendarEntry,
+  getPitLaneLossLabel,
+} from "../data/pitLaneLossDatabase.js";
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import {
@@ -43,6 +47,8 @@ export const COMPOUND_LABELS = {
  * @property {string} [alternativeTyreStrategy]
  * @property {string} [confidence]
  * @property {number} [confidenceScore]
+ * @property {string} [pitLaneLoss]
+ * @property {import("../data/pitstopStrategyEvidence.js").PitstopProvenStrategy[]} [provenStrategies]
  * @property {string[]} [notes]
  * @property {Object} [breakdown]
  */
@@ -310,7 +316,15 @@ export function analyzePitstopStrategy(input = {}) {
     fuelMultiplier,
     tyreMultiplier,
   });
-  const evidence = resolvePitstopStrategyEvidence(evidenceContext);
+  const evidence = resolvePitstopStrategySignals(evidenceContext);
+  const pitLaneEntry = getPitLaneCalendarEntry(trackId, {
+    season: 23,
+    carClass: car.class,
+  });
+  const pitLaneLoss = getPitLaneLossLabel(trackId, {
+    season: 23,
+    carClass: car.class,
+  });
 
   let recommendedStops = estimateStopCount(
     wear.combinedStress,
@@ -369,6 +383,22 @@ export function analyzePitstopStrategy(input = {}) {
     notes.push("ALR / community strategy evidence applied as a refinement layer.");
   }
 
+  if (pitLaneEntry?.strategyNotes?.length) {
+    notes.push(...pitLaneEntry.strategyNotes);
+  }
+
+  for (const proven of evidence.provenStrategies ?? []) {
+    notes.push(
+      `${proven.raceLabel}: ${proven.recommendedStops} stop — ${proven.tyreStrategy} (pit lap ${proven.pitLap}). Source: ${proven.source}.`,
+    );
+  }
+
+  const provenConfidence = evidence.provenStrategies?.[0]?.confidence;
+  const displayConfidence =
+    provenConfidence && evidence.provenStrategies?.length
+      ? provenConfidence
+      : confidence.label;
+
   return {
     ready: true,
     recommendedStrategy: formatStopLabel(recommendedStops),
@@ -381,8 +411,10 @@ export function analyzePitstopStrategy(input = {}) {
     alternativeStops: alternative.stops,
     alternativePitLaps: alternative.pitLaps,
     alternativeTyreStrategy: formatCompoundChain(alternative.compounds),
-    confidence: confidence.label,
+    confidence: displayConfidence,
     confidenceScore: confidence.score,
+    pitLaneLoss,
+    provenStrategies: evidence.provenStrategies ?? [],
     notes,
     breakdown: {
       lapCount: wear.laps,
@@ -394,6 +426,7 @@ export function analyzePitstopStrategy(input = {}) {
       trackTyres: track.tyres,
       trackFuel: track.fuel,
       evidenceMatched: evidence.matchedEntryId,
+      pitLaneLossStatus: pitLaneEntry?.status ?? "TBC",
     },
   };
 }

@@ -24,6 +24,7 @@ const PREFERENCES_STORAGE_KEY = "r79-wheel-settings-preferences";
 /**
  * @typedef {Object} WheelSettingsPreferences
  * @property {string} [gameVersion]
+ * @property {string} [carClass]
  * @property {string} [wheelBase]
  * @property {string} [carId]
  * @property {string} [trackId]

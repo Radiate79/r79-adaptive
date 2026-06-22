@@ -1,9 +1,8 @@
 /**
  * Pitstop Strategy evidence — future ALR / community strategy data layer.
  *
- * Populate `PITSTOP_STRATEGY_EVIDENCE` with real race imports to refine pit windows,
- * compound choices and stop counts. The engine applies small adjustments only;
- * tyre/fuel wear and car characteristics remain primary.
+ * Populate `PITSTOP_STRATEGY_EVIDENCE` and `PITSTOP_PROVEN_STRATEGIES` with real
+ * race imports to refine pit windows, compound choices and stop counts.
  */
 
 /**
@@ -23,8 +22,46 @@
  * @property {string} [source] e.g. "ALR Season 22", "Community"
  */
 
+/**
+ * @typedef {Object} PitstopProvenStrategy
+ * @property {string} id
+ * @property {string} trackId
+ * @property {string} [carClass]
+ * @property {string} raceLabel
+ * @property {number} laps
+ * @property {number} recommendedStops
+ * @property {string} startTyre
+ * @property {number} pitLap
+ * @property {string} finishTyre
+ * @property {string} tyreStrategy Display chain e.g. "Racing Hard → Racing Medium"
+ * @property {string} confidence e.g. "Tested", "Community"
+ * @property {string} source
+ * @property {number} [confidenceBonus]
+ * @property {number} [fuelMultiplier]
+ * @property {number} [tyreMultiplier]
+ */
+
 /** @type {PitstopStrategyEvidenceEntry[]} */
 export const PITSTOP_STRATEGY_EVIDENCE = [];
+
+/** Known / proven race strategies — update as ALR rounds are completed. */
+export const PITSTOP_PROVEN_STRATEGIES = [
+  {
+    id: "alr_s23_r1_suzuka_feature",
+    trackId: "suzuka",
+    carClass: "Gr.3",
+    raceLabel: "ALR Season 23 Round 1 Feature",
+    laps: 20,
+    recommendedStops: 1,
+    startTyre: "Racing Hard",
+    pitLap: 11,
+    finishTyre: "Racing Medium",
+    tyreStrategy: "Racing Hard → Racing Medium",
+    confidence: "Tested",
+    source: "Radiate79 test race",
+    confidenceBonus: 14,
+  },
+];
 
 /**
  * @typedef {Object} PitstopStrategyContext
@@ -98,6 +135,85 @@ export function resolvePitstopStrategyEvidence(context = {}) {
     tyreStrategyOverride,
     confidenceBonus,
     matchedEntryId,
+  };
+}
+
+/**
+ * @param {PitstopStrategyContext} context
+ * @returns {PitstopProvenStrategy[]}
+ */
+export function findProvenStrategies(context = {}) {
+  const lapCount = Number(context.lapCount);
+
+  return PITSTOP_PROVEN_STRATEGIES.filter((entry) => {
+    if (context.trackId && entry.trackId !== context.trackId) {
+      return false;
+    }
+
+    if (context.carClass && entry.carClass && entry.carClass !== context.carClass) {
+      return false;
+    }
+
+    if (
+      Number.isFinite(lapCount) &&
+      Math.abs(lapCount - entry.laps) > Math.max(1, Math.round(entry.laps * 0.1))
+    ) {
+      return false;
+    }
+
+    if (
+      context.fuelMultiplier != null &&
+      entry.fuelMultiplier != null &&
+      entry.fuelMultiplier !== context.fuelMultiplier
+    ) {
+      return false;
+    }
+
+    if (
+      context.tyreMultiplier != null &&
+      entry.tyreMultiplier != null &&
+      entry.tyreMultiplier !== context.tyreMultiplier
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+/**
+ * @param {PitstopStrategyContext} context
+ * @returns {{
+ *   pitLapAdjustments: number[],
+ *   stopAdjustment: number,
+ *   tyreStrategyOverride: string | null,
+ *   confidenceBonus: number,
+ *   matchedEntryId: string | null,
+ *   provenStrategies: PitstopProvenStrategy[],
+ * }}
+ */
+export function resolvePitstopStrategySignals(context = {}) {
+  const evidence = resolvePitstopStrategyEvidence(context);
+  const provenStrategies = findProvenStrategies(context);
+
+  if (provenStrategies.length === 0) {
+    return {
+      ...evidence,
+      provenStrategies,
+    };
+  }
+
+  const primary = provenStrategies[0];
+  return {
+    pitLapAdjustments: [primary.pitLap],
+    stopAdjustment: primary.recommendedStops,
+    tyreStrategyOverride: primary.tyreStrategy,
+    confidenceBonus: Math.max(
+      evidence.confidenceBonus,
+      primary.confidenceBonus ?? 12,
+    ),
+    matchedEntryId: primary.id,
+    provenStrategies,
   };
 }
 
