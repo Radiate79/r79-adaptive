@@ -1,4 +1,5 @@
 import { STARTER_SETUP_LABEL } from "./wheelSetupsMeta.js";
+import { cars as gt7Cars } from "./gt7/cars.js";
 
 /** @type {Record<string, string>} */
 const T598_BASE_VALUES = {
@@ -61,7 +62,7 @@ const T598_GR4_STARTER = {
  */
 
 /** @type {WheelSetupRecord[]} */
-export const STARTER_WHEEL_SETUPS = [
+const BASE_STARTER_WHEEL_SETUPS = [
   {
     id: "starter_t598_suzuka_porsche",
     label: STARTER_SETUP_LABEL,
@@ -478,6 +479,115 @@ export const STARTER_WHEEL_SETUPS = [
       notes: "Gr.2 starter — strong braking stability through Spoon and 130R.",
     },
   },
+  {
+    id: "starter_t598_gr1_spa_peugeot9x8",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "peugeot_9x8_22",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      notes: "Gr.1 starter profile — Peugeot 9X8 high-speed stability baseline.",
+    },
+  },
+  {
+    id: "starter_t598_gr1_spa_cadillac_vseries",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "cadillac_vseries_r_23",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      brakeBalance: "53% front / 47% rear",
+      notes: "Gr.1 starter profile — Cadillac V-Series.R stable braking reference.",
+    },
+  },
+  {
+    id: "starter_t598_gr1_suzuka_toyota_ts030",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "toyota_ts030_hybrid_12",
+    trackId: "suzuka",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      damper: "30%",
+      notes: "Gr.1 starter profile — TS030 technical circuit baseline.",
+    },
+  },
+  {
+    id: "starter_t598_gr1_spa_audi_r18",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "audi_r18_16",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR1_STARTER,
+      notes: "Gr.1 starter profile — Audi R18 endurance stability baseline.",
+    },
+  },
+  {
+    id: "starter_t598_gr2_spa_corvette_c8r",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "chevrolet_corvette_c8_r_20",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      notes: "Gr.2 starter profile — Corvette C8.R corner-entry baseline.",
+    },
+  },
+  {
+    id: "starter_t598_gr2_brands_aston_vantage_gte",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "aston_martin_vantage_amr_gte_18",
+    trackId: "brands_hatch",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      brakeBalance: "51% front / 49% rear",
+      notes: "Gr.2 starter profile — Aston Martin Vantage GTE rotation baseline.",
+    },
+  },
+  {
+    id: "starter_t598_gr2_spa_ford_gt_gte",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "ford_gt_gte_17",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...T598_GR2_STARTER,
+      damper: "30%",
+      notes: "Gr.2 starter profile — Ford GT GTE high-speed baseline.",
+    },
+  },
   // —— Gr.4 starter T598 profiles ——
   {
     id: "starter_t598_gr4_brands_cayman_gt4",
@@ -526,4 +636,57 @@ export const STARTER_WHEEL_SETUPS = [
       notes: "Gr.4 starter — lower snappiness for Monza kerb stability.",
     },
   },
+];
+
+const DEFAULT_GR1_TRACK = "spa";
+const DEFAULT_GR2_TRACK = "spa";
+
+/**
+ * @param {string} carId
+ * @param {"Gr.1" | "Gr.2"} carClass
+ * @param {string} [trackId]
+ * @returns {WheelSetupRecord}
+ */
+function createT598ClassStarter(carId, carClass, trackId) {
+  const template = carClass === "Gr.1" ? T598_GR1_STARTER : T598_GR2_STARTER;
+  const resolvedTrack =
+    trackId ?? (carClass === "Gr.1" ? DEFAULT_GR1_TRACK : DEFAULT_GR2_TRACK);
+
+  return {
+    id: `starter_t598_auto_${carId}`,
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId,
+    trackId: resolvedTrack,
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      ...template,
+      notes: `${carClass} starter profile — untested T598 baseline. Refine after track testing.`,
+    },
+  };
+}
+
+const T598_COVERED_CAR_IDS = new Set(
+  BASE_STARTER_WHEEL_SETUPS.filter(
+    (setup) =>
+      setup.gameVersion === "gt7" && setup.wheelBase === "thrustmaster_t598",
+  ).map((setup) => setup.carId),
+);
+
+/** Auto T598 starters for every Gr.1 / Gr.2 car without a manual profile. */
+const AUTO_GR1_GR2_T598_STARTERS = gt7Cars
+  .filter(
+    (car) =>
+      (car.class === "Gr.1" || car.class === "Gr.2") &&
+      !T598_COVERED_CAR_IDS.has(car.id),
+  )
+  .map((car) => createT598ClassStarter(car.id, car.class));
+
+/** @type {WheelSetupRecord[]} */
+export const STARTER_WHEEL_SETUPS = [
+  ...BASE_STARTER_WHEEL_SETUPS,
+  ...AUTO_GR1_GR2_T598_STARTERS,
 ];

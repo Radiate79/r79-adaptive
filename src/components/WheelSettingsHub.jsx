@@ -112,24 +112,8 @@ export default function WheelSettingsHub({
     () => searchWheelSetups(searchQuery, filterGame) ?? [],
     [searchQuery, filterGame],
   );
-  const filteredCars = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) {
-      return cars;
-    }
-
-    return cars.filter((car) => car.name.toLowerCase().includes(query));
-  }, [cars, searchQuery]);
-  const filteredTracks = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) {
-      return tracks;
-    }
-
-    return tracks.filter((track) =>
-      getTrackDisplayName(track).toLowerCase().includes(query),
-    );
-  }, [tracks, searchQuery]);
+  const filteredCars = useMemo(() => cars, [cars]);
+  const filteredTracks = useMemo(() => tracks, [tracks]);
   const requestCars = useMemo(
     () =>
       getCarsForGame(requestGame).filter((car) => car.class === requestCarClass),

@@ -8,7 +8,7 @@ export const WHEEL_SETUP_REQUEST_STATUSES = [
   "Rejected",
 ];
 
-export const STARTER_SETUP_LABEL = "Starter Setup";
+export const STARTER_SETUP_LABEL = "Starter profile";
 
 export const NO_EXACT_SETUP_MESSAGE =
   "No exact wheel setup found yet. Try a similar car/track combination or submit a request.";

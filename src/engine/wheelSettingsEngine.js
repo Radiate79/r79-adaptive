@@ -147,6 +147,51 @@ export function findWheelSetup(filters) {
     };
   }
 
+  const carOnly = STARTER_WHEEL_SETUPS.find(
+    (setup) =>
+      setup.gameVersion === filters.gameVersion &&
+      setup.wheelBase === filters.wheelBase &&
+      setup.carId === filters.carId,
+  );
+
+  if (carOnly) {
+    return {
+      matchType: "carOnly",
+      setup: carOnly,
+      message: "Showing starter profile for this car on a different track.",
+    };
+  }
+
+  const selectedCar = getCarsForGame(filters.gameVersion).find(
+    (car) => car.id === filters.carId,
+  );
+  const carClass = selectedCar?.class;
+
+  if (carClass && filters.wheelBase) {
+    const classStarter = STARTER_WHEEL_SETUPS.find((setup) => {
+      if (
+        setup.gameVersion !== filters.gameVersion ||
+        setup.wheelBase !== filters.wheelBase ||
+        !setup.isStarter
+      ) {
+        return false;
+      }
+
+      const setupCar = getCarsForGame(filters.gameVersion).find(
+        (car) => car.id === setup.carId,
+      );
+      return setupCar?.class === carClass;
+    });
+
+    if (classStarter) {
+      return {
+        matchType: "classStarter",
+        setup: classStarter,
+        message: `Showing ${carClass} starter profile — refine per car after testing.`,
+      };
+    }
+  }
+
   const wheelOnly = STARTER_WHEEL_SETUPS.find(
     (setup) =>
       setup.gameVersion === filters.gameVersion &&
