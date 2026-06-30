@@ -1,9 +1,8 @@
 import { R79_APP_TAGLINE } from "../../data/brandingMeta.js";
 import R79Emblem from "./R79Emblem.jsx";
-import R79Wordmark from "./R79Wordmark.jsx";
 
 /**
- * R79 identity bar — icon logo + Radiate79 wordmark.
+ * R79 identity bar — icon logo and optional tagline.
  *
  * @param {Object} props
  * @param {"app" | "page"} [props.variant]
@@ -17,7 +16,6 @@ export default function R79BrandBar({
 }) {
   const logoVariant = variant === "app" ? "header" : "compact";
   const emblem = <R79Emblem variant={logoVariant} />;
-  const wordmarkVariant = variant === "app" ? "header" : "compact";
 
   return (
     <div className={`r79-brand-bar r79-brand-bar--${variant}`}>
@@ -38,7 +36,6 @@ export default function R79BrandBar({
       )}
 
       <div className="r79-brand-bar__copy">
-        <R79Wordmark variant={wordmarkVariant} />
         {showTagline ? (
           <span className="r79-brand-bar__tagline">{R79_APP_TAGLINE}</span>
         ) : null}
