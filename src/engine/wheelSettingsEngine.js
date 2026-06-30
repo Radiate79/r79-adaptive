@@ -4,8 +4,12 @@ import {
   getWheelBaseOption,
   WHEEL_BASE_OPTIONS,
 } from "../data/wheelBases.js";
-import { STARTER_WHEEL_SETUPS } from "../data/wheelSetups.js";
+import {
+  STARTER_WHEEL_SETUPS,
+  WHEEL_SETUP_POOL,
+} from "../data/wheelSetups.js";
 import { NO_EXACT_SETUP_MESSAGE } from "../data/wheelSetupsMeta.js";
+import { getT598FieldMeta } from "../data/t598FieldHelp.js";
 import { getCarsForGame, getTrackDisplayName, getTracksForGame } from "../utils/gameData.js";
 
 /**
@@ -78,6 +82,25 @@ function getSetupSearchText(setup, gameVersion = setup.gameVersion) {
     .toLowerCase();
 }
 
+/**
+ * @param {WheelSetupFilters} filters
+ * @param {(setup: import("../data/wheelSetups.js").WheelSetupRecord) => boolean} predicate
+ */
+function findInPool(filters, predicate) {
+  return WHEEL_SETUP_POOL.find((setup) => predicate(setup) && matchesSetup(setup, filters));
+}
+
+/**
+ * @param {WheelSetupFilters} filters
+ * @param {(setup: import("../data/wheelSetups.js").WheelSetupRecord) => boolean} predicate
+ * @param {{ exactTyres?: boolean, exactBop?: boolean }} [options]
+ */
+function findSimilarInPool(filters, predicate, options) {
+  return WHEEL_SETUP_POOL.find(
+    (setup) => predicate(setup) && matchesSetup(setup, filters, options),
+  );
+}
+
 /** @returns {import("../data/wheelSetups.js").WheelSetupRecord[]} */
 export function listWheelSetups(gameVersion) {
   const pool = Array.isArray(STARTER_WHEEL_SETUPS) ? STARTER_WHEEL_SETUPS : [];
@@ -110,29 +133,32 @@ export function searchWheelSetups(query, gameVersion) {
  * @param {WheelSetupFilters} filters
  */
 export function findWheelSetup(filters) {
-  const exact = STARTER_WHEEL_SETUPS.find((setup) => matchesSetup(setup, filters));
+  const exact = findInPool(filters, () => true);
 
   if (exact) {
     return {
-      matchType: "exact",
+      matchType: exact.isValidated ? "validated" : "exact",
       setup: exact,
-      message: null,
+      message: exact.isValidated
+        ? null
+        : null,
     };
   }
 
-  const similar = STARTER_WHEEL_SETUPS.find((setup) =>
-    matchesSetup(setup, filters, { exactTyres: false, exactBop: false }),
-  );
+  const similar = findSimilarInPool(filters, () => true, {
+    exactTyres: false,
+    exactBop: false,
+  });
 
   if (similar) {
     return {
-      matchType: "similar",
+      matchType: similar.isValidated ? "validatedSimilar" : "similar",
       setup: similar,
       message: "Showing closest match — tyre compound or BOP may differ.",
     };
   }
 
-  const carTrack = STARTER_WHEEL_SETUPS.find(
+  const carTrack = WHEEL_SETUP_POOL.find(
     (setup) =>
       setup.gameVersion === filters.gameVersion &&
       setup.carId === filters.carId &&
@@ -141,13 +167,13 @@ export function findWheelSetup(filters) {
 
   if (carTrack) {
     return {
-      matchType: "carTrack",
+      matchType: carTrack.isValidated ? "validatedCarTrack" : "carTrack",
       setup: carTrack,
       message: "Showing closest car/track match for a different wheel base.",
     };
   }
 
-  const carOnly = STARTER_WHEEL_SETUPS.find(
+  const carOnly = WHEEL_SETUP_POOL.find(
     (setup) =>
       setup.gameVersion === filters.gameVersion &&
       setup.wheelBase === filters.wheelBase &&
@@ -156,9 +182,11 @@ export function findWheelSetup(filters) {
 
   if (carOnly) {
     return {
-      matchType: "carOnly",
+      matchType: carOnly.isValidated ? "validatedCarOnly" : "carOnly",
       setup: carOnly,
-      message: "Showing starter profile for this car on a different track.",
+      message: carOnly.isValidated
+        ? null
+        : "Showing starter profile for this car on a different track.",
     };
   }
 
@@ -168,11 +196,11 @@ export function findWheelSetup(filters) {
   const carClass = selectedCar?.class;
 
   if (carClass && filters.wheelBase) {
-    const classStarter = STARTER_WHEEL_SETUPS.find((setup) => {
+    const classStarter = WHEEL_SETUP_POOL.find((setup) => {
       if (
         setup.gameVersion !== filters.gameVersion ||
         setup.wheelBase !== filters.wheelBase ||
-        !setup.isStarter
+        (!setup.isStarter && !setup.isValidated)
       ) {
         return false;
       }
@@ -185,14 +213,16 @@ export function findWheelSetup(filters) {
 
     if (classStarter) {
       return {
-        matchType: "classStarter",
+        matchType: classStarter.isValidated ? "validatedClass" : "classStarter",
         setup: classStarter,
-        message: `Showing ${carClass} starter profile — refine per car after testing.`,
+        message: classStarter.isValidated
+          ? null
+          : `Showing ${carClass} starter profile — refine per car after testing.`,
       };
     }
   }
 
-  const wheelOnly = STARTER_WHEEL_SETUPS.find(
+  const wheelOnly = WHEEL_SETUP_POOL.find(
     (setup) =>
       setup.gameVersion === filters.gameVersion &&
       setup.wheelBase === filters.wheelBase,
@@ -200,7 +230,7 @@ export function findWheelSetup(filters) {
 
   if (wheelOnly) {
     return {
-      matchType: "wheelOnly",
+      matchType: wheelOnly.isValidated ? "validatedWheelOnly" : "wheelOnly",
       setup: wheelOnly,
       message: "Showing starter reference for this wheel base only.",
     };
@@ -223,20 +253,23 @@ export function findWheelSetupForRaceEngineer(filters) {
     return null;
   }
 
-  const exact = STARTER_WHEEL_SETUPS.find((setup) => matchesSetup(setup, filters));
+  const exact = WHEEL_SETUP_POOL.find((setup) => matchesSetup(setup, filters));
   if (exact) {
-    return { setup: exact, matchType: "exact" };
+    return { setup: exact, matchType: exact.isValidated ? "validated" : "exact" };
   }
 
-  const similar = STARTER_WHEEL_SETUPS.find((setup) =>
+  const similar = WHEEL_SETUP_POOL.find((setup) =>
     matchesSetup(setup, filters, { exactTyres: false, exactBop: false }),
   );
 
   if (similar) {
-    return { setup: similar, matchType: "similar" };
+    return {
+      setup: similar,
+      matchType: similar.isValidated ? "validatedSimilar" : "similar",
+    };
   }
 
-  const carTrack = STARTER_WHEEL_SETUPS.find(
+  const carTrack = WHEEL_SETUP_POOL.find(
     (setup) =>
       setup.gameVersion === filters.gameVersion &&
       setup.carId === filters.carId &&
@@ -244,7 +277,10 @@ export function findWheelSetupForRaceEngineer(filters) {
   );
 
   if (carTrack) {
-    return { setup: carTrack, matchType: "carTrack" };
+    return {
+      setup: carTrack,
+      matchType: carTrack.isValidated ? "validatedCarTrack" : "carTrack",
+    };
   }
 
   return null;
@@ -258,14 +294,64 @@ export function formatWheelSetupValues(setup) {
     return [];
   }
 
+  const templateFamily = getTemplateFamilyForWheelBase(setup.wheelBase ?? "");
   const fields = getTemplateFieldsForWheelBase(setup.wheelBase ?? "");
   const values = setup.values ?? {};
+  const carClass = getCarsForGame(setup.gameVersion).find(
+    (car) => car.id === setup.carId,
+  )?.class;
 
-  return fields.map((field) => ({
-    key: field.key,
-    label: field.label,
-    value: values[field.key] ?? "—",
-  }));
+  const rows = fields.map((field) => {
+    const value = values[field.key] ?? "—";
+
+    if (templateFamily === "t598") {
+      const meta = getT598FieldMeta(field.key, value, carClass);
+      return {
+        key: field.key,
+        label: meta.label,
+        value: meta.value,
+        description: meta.description,
+        reason: meta.reason,
+      };
+    }
+
+    return {
+      key: field.key,
+      label: field.label,
+      value,
+      description: "",
+      reason: value !== "—" ? `Recommended value: ${value}` : "",
+    };
+  });
+
+  const knownKeys = new Set(fields.map((field) => field.key));
+  for (const [key, value] of Object.entries(values)) {
+    if (knownKeys.has(key) || value == null || value === "") {
+      continue;
+    }
+
+    if (templateFamily === "t598") {
+      const meta = getT598FieldMeta(key, value, carClass);
+      rows.push({
+        key,
+        label: meta.label,
+        value: meta.value,
+        description: meta.description,
+        reason: meta.reason,
+      });
+      continue;
+    }
+
+    rows.push({
+      key,
+      label: key,
+      value,
+      description: "",
+      reason: `Recommended value: ${value}`,
+    });
+  }
+
+  return rows;
 }
 
 /**

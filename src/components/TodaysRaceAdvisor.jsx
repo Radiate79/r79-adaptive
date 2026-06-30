@@ -386,6 +386,34 @@ export default function TodaysRaceAdvisor() {
                 ))}
               </div>
             ) : null}
+            {analysis.alrPaceSummary ? (
+              <div style={styles.alrPacePanel}>
+                <h4 style={styles.alrPaceTitle}>ALR Pace Evidence</h4>
+                <div style={styles.alrPaceHero}>
+                  <div style={styles.alrPaceHeroItem}>
+                    <span style={styles.alrPaceLabel}>Fastest Car</span>
+                    <strong style={styles.alrPaceValue}>
+                      {analysis.alrPaceSummary.fastestCar}
+                    </strong>
+                  </div>
+                  <div style={styles.alrPaceHeroItem}>
+                    <span style={styles.alrPaceLabel}>Fastest Lap</span>
+                    <strong style={styles.alrPaceValue}>
+                      {analysis.alrPaceSummary.fastestLap}
+                    </strong>
+                  </div>
+                </div>
+                <ol style={styles.alrPaceList}>
+                  {analysis.alrPaceSummary.rankings.map((row) => (
+                    <li key={row.carId} style={styles.alrPaceRow}>
+                      <span style={styles.alrPaceRank}>{row.rank}.</span>
+                      <span style={styles.alrPaceCar}>{row.carName}</span>
+                      <span style={styles.alrPaceLap}>{row.bestLap}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
           </div>
         ) : (
           <div style={styles.analysisPanel}>
@@ -718,6 +746,73 @@ const styles = {
   },
   drivetrainScore: {
     color: "#9bc0ff",
+    fontWeight: 700,
+  },
+  alrPacePanel: {
+    borderTop: "1px solid rgba(124, 156, 222, 0.2)",
+    display: "grid",
+    gap: "10px",
+    marginTop: "12px",
+    paddingTop: "12px",
+  },
+  alrPaceTitle: {
+    color: "#dce9ff",
+    fontSize: "0.92rem",
+    fontWeight: 700,
+    margin: 0,
+  },
+  alrPaceHero: {
+    display: "grid",
+    gap: "8px",
+    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+  },
+  alrPaceHeroItem: {
+    background: "rgba(20, 30, 52, 0.45)",
+    border: "1px solid rgba(124, 156, 222, 0.2)",
+    borderRadius: "8px",
+    display: "grid",
+    gap: "4px",
+    padding: "8px 10px",
+  },
+  alrPaceLabel: {
+    color: "#b8cdff",
+    fontSize: "0.76rem",
+    fontWeight: 600,
+  },
+  alrPaceValue: {
+    color: "#9bc0ff",
+    fontSize: "0.95rem",
+  },
+  alrPaceList: {
+    display: "grid",
+    gap: "6px",
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+  },
+  alrPaceRow: {
+    alignItems: "center",
+    background: "rgba(20, 30, 52, 0.45)",
+    border: "1px solid rgba(124, 156, 222, 0.2)",
+    borderRadius: "8px",
+    display: "grid",
+    gap: "8px",
+    gridTemplateColumns: "auto 1fr auto",
+    padding: "7px 10px",
+  },
+  alrPaceRank: {
+    color: "#b8cdff",
+    fontSize: "0.84rem",
+    fontWeight: 700,
+  },
+  alrPaceCar: {
+    color: "#dce9ff",
+    fontSize: "0.86rem",
+  },
+  alrPaceLap: {
+    color: "#9bc0ff",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    fontSize: "0.86rem",
     fontWeight: 700,
   },
   strategyPanel: {

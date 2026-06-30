@@ -70,6 +70,7 @@ export const WHEEL_TEMPLATE_FIELDS = {
     { key: "spring", label: "SPRING" },
     { key: "gearJolt", label: "GEAR JOLT" },
     { key: "endStop", label: "END STOP" },
+    { key: "brakeBalance", label: "Brake Balance suggestion" },
   ],
   logitech_g923: [
     { key: "forceFeedbackMaxTorque", label: "Force Feedback Max Torque" },

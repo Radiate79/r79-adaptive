@@ -12,6 +12,11 @@ import {
   getRecommendationHistoricalScore,
   passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
+import {
+  ALR_LAP_EVIDENCE_REASON,
+  getAlrLapEvidenceBonus,
+  getTrackAlrPaceSummary,
+} from "./alrLapEvidenceEngine.js";
 import { getCarsForGame, getTracksForGame } from "../utils/gameData.js";
 import {
   DRIVING_STYLE_LABELS,
@@ -123,6 +128,10 @@ function buildCarReasons(car, track, raceSettings, historicalScore) {
   const reasons = [];
   const isTechnical = track.traction >= 8;
   const isHighSpeed = track.topSpeed >= 8;
+
+  if (getAlrLapEvidenceBonus(car.id, track.id, car.class) > 0) {
+    reasons.push(ALR_LAP_EVIDENCE_REASON);
+  }
 
   const attributes = [
     { field: "tyres", value: Number(car.tyres ?? 0), demand: track.tyres },
@@ -487,10 +496,17 @@ export function analyzeTodaysRace(input) {
       null,
   );
 
+  const alrPaceSummary = getTrackAlrPaceSummary(
+    track.id,
+    requestedClass,
+    gameVersion,
+  );
+
   return {
     ready: true,
     track,
     trackAnalysis: buildTrackAnalysis(track, raceSettings),
+    alrPaceSummary,
     recommendations: top10,
     topPick,
     alternativeChoice,

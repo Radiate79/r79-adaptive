@@ -7,6 +7,10 @@ import {
   resolveDailyRaceEvidenceBoost,
 } from "../data/dailyRaceEvidence.js";
 import { getALRResultScore } from "../engine/alrPerformanceEngine.js";
+import {
+  ALR_LAP_EVIDENCE_REASON,
+  getAlrLapEvidenceBonus,
+} from "../engine/alrLapEvidenceEngine.js";
 import { isCarEligibleForRecommendations } from "./carClassFilter.js";
 import { getCarsForGame } from "./gameData.js";
 import { loadALRRecords } from "./alrStorage.js";
@@ -126,6 +130,9 @@ export function buildRecommendationBreakdown(
     recommendationPenalty: getRecommendationPenalty(car),
     historicalModifier: Number(historicalModifier.toFixed(2)),
     dailyRaceModifier: Number(dailyRace.scoreModifier.toFixed(2)),
+    alrLapModifier: Number(
+      getAlrLapEvidenceModifier(car, recommendationContext).toFixed(2),
+    ),
     overallScore: blendRecommendationScore(
       technicalScore,
       car,
@@ -169,6 +176,29 @@ export function getHistoricalModifier(historicalScore, maxHistorical) {
 }
 
 /**
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
+ */
+export function getAlrLapEvidenceModifier(car, recommendationContext = {}) {
+  const trackId = recommendationContext.trackId;
+  const carClass = car?.class ?? recommendationContext.carClass ?? "";
+
+  if (!trackId || !car?.id) {
+    return 0;
+  }
+
+  return getAlrLapEvidenceBonus(car.id, trackId, carClass);
+}
+
+/**
+ * @param {{ communityConfidence?: number, id?: string, class?: string }} car
+ * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
+ */
+export function getAlrLapEvidenceReason(car, recommendationContext = {}) {
+  const modifier = getAlrLapEvidenceModifier(car, recommendationContext);
+  return modifier > 0 ? ALR_LAP_EVIDENCE_REASON : null;
+}
+
+/**
  * Track suitability is the primary score; community and history are small modifiers.
  *
  * @param {number} technicalScore
@@ -197,7 +227,8 @@ export function blendRecommendationScore(
       getCommunityModifier(car) +
       getHistoricalModifier(historicalScore, maxHistorical) +
       getCompetitiveUseModifier(car) +
-      dailyRace.scoreModifier
+      dailyRace.scoreModifier +
+      getAlrLapEvidenceModifier(car, recommendationContext)
     ).toFixed(2),
   );
 }

@@ -1,5 +1,6 @@
 import { STARTER_SETUP_LABEL } from "./wheelSetupsMeta.js";
 import { cars as gt7Cars } from "./gt7/cars.js";
+import { T598_VALIDATED_PROFILES } from "./t598ValidatedProfiles.js";
 
 /** @type {Record<string, string>} */
 const T598_BASE_VALUES = {
@@ -11,7 +12,7 @@ const T598_BASE_VALUES = {
   boostLow: "0",
   boostHigh: "0",
   speed: "High",
-  damper: "30%",
+  damper: "20%",
   damperGain: "High",
   spring: "0%",
   gearJolt: "Medium",
@@ -28,10 +29,19 @@ const T598_GR1_STARTER = {
   brakeBalance: "54% front / 46% rear",
 };
 
+/** Gr.3 — balanced rotation, responsive centre, stable under load. */
+const T598_GR3_STARTER = {
+  ...T598_BASE_VALUES,
+  damper: "20%",
+  inertia: "Mid",
+  friction: "Mid",
+  brakeBalance: "52% front / 48% rear",
+};
+
 /** Gr.2 — sharp but stable, strong corner entry, balanced rotation. */
 const T598_GR2_STARTER = {
   ...T598_BASE_VALUES,
-  damper: "35%",
+  damper: "30%",
   inertia: "Mid",
   friction: "Mid",
   brakeBalance: "52% front / 48% rear",
@@ -475,7 +485,7 @@ const BASE_STARTER_WHEEL_SETUPS = [
     bopOn: true,
     values: {
       ...T598_GR2_STARTER,
-      damper: "30%",
+      damper: "20%",
       notes: "Gr.2 starter — strong braking stability through Spoon and 130R.",
     },
   },
@@ -522,7 +532,7 @@ const BASE_STARTER_WHEEL_SETUPS = [
     bopOn: true,
     values: {
       ...T598_GR1_STARTER,
-      damper: "30%",
+      damper: "20%",
       notes: "Gr.1 starter profile — TS030 technical circuit baseline.",
     },
   },
@@ -584,7 +594,7 @@ const BASE_STARTER_WHEEL_SETUPS = [
     bopOn: true,
     values: {
       ...T598_GR2_STARTER,
-      damper: "30%",
+      damper: "20%",
       notes: "Gr.2 starter profile — Ford GT GTE high-speed baseline.",
     },
   },
@@ -638,19 +648,31 @@ const BASE_STARTER_WHEEL_SETUPS = [
   },
 ];
 
-const DEFAULT_GR1_TRACK = "spa";
-const DEFAULT_GR2_TRACK = "spa";
+/** @type {Record<string, string>} */
+const DEFAULT_TRACK_BY_CLASS = {
+  "Gr.1": "spa",
+  "Gr.2": "spa",
+  "Gr.3": "suzuka",
+  "Gr.4": "brands_hatch",
+};
+
+/** @type {Record<string, Record<string, string>>} */
+const T598_CLASS_STARTERS = {
+  "Gr.1": T598_GR1_STARTER,
+  "Gr.2": T598_GR2_STARTER,
+  "Gr.3": T598_GR3_STARTER,
+  "Gr.4": T598_GR4_STARTER,
+};
 
 /**
  * @param {string} carId
- * @param {"Gr.1" | "Gr.2"} carClass
+ * @param {"Gr.1" | "Gr.2" | "Gr.3" | "Gr.4"} carClass
  * @param {string} [trackId]
  * @returns {WheelSetupRecord}
  */
 function createT598ClassStarter(carId, carClass, trackId) {
-  const template = carClass === "Gr.1" ? T598_GR1_STARTER : T598_GR2_STARTER;
-  const resolvedTrack =
-    trackId ?? (carClass === "Gr.1" ? DEFAULT_GR1_TRACK : DEFAULT_GR2_TRACK);
+  const template = T598_CLASS_STARTERS[carClass] ?? T598_BASE_VALUES;
+  const resolvedTrack = trackId ?? DEFAULT_TRACK_BY_CLASS[carClass] ?? "spa";
 
   return {
     id: `starter_t598_auto_${carId}`,
@@ -676,11 +698,11 @@ const T598_COVERED_CAR_IDS = new Set(
   ).map((setup) => setup.carId),
 );
 
-/** Auto T598 starters for every Gr.1 / Gr.2 car without a manual profile. */
-const AUTO_GR1_GR2_T598_STARTERS = gt7Cars
+/** Auto T598 starters for every Gr.1–Gr.4 car without a manual profile. */
+const AUTO_T598_STARTERS = gt7Cars
   .filter(
     (car) =>
-      (car.class === "Gr.1" || car.class === "Gr.2") &&
+      ["Gr.1", "Gr.2", "Gr.3", "Gr.4"].includes(car.class) &&
       !T598_COVERED_CAR_IDS.has(car.id),
   )
   .map((car) => createT598ClassStarter(car.id, car.class));
@@ -688,5 +710,11 @@ const AUTO_GR1_GR2_T598_STARTERS = gt7Cars
 /** @type {WheelSetupRecord[]} */
 export const STARTER_WHEEL_SETUPS = [
   ...BASE_STARTER_WHEEL_SETUPS,
-  ...AUTO_GR1_GR2_T598_STARTERS,
+  ...AUTO_T598_STARTERS,
+];
+
+/** Validated profiles take priority over starter entries in lookup. */
+export const WHEEL_SETUP_POOL = [
+  ...T598_VALIDATED_PROFILES,
+  ...STARTER_WHEEL_SETUPS,
 ];
