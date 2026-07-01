@@ -42,6 +42,8 @@ import TodaysRaceAdvisor from "./components/TodaysRaceAdvisor.jsx";
 
 import WheelSettingsHub from "./components/WheelSettingsHub.jsx";
 
+import ALRPerformanceHub from "./components/ALRPerformanceHub.jsx";
+
 import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 
 import { hasSeenSplash } from "./utils/splashStorage.js";
@@ -50,11 +52,12 @@ import { hasSeenSplash } from "./utils/splashStorage.js";
 
 
 const PAGES = [
+  { id: "wheel-settings", label: "Wheel Settings" },
   { id: "todays-race", label: "Today's Race" },
   { id: "ai-engineer", label: "AI Race Engineer" },
-  { id: "wheel-settings", label: "Wheel Settings" },
   { id: "advisor", label: "Championship Advisor" },
   { id: "shortlist", label: "Team Car Shortlist" },
+  { id: "alr-performance", label: "ALR Performance" },
   { id: "alr", label: "Race Archive" },
   { id: "rankings", label: "Historical Rankings" },
   { id: "profiles", label: "Car Profiles" },
@@ -87,7 +90,7 @@ const LOGO_CLICK_RESET_MS = 3000;
 
 function AppShell() {
 
-  const [page, setPage] = useState("todays-race");
+  const [page, setPage] = useState("wheel-settings");
   const [settingsBootView, setSettingsBootView] = useState(null);
   const [wheelSettingsPrefill, setWheelSettingsPrefill] = useState(null);
 
@@ -138,6 +141,8 @@ function AppShell() {
         return wrap("Pitstop Strategy", <PitstopStrategy />);
       case "shortlist":
         return wrap("Team Car Shortlist", <TeamCarShortlistAdvisor />);
+      case "alr-performance":
+        return wrap("ALR Performance", <ALRPerformanceHub />);
       case "rankings":
         return wrap("Historical Rankings", <ALRHistoricalRankings />);
       case "profiles":
@@ -185,7 +190,13 @@ function AppShell() {
           />,
         );
       default:
-        return null;
+        return wrap(
+          "Wheel Settings",
+          <WheelSettingsHub
+            prefill={wheelSettingsPrefill}
+            onPrefillConsumed={() => setWheelSettingsPrefill(null)}
+          />,
+        );
     }
   };
 
@@ -249,8 +260,7 @@ function AppShell() {
         />
       </div>
 
-
-
+      <main className="r79-app-main">
       {showRaceDataNotice ? (
         <p className="r79-notice r79-notice--wide">
 
@@ -265,6 +275,7 @@ function AppShell() {
 
 
       {renderPage()}
+      </main>
 
 
 

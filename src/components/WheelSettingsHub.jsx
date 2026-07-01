@@ -176,13 +176,13 @@ export default function WheelSettingsHub({
   };
 
   return (
-    <section className="r79-page">
+    <section className="r79-page r79-page--wheel-settings">
       <R79PageHeader
         title="Wheel Settings"
         subtitle="Professional wheel-base settings for Gran Turismo 7."
       />
 
-      <details className="r79-details">
+      <details className="r79-details r79-wheel-details">
         <summary>
           Where does the wheel data come from?
         </summary>
@@ -194,24 +194,25 @@ export default function WheelSettingsHub({
         </p>
       </details>
 
-      <div className="r79-card" style={styles.filtersPanel}>
+      <div className="r79-card r79-wheel-filters" style={styles.filtersPanel}>
         <div style={styles.filtersHeader}>
           <h3 className="r79-section-title" style={styles.panelTitle}>
             Filters
           </h3>
         </div>
-        <label style={styles.searchField}>
+        <label className="r79-wheel-search" style={styles.searchField}>
           Search setups, cars, or tracks
           <input
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="e.g. Ferrari, Spa, T598"
+            className="r79-wheel-search-input"
             style={styles.searchInput}
           />
         </label>
         {searchQuery.trim() && searchMatches.length > 0 ? (
-          <div style={styles.searchResults}>
+          <div className="r79-wheel-search-results" style={styles.searchResults}>
             {searchMatches.map((setup) => {
               const carName =
                 cars.find((car) => car.id === setup.carId)?.name ?? setup.carId;
@@ -239,6 +240,7 @@ export default function WheelSettingsHub({
                     setTyreCompound(setup.tyreCompound);
                     setBopOn(setup.bopOn);
                   }}
+                  className="r79-wheel-search-hit"
                   style={styles.searchResultButton}
                 >
                   {carName} · {trackName} · {wheelName}
@@ -247,10 +249,10 @@ export default function WheelSettingsHub({
             })}
           </div>
         ) : null}
-        <div style={styles.filtersGrid}>
-          <label style={styles.fieldLabel}>
+        <div className="r79-wheel-filters-grid" style={styles.filtersGrid}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Game
-            <div style={styles.toggleRow}>
+            <div className="r79-wheel-chip-row" style={styles.toggleRow}>
               {gameOptions.map((version) => {
                 const entry = GAME_CATALOG[version];
                 const isActive = filterGame === version;
@@ -258,6 +260,11 @@ export default function WheelSettingsHub({
                   <button
                     key={version}
                     type="button"
+                    className={
+                      isActive
+                        ? "r79-wheel-chip r79-wheel-chip--active"
+                        : "r79-wheel-chip"
+                    }
                     onClick={() => setFilterGame(version)}
                     style={{
                       ...styles.toggleButton,
@@ -271,15 +278,20 @@ export default function WheelSettingsHub({
             </div>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Car Class
-            <div style={styles.toggleRow}>
+            <div className="r79-wheel-chip-row" style={styles.toggleRow}>
               {CAR_CLASS_OPTIONS.map((value) => {
                 const isActive = carClass === value;
                 return (
                   <button
                     key={value}
                     type="button"
+                    className={
+                      isActive
+                        ? "r79-wheel-chip r79-wheel-chip--active"
+                        : "r79-wheel-chip"
+                    }
                     onClick={() => {
                       setCarClass(value);
                       setCarId("");
@@ -297,11 +309,12 @@ export default function WheelSettingsHub({
             </div>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Wheel Base
               <select
                 value={wheelBase}
                 onChange={(event) => setWheelBase(event.target.value)}
+                className="r79-wheel-control-select"
                 style={styles.controlSelect}
               >
                 {WHEEL_BASE_OPTIONS.map((option) => (
@@ -312,11 +325,12 @@ export default function WheelSettingsHub({
               </select>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Car
               <select
                 value={carId}
                 onChange={(event) => setCarId(event.target.value)}
+                className="r79-wheel-control-select"
                 style={styles.controlSelect}
               >
                 <option value="">Select a car…</option>
@@ -328,11 +342,12 @@ export default function WheelSettingsHub({
               </select>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Track
               <select
                 value={trackId}
                 onChange={(event) => setTrackId(event.target.value)}
+                className="r79-wheel-control-select"
                 style={styles.controlSelect}
               >
                 <option value="">Select a track…</option>
@@ -344,11 +359,12 @@ export default function WheelSettingsHub({
               </select>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Tyre Compound
               <select
                 value={tyreCompound}
                 onChange={(event) => setTyreCompound(event.target.value)}
+                className="r79-wheel-control-select"
                 style={styles.controlSelect}
               >
                 {TYRE_COMPOUND_OPTIONS.map((compound) => (
@@ -359,11 +375,16 @@ export default function WheelSettingsHub({
               </select>
           </label>
 
-          <label style={styles.fieldLabel}>
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             BOP
-            <div style={styles.toggleRow}>
+            <div className="r79-wheel-chip-row" style={styles.toggleRow}>
               <button
                 type="button"
+                className={
+                  bopOn
+                    ? "r79-wheel-chip r79-wheel-chip--active"
+                    : "r79-wheel-chip"
+                }
                 onClick={() => setBopOn(true)}
                 style={{
                   ...styles.toggleButton,
@@ -374,6 +395,11 @@ export default function WheelSettingsHub({
               </button>
               <button
                 type="button"
+                className={
+                  !bopOn
+                    ? "r79-wheel-chip r79-wheel-chip--active"
+                    : "r79-wheel-chip"
+                }
                 onClick={() => setBopOn(false)}
                 style={{
                   ...styles.toggleButton,
@@ -387,7 +413,7 @@ export default function WheelSettingsHub({
         </div>
       </div>
 
-      <div style={styles.resultsPanel}>
+      <div className="r79-wheel-results" style={styles.resultsPanel}>
         <div style={styles.resultsHeader}>
           <h3 style={styles.panelTitle}>Wheel Setup</h3>
         </div>
@@ -396,7 +422,7 @@ export default function WheelSettingsHub({
           <p style={styles.emptyState}>Select a car and track to load settings.</p>
         ) : lookup.setup ? (
           <>
-            <p style={styles.contextLine}>
+            <p className="r79-wheel-context" style={styles.contextLine}>
               {GAME_CATALOG[filterGame]?.shortLabel} · {carClass} · {wheelLabel} ·{" "}
               {selectedCar?.name} · {getTrackDisplayName(selectedTrack)} · {tyreCompound} · BOP{" "}
               {bopOn ? "On" : "Off"}
@@ -404,21 +430,27 @@ export default function WheelSettingsHub({
             {lookup.message ? (
               <p style={styles.matchNotice}>{lookup.message}</p>
             ) : null}
-            <div style={styles.valuesGrid}>
+            <div className="r79-wheel-values-grid" style={styles.valuesGrid}>
               {setupRows.map((row) => (
-                <div key={row.key} style={styles.valueCard}>
+                <div key={row.key} className="r79-wheel-value-card" style={styles.valueCard}>
                   <span style={styles.valueLabel}>{row.label}</span>
                   {row.description ? (
-                    <p style={styles.fieldDescription}>{row.description}</p>
+                    <p className="r79-wheel-field-description" style={styles.fieldDescription}>
+                      {row.description}
+                    </p>
                   ) : null}
                   <div style={styles.recommendedBlock}>
                     <span style={styles.recommendedLabel}>Recommended value:</span>
-                    <span style={styles.valueText}>{String(row.value)}</span>
+                    <span className="r79-wheel-value-text" style={styles.valueText}>
+                      {String(row.value)}
+                    </span>
                   </div>
                   {row.reason ? (
                     <div style={styles.reasonBlock}>
                       <span style={styles.reasonLabel}>Reason:</span>
-                      <p style={styles.reasonText}>{row.reason}</p>
+                      <p className="r79-wheel-reason-text" style={styles.reasonText}>
+                        {row.reason}
+                      </p>
                     </div>
                   ) : null}
                 </div>
@@ -435,11 +467,11 @@ export default function WheelSettingsHub({
         )}
       </div>
 
-      <div style={styles.resetRow}>
+      <div className="r79-wheel-reset-row" style={styles.resetRow}>
         <button
           type="button"
           onClick={handleResetWheelSettings}
-          className="r79-btn-secondary"
+          className="r79-btn-secondary r79-wheel-reset-btn"
         >
           Reset
         </button>

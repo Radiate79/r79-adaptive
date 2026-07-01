@@ -24,7 +24,7 @@ export default function R79BrandBar({
           type="button"
           className="r79-brand-bar__logo-btn"
           onClick={onLogoClick}
-          aria-label="R79 Radiate79"
+          aria-label="R79"
           title="R79"
         >
           {emblem}
