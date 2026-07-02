@@ -34,11 +34,28 @@ export const PRIMARY_NAV_ITEMS = [
   },
 ];
 
+/** Top feature row — horizontal scroll on mobile. */
+export const MOBILE_FEATURE_CARD_ORDER = [
+  "wheel-settings",
+  "todays-race",
+  "ai-engineer",
+  "advisor",
+  "pitstop-strategy",
+];
+
+/**
+ * @param {string} id
+ * @returns {{ id: string, label: string, shortLabel: string, icon: string } | undefined}
+ */
+export function getPrimaryNavItem(id) {
+  return PRIMARY_NAV_ITEMS.find((item) => item.id === id);
+}
+
 /** Fixed bottom navigation — mobile only. */
 export const MOBILE_BOTTOM_NAV_ITEMS = [
-  { id: "wheel-settings", pageId: "wheel-settings", label: "Wheel Settings", icon: "⚙️" },
-  { id: "ai-engineer", pageId: "ai-engineer", label: "AI Engineer", icon: "🤖" },
-  { id: "advisor", pageId: "advisor", label: "Championship", icon: "🏆" },
+  { id: "wheel-settings", pageId: "wheel-settings", label: "Wheel", icon: "⚙️" },
+  { id: "ai-engineer", pageId: "ai-engineer", label: "AI", icon: "🤖" },
+  { id: "advisor", pageId: "advisor", label: "Advisor", icon: "🏆" },
   { id: "pitstop-strategy", pageId: "pitstop-strategy", label: "Pitstop", icon: "⛽" },
   { id: "more", pageId: "more", label: "More", icon: "☰" },
 ];

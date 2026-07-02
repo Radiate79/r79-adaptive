@@ -309,26 +309,40 @@ export default function WheelSettingsHub({
     resetWheelSettings();
   };
 
+  const wheelDataSourceDetails = (
+    <>
+      <summary>Where does the wheel data come from?</summary>
+      <p>
+        R79 wheel profiles are built from GT7 testing, league racing experience,
+        community feedback and continuous refinement. Settings are designed as
+        strong starting points and may be adjusted to suit each driver&apos;s
+        style, equipment and car choice.
+      </p>
+    </>
+  );
+
   return (
     <section className="r79-page r79-page--wheel-settings">
-      <R79PageHeader
-        title="Wheel Settings"
-        subtitle="Professional wheel-base settings for Gran Turismo 7."
-      />
+      <div className="r79-wheel-page-header-wrap">
+        <R79PageHeader
+          title="Wheel Settings"
+          subtitle="Professional wheel-base settings for Gran Turismo 7."
+        />
+      </div>
 
-      <details className="r79-details r79-wheel-details">
-        <summary>
-          Where does the wheel data come from?
-        </summary>
-        <p>
-          R79 wheel profiles are built from GT7 testing, league racing
-          experience, community feedback and continuous refinement. Settings are
-          designed as strong starting points and may be adjusted to suit each
-          driver&apos;s style, equipment and car choice.
-        </p>
+      <details className="r79-details r79-wheel-details r79-wheel-details--desktop">
+        {wheelDataSourceDetails}
       </details>
 
-      <h2 className="r79-wheel-mobile-heading">Wheel Settings</h2>
+      <div className="r79-card r79-wheel-intro-card" style={styles.introPanel}>
+        <h2 className="r79-wheel-mobile-heading">Wheel Settings</h2>
+        <p className="r79-wheel-mobile-subtitle">
+          Professional wheel-base settings for Gran Turismo 7.
+        </p>
+        <details className="r79-details r79-wheel-details r79-wheel-details--mobile">
+          {wheelDataSourceDetails}
+        </details>
+      </div>
 
       <div className="r79-card r79-wheel-filters" style={styles.filtersPanel}>
         <div style={styles.filtersHeader}>
@@ -741,6 +755,11 @@ export default function WheelSettingsHub({
 }
 
 const styles = {
+  introPanel: {
+    ...R79_INNER_PANEL,
+    marginBottom: "10px",
+    padding: "18px",
+  },
   filtersPanel: {
     ...R79_INNER_PANEL,
     marginBottom: "12px",

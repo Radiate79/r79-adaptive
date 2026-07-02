@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import { GAME_CATALOG } from "../../data/gameVersions.js";
 import {
+  getPrimaryNavItem,
   getSecondaryNavIcon,
   MOBILE_BOTTOM_NAV_PAGE_IDS,
+  MOBILE_FEATURE_CARD_ORDER,
   PRIMARY_NAV_ITEMS,
 } from "../../data/appNavMeta.js";
 
@@ -50,6 +52,10 @@ export default function R79AppNav({
   const mobileMoreMenuPages = allPages.filter(
     (item) => !MOBILE_BOTTOM_NAV_PAGE_IDS.has(item.id),
   );
+
+  const mobileFeatureCards = MOBILE_FEATURE_CARD_ORDER.map((id) =>
+    getPrimaryNavItem(id),
+  ).filter(Boolean);
 
   useEffect(() => {
     if (!moreOpen) {
@@ -160,8 +166,57 @@ export default function R79AppNav({
         </div>
       </div>
 
-      {/* Mobile — game selector only; navigation via bottom bar */}
+      {/* Mobile chrome — feature scroll, More, game selector */}
       <div className="r79-mobile-chrome">
+        <div
+          className="r79-mobile-feature-scroll"
+          role="navigation"
+          aria-label="Features"
+        >
+          {mobileFeatureCards.map((item) => {
+            const isActive = page === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => navigate(item.id)}
+                className={
+                  isActive
+                    ? "r79-mobile-feature-card r79-mobile-feature-card--active"
+                    : "r79-mobile-feature-card"
+                }
+                aria-current={isActive ? "page" : undefined}
+              >
+                <span className="r79-mobile-feature-card__icon" aria-hidden="true">
+                  {item.icon}
+                </span>
+                <span className="r79-mobile-feature-card__label">
+                  {item.shortLabel}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="r79-mobile-more-wrap">
+          <button
+            type="button"
+            className={
+              mobileMoreMenuPages.some((item) => item.id === page) || moreOpen
+                ? "r79-mobile-more-btn r79-mobile-more-btn--active"
+                : "r79-mobile-more-btn"
+            }
+            aria-expanded={moreOpen}
+            aria-haspopup="menu"
+            onClick={() => onMoreOpenChange(!moreOpen)}
+          >
+            <span className="r79-mobile-more-btn__icon" aria-hidden="true">
+              ☰
+            </span>
+            <span>More</span>
+          </button>
+        </div>
+
         <div className="r79-mobile-game-panel">
           <span className="r79-mobile-game-panel__label">Game</span>
           <div className="r79-mobile-game-panel__pills">
