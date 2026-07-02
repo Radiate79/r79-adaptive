@@ -1,11 +1,23 @@
 import { useEffect, useRef } from "react";
 import { GAME_CATALOG } from "../../data/gameVersions.js";
 import {
-  getPrimaryNavItem,
   getSecondaryNavIcon,
-  MOBILE_FEATURE_CARD_ORDER,
+  MOBILE_BOTTOM_NAV_PAGE_IDS,
   PRIMARY_NAV_ITEMS,
 } from "../../data/appNavMeta.js";
+
+/**
+ * @param {string} pageId
+ * @returns {string}
+ */
+function getMobileMoreMenuIcon(pageId) {
+  const primary = PRIMARY_NAV_ITEMS.find((item) => item.id === pageId);
+  if (primary) {
+    return primary.icon;
+  }
+
+  return getSecondaryNavIcon(pageId);
+}
 
 /**
  * @param {Object} props
@@ -33,11 +45,11 @@ export default function R79AppNav({
 
   const primaryIds = new Set(PRIMARY_NAV_ITEMS.map((item) => item.id));
   const secondaryPages = allPages.filter((item) => !primaryIds.has(item.id));
-  const moreIsActive = secondaryPages.some((item) => item.id === page);
+  const desktopMoreIsActive = secondaryPages.some((item) => item.id === page);
 
-  const mobileFeatureCards = MOBILE_FEATURE_CARD_ORDER.map((id) =>
-    getPrimaryNavItem(id),
-  ).filter(Boolean);
+  const mobileMoreMenuPages = allPages.filter(
+    (item) => !MOBILE_BOTTOM_NAV_PAGE_IDS.has(item.id),
+  );
 
   useEffect(() => {
     if (!moreOpen) {
@@ -90,7 +102,7 @@ export default function R79AppNav({
           <button
             type="button"
             className={
-              moreIsActive || moreOpen
+              desktopMoreIsActive || moreOpen
                 ? "r79-nav-pill r79-nav-pill--active r79-nav-more__trigger"
                 : "r79-nav-pill r79-nav-more__trigger"
             }
@@ -148,77 +160,8 @@ export default function R79AppNav({
         </div>
       </div>
 
-      {/* Mobile approved layout: nav → More → game → content */}
+      {/* Mobile — game selector only; navigation via bottom bar */}
       <div className="r79-mobile-chrome">
-        <div className="r79-mobile-feature-cards" role="navigation" aria-label="Features">
-          {mobileFeatureCards.map((item) => {
-            const isActive = page === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.id)}
-                className={
-                  isActive
-                    ? "r79-mobile-feature-card r79-mobile-feature-card--active"
-                    : "r79-mobile-feature-card"
-                }
-                aria-current={isActive ? "page" : undefined}
-              >
-                <span className="r79-mobile-feature-card__icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                <span className="r79-mobile-feature-card__label">{item.shortLabel}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="r79-mobile-more-wrap" ref={mobileMoreRef}>
-          <button
-            type="button"
-            className={
-              moreIsActive || moreOpen
-                ? "r79-mobile-more-btn r79-mobile-more-btn--active"
-                : "r79-mobile-more-btn"
-            }
-            aria-expanded={moreOpen}
-            aria-haspopup="menu"
-            onClick={() => onMoreOpenChange(!moreOpen)}
-          >
-            <span className="r79-mobile-more-btn__icon" aria-hidden="true">
-              ☰
-            </span>
-            <span>More</span>
-          </button>
-
-          {moreOpen ? (
-            <div className="r79-mobile-menu-sheet" role="menu">
-              {secondaryPages.map((item) => {
-                const isActive = page === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => navigate(item.id)}
-                    className={
-                      isActive
-                        ? "r79-mobile-menu-sheet__item r79-mobile-menu-sheet__item--active"
-                        : "r79-mobile-menu-sheet__item"
-                    }
-                  >
-                    <span className="r79-mobile-menu-sheet__icon" aria-hidden="true">
-                      {getSecondaryNavIcon(item.id)}
-                    </span>
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
-
         <div className="r79-mobile-game-panel">
           <span className="r79-mobile-game-panel__label">Game</span>
           <div className="r79-mobile-game-panel__pills">
@@ -243,6 +186,44 @@ export default function R79AppNav({
           </div>
         </div>
       </div>
+
+      {moreOpen ? (
+        <div
+          className="r79-mobile-menu-backdrop"
+          ref={mobileMoreRef}
+          onClick={() => onMoreOpenChange(false)}
+          role="presentation"
+        >
+          <div
+            className="r79-mobile-menu-sheet r79-mobile-menu-sheet--floating"
+            role="menu"
+            aria-label="More features"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {mobileMoreMenuPages.map((item) => {
+              const isActive = page === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => navigate(item.id)}
+                  className={
+                    isActive
+                      ? "r79-mobile-menu-sheet__item r79-mobile-menu-sheet__item--active"
+                      : "r79-mobile-menu-sheet__item"
+                  }
+                >
+                  <span className="r79-mobile-menu-sheet__icon" aria-hidden="true">
+                    {getMobileMoreMenuIcon(item.id)}
+                  </span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

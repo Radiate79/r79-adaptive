@@ -416,41 +416,6 @@ export default function WheelSettingsHub({
                 );
               })}
             </div>
-            <div className="r79-wheel-mobile-bop-row">
-              <span className="r79-wheel-mobile-class-label">BOP</span>
-              <div className="r79-wheel-chip-row" style={styles.toggleRow}>
-                <button
-                  type="button"
-                  className={
-                    bopOn
-                      ? "r79-wheel-chip r79-wheel-chip--active"
-                      : "r79-wheel-chip"
-                  }
-                  onClick={() => setBopOn(true)}
-                  style={{
-                    ...styles.toggleButton,
-                    ...(bopOn ? styles.toggleButtonActive : null),
-                  }}
-                >
-                  On
-                </button>
-                <button
-                  type="button"
-                  className={
-                    !bopOn
-                      ? "r79-wheel-chip r79-wheel-chip--active"
-                      : "r79-wheel-chip"
-                  }
-                  onClick={() => setBopOn(false)}
-                  style={{
-                    ...styles.toggleButton,
-                    ...(!bopOn ? styles.toggleButtonActive : null),
-                  }}
-                >
-                  Off
-                </button>
-              </div>
-            </div>
           </div>
 
           <MobileFilterRow
@@ -515,6 +480,17 @@ export default function WheelSettingsHub({
             onFuelChange={setFuelMultiplier}
             onTyreChange={setTyreMultiplier}
           />
+
+          <MobileFilterRow icon="⚖️" label="BOP" value={bopOn ? "On" : "Off"}>
+            <select
+              value={bopOn ? "on" : "off"}
+              onChange={(event) => setBopOn(event.target.value === "on")}
+              className="r79-mobile-filter-row__select"
+            >
+              <option value="on">On</option>
+              <option value="off">Off</option>
+            </select>
+          </MobileFilterRow>
 
           <MobileFilterRow icon="🎮" label="Wheel Base" value={wheelLabel}>
             <select

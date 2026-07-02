@@ -285,7 +285,8 @@ function AppShell() {
       <R79MobileBottomNav
         page={page}
         setPage={setPage}
-        onOpenMenu={() => setMobileMenuOpen(true)}
+        moreOpen={mobileMenuOpen}
+        onOpenMenu={() => setMobileMenuOpen((open) => !open)}
       />
       <R79ScrollToTop />
 
