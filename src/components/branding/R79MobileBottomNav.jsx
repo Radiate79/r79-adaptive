@@ -1,4 +1,4 @@
-import { MOBILE_BOTTOM_NAV_ITEMS, MOBILE_BOTTOM_NAV_PAGE_IDS } from "../../data/appNavMeta.js";
+import { MOBILE_BOTTOM_NAV_ITEMS, MOBILE_MORE_PINNED_ITEMS } from "../../data/appNavMeta.js";
 
 /**
  * @param {Object} props
@@ -23,9 +23,23 @@ export default function R79MobileBottomNav({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const isMoreRoute = (pageId) => {
+    if (pageId === "settings") {
+      return true;
+    }
+
+    if (MOBILE_MORE_PINNED_ITEMS.some((item) => item.pageId === pageId)) {
+      return true;
+    }
+
+    return !MOBILE_BOTTOM_NAV_ITEMS.some(
+      (item) => item.pageId !== "more" && item.pageId === pageId,
+    );
+  };
+
   const isActive = (item) => {
     if (item.pageId === "more") {
-      return moreOpen || !MOBILE_BOTTOM_NAV_PAGE_IDS.has(page);
+      return moreOpen || isMoreRoute(page);
     }
 
     return page === item.pageId;

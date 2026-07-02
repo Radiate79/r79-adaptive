@@ -36,6 +36,7 @@ import PitstopStrategy from "./components/PitstopStrategy.jsx";
 import R79AppNav from "./components/branding/R79AppNav.jsx";
 import R79BrandBar from "./components/branding/R79BrandBar.jsx";
 import R79MobileBottomNav from "./components/branding/R79MobileBottomNav.jsx";
+import R79MobileMoreMenu from "./components/branding/R79MobileMoreMenu.jsx";
 import R79ScrollToTop from "./components/branding/R79ScrollToTop.jsx";
 
 import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
@@ -287,6 +288,14 @@ function AppShell() {
         setPage={setPage}
         moreOpen={mobileMenuOpen}
         onOpenMenu={() => setMobileMenuOpen((open) => !open)}
+      />
+      <R79MobileMoreMenu
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        page={page}
+        setPage={setPage}
+        setSettingsBootView={setSettingsBootView}
+        allPages={PAGES}
       />
       <R79ScrollToTop />
 

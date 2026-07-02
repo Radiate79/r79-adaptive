@@ -61,7 +61,7 @@ export function ReportIssueButton({
  *   onClose: () => void,
  * }} props
  */
-function ReportIssueModal({
+export function ReportIssueModal({
   sourcePage,
   itemName,
   defaultIssueType,

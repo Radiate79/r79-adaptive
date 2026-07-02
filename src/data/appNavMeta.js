@@ -67,6 +67,59 @@ export const MOBILE_BOTTOM_NAV_PAGE_IDS = new Set(
   ),
 );
 
+/** Pinned entries at the top of the mobile More menu. */
+export const MOBILE_MORE_PINNED_ITEMS = [
+  {
+    id: "alr-performance",
+    action: "page",
+    pageId: "alr-performance",
+    label: "ALR Performance Hub",
+    icon: "📊",
+  },
+  {
+    id: "about-r79",
+    action: "settings",
+    settingsView: "about",
+    label: "About R79",
+    icon: "✨",
+  },
+  {
+    id: "data-sources",
+    action: "settings",
+    settingsView: "dataReports",
+    label: "Data Sources",
+    icon: "📋",
+  },
+  {
+    id: "feedback",
+    action: "settings",
+    settingsView: "feedback",
+    label: "Feedback / Request Feature",
+    icon: "💬",
+  },
+];
+
+const MOBILE_MORE_PINNED_PAGE_IDS = new Set(
+  MOBILE_MORE_PINNED_ITEMS.filter((item) => item.action === "page").map(
+    (item) => item.pageId,
+  ),
+);
+
+/**
+ * @param {{ id: string, label: string }[]} allPages
+ * @returns {{ id: string, label: string }[]}
+ */
+export function getMobileMoreSecondaryItems(allPages) {
+  const exclude = new Set([
+    ...MOBILE_BOTTOM_NAV_PAGE_IDS,
+    ...MOBILE_FEATURE_CARD_ORDER,
+    ...MOBILE_MORE_PINNED_PAGE_IDS,
+    "settings",
+  ]);
+
+  return allPages.filter((item) => !exclude.has(item.id));
+}
+
 /** @type {Record<string, string>} */
 export const SECONDARY_NAV_ICONS = {
   shortlist: "📋",

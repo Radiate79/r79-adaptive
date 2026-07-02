@@ -2,24 +2,9 @@ import { useEffect, useRef } from "react";
 import { GAME_CATALOG } from "../../data/gameVersions.js";
 import {
   getPrimaryNavItem,
-  getSecondaryNavIcon,
-  MOBILE_BOTTOM_NAV_PAGE_IDS,
   MOBILE_FEATURE_CARD_ORDER,
   PRIMARY_NAV_ITEMS,
 } from "../../data/appNavMeta.js";
-
-/**
- * @param {string} pageId
- * @returns {string}
- */
-function getMobileMoreMenuIcon(pageId) {
-  const primary = PRIMARY_NAV_ITEMS.find((item) => item.id === pageId);
-  if (primary) {
-    return primary.icon;
-  }
-
-  return getSecondaryNavIcon(pageId);
-}
 
 /**
  * @param {Object} props
@@ -43,15 +28,10 @@ export default function R79AppNav({
   onMoreOpenChange,
 }) {
   const desktopMoreRef = useRef(null);
-  const mobileMoreRef = useRef(null);
 
   const primaryIds = new Set(PRIMARY_NAV_ITEMS.map((item) => item.id));
   const secondaryPages = allPages.filter((item) => !primaryIds.has(item.id));
   const desktopMoreIsActive = secondaryPages.some((item) => item.id === page);
-
-  const mobileMoreMenuPages = allPages.filter(
-    (item) => !MOBILE_BOTTOM_NAV_PAGE_IDS.has(item.id),
-  );
 
   const mobileFeatureCards = MOBILE_FEATURE_CARD_ORDER.map((id) =>
     getPrimaryNavItem(id),
@@ -63,19 +43,24 @@ export default function R79AppNav({
     }
 
     const handlePointer = (event) => {
-      const inDesktop = desktopMoreRef.current?.contains(event.target);
-      const inMobile = mobileMoreRef.current?.contains(event.target);
-      if (!inDesktop && !inMobile) {
-        onMoreOpenChange(false);
+      if (!window.matchMedia("(min-width: 769px)").matches) {
+        return;
       }
+
+      if (desktopMoreRef.current?.contains(event.target)) {
+        return;
+      }
+
+      onMoreOpenChange(false);
     };
 
-    document.addEventListener("mousedown", handlePointer);
-    document.addEventListener("touchstart", handlePointer);
+    const timer = window.setTimeout(() => {
+      document.addEventListener("mousedown", handlePointer);
+    }, 0);
 
     return () => {
+      window.clearTimeout(timer);
       document.removeEventListener("mousedown", handlePointer);
-      document.removeEventListener("touchstart", handlePointer);
     };
   }, [moreOpen, onMoreOpenChange]);
 
@@ -202,7 +187,7 @@ export default function R79AppNav({
           <button
             type="button"
             className={
-              mobileMoreMenuPages.some((item) => item.id === page) || moreOpen
+              moreOpen
                 ? "r79-mobile-more-btn r79-mobile-more-btn--active"
                 : "r79-mobile-more-btn"
             }
@@ -242,43 +227,6 @@ export default function R79AppNav({
         </div>
       </div>
 
-      {moreOpen ? (
-        <div
-          className="r79-mobile-menu-backdrop"
-          ref={mobileMoreRef}
-          onClick={() => onMoreOpenChange(false)}
-          role="presentation"
-        >
-          <div
-            className="r79-mobile-menu-sheet r79-mobile-menu-sheet--floating"
-            role="menu"
-            aria-label="More features"
-            onClick={(event) => event.stopPropagation()}
-          >
-            {mobileMoreMenuPages.map((item) => {
-              const isActive = page === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => navigate(item.id)}
-                  className={
-                    isActive
-                      ? "r79-mobile-menu-sheet__item r79-mobile-menu-sheet__item--active"
-                      : "r79-mobile-menu-sheet__item"
-                  }
-                >
-                  <span className="r79-mobile-menu-sheet__icon" aria-hidden="true">
-                    {getMobileMoreMenuIcon(item.id)}
-                  </span>
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }
