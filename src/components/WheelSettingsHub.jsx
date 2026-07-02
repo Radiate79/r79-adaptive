@@ -35,6 +35,112 @@ import {
 import R79PageHeader from "./branding/R79PageHeader.jsx";
 
 /**
+ * @param {{ icon: string, label: string, value: string, children: import("react").ReactNode }} props
+ */
+function MobileFilterRow({ icon, label, value, children }) {
+  return (
+    <label className="r79-mobile-filter-row">
+      <span className="r79-mobile-filter-row__icon" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="r79-mobile-filter-row__label">{label}</span>
+      <span className="r79-mobile-filter-row__value">{value}</span>
+      <span className="r79-mobile-filter-row__arrow" aria-hidden="true">
+        ›
+      </span>
+      {children}
+    </label>
+  );
+}
+
+/**
+ * @param {{
+ *   fuelMultiplier: number,
+ *   tyreMultiplier: number,
+ *   onFuelChange: (value: number) => void,
+ *   onTyreChange: (value: number) => void,
+ * }} props
+ */
+function MobileWearMultiplierRow({
+  fuelMultiplier,
+  tyreMultiplier,
+  onFuelChange,
+  onTyreChange,
+}) {
+  const [open, setOpen] = useState(false);
+  const valueText = `Fuel x${fuelMultiplier} / Tyres x${tyreMultiplier}`;
+
+  return (
+    <div
+      className={
+        open
+          ? "r79-mobile-filter-row-wrap r79-mobile-filter-row-wrap--open"
+          : "r79-mobile-filter-row-wrap"
+      }
+    >
+      <button
+        type="button"
+        className="r79-mobile-filter-row r79-mobile-filter-row--toggle"
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+      >
+        <span className="r79-mobile-filter-row__icon" aria-hidden="true">
+          ⛽
+        </span>
+        <span className="r79-mobile-filter-row__label">Fuel / Tyre Wear</span>
+        <span className="r79-mobile-filter-row__value">{valueText}</span>
+        <span
+          className={
+            open
+              ? "r79-mobile-filter-row__arrow r79-mobile-filter-row__arrow--open"
+              : "r79-mobile-filter-row__arrow"
+          }
+          aria-hidden="true"
+        >
+          ›
+        </span>
+      </button>
+
+      {open ? (
+        <div className="r79-mobile-filter-panel">
+          <label className="r79-mobile-filter-panel__field">
+            <span className="r79-mobile-filter-panel__label">Fuel Multiplier</span>
+            <div className="r79-mobile-filter-panel__control">
+              <input
+                type="range"
+                className="r79-mobile-filter-panel__range"
+                min="1"
+                max="10"
+                step="1"
+                value={fuelMultiplier}
+                onChange={(event) => onFuelChange(Number(event.target.value))}
+              />
+              <span className="r79-mobile-filter-panel__value">x{fuelMultiplier}</span>
+            </div>
+          </label>
+
+          <label className="r79-mobile-filter-panel__field">
+            <span className="r79-mobile-filter-panel__label">Tyre Wear Multiplier</span>
+            <div className="r79-mobile-filter-panel__control">
+              <input
+                type="range"
+                className="r79-mobile-filter-panel__range"
+                min="1"
+                max="10"
+                step="1"
+                value={tyreMultiplier}
+                onChange={(event) => onTyreChange(Number(event.target.value))}
+              />
+              <span className="r79-mobile-filter-panel__value">x{tyreMultiplier}</span>
+            </div>
+          </label>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
  * @typedef {Object} WheelSettingsPrefill
  * @property {string} [gameVersion]
  * @property {string} [wheelBase]
@@ -42,6 +148,8 @@ import R79PageHeader from "./branding/R79PageHeader.jsx";
  * @property {string} [trackId]
  * @property {string} [tyreCompound]
  * @property {boolean} [bopOn]
+ * @property {number} [fuelMultiplier]
+ * @property {number} [tyreMultiplier]
  */
 
 /**
@@ -72,6 +180,12 @@ export default function WheelSettingsHub({
   );
   const [bopOn, setBopOn] = useState(
     prefill?.bopOn ?? savedPrefs.bopOn ?? true,
+  );
+  const [fuelMultiplier, setFuelMultiplier] = useState(
+    prefill?.fuelMultiplier ?? savedPrefs.fuelMultiplier ?? 1,
+  );
+  const [tyreMultiplier, setTyreMultiplier] = useState(
+    prefill?.tyreMultiplier ?? savedPrefs.tyreMultiplier ?? 1,
   );
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,6 +220,12 @@ export default function WheelSettingsHub({
     if (prefill.trackId) setTrackId(prefill.trackId);
     if (prefill.tyreCompound) setTyreCompound(prefill.tyreCompound);
     if (prefill.bopOn !== undefined) setBopOn(prefill.bopOn);
+    if (prefill.fuelMultiplier !== undefined) {
+      setFuelMultiplier(prefill.fuelMultiplier);
+    }
+    if (prefill.tyreMultiplier !== undefined) {
+      setTyreMultiplier(prefill.tyreMultiplier);
+    }
 
     onPrefillConsumed?.();
   }, [prefill, onPrefillConsumed]);
@@ -131,8 +251,20 @@ export default function WheelSettingsHub({
       trackId,
       tyreCompound,
       bopOn,
+      fuelMultiplier,
+      tyreMultiplier,
     });
-  }, [filterGame, carClass, wheelBase, carId, trackId, tyreCompound, bopOn]);
+  }, [
+    filterGame,
+    carClass,
+    wheelBase,
+    carId,
+    trackId,
+    tyreCompound,
+    bopOn,
+    fuelMultiplier,
+    tyreMultiplier,
+  ]);
 
   const lookup = useMemo(
     () =>
@@ -162,6 +294,8 @@ export default function WheelSettingsHub({
     setTrackId("");
     setTyreCompound("M");
     setBopOn(true);
+    setFuelMultiplier(1);
+    setTyreMultiplier(1);
     setSearchQuery("");
   };
 
@@ -194,14 +328,16 @@ export default function WheelSettingsHub({
         </p>
       </details>
 
+      <h2 className="r79-wheel-mobile-heading">Wheel Settings</h2>
+
       <div className="r79-card r79-wheel-filters" style={styles.filtersPanel}>
         <div style={styles.filtersHeader}>
-          <h3 className="r79-section-title" style={styles.panelTitle}>
+          <h3 className="r79-section-title r79-wheel-filters-title" style={styles.panelTitle}>
             Filters
           </h3>
         </div>
-        <label className="r79-wheel-search" style={styles.searchField}>
-          Search setups, cars, or tracks
+        <label className="r79-wheel-search r79-wheel-search--mobile" style={styles.searchField}>
+          <span className="r79-wheel-search__label">Search</span>
           <input
             type="search"
             value={searchQuery}
@@ -249,6 +385,153 @@ export default function WheelSettingsHub({
             })}
           </div>
         ) : null}
+
+        <div className="r79-wheel-filters-mobile">
+          <div className="r79-wheel-mobile-class-row">
+            <span className="r79-wheel-mobile-class-label">Car Class</span>
+            <div className="r79-wheel-chip-row" style={styles.toggleRow}>
+              {CAR_CLASS_OPTIONS.map((value) => {
+                const isActive = carClass === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    className={
+                      isActive
+                        ? "r79-wheel-chip r79-wheel-chip--active"
+                        : "r79-wheel-chip"
+                    }
+                    onClick={() => {
+                      setCarClass(value);
+                      setCarId("");
+                      setTrackId("");
+                    }}
+                    style={{
+                      ...styles.toggleButton,
+                      ...(isActive ? styles.toggleButtonActive : null),
+                    }}
+                  >
+                    {value}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="r79-wheel-mobile-bop-row">
+              <span className="r79-wheel-mobile-class-label">BOP</span>
+              <div className="r79-wheel-chip-row" style={styles.toggleRow}>
+                <button
+                  type="button"
+                  className={
+                    bopOn
+                      ? "r79-wheel-chip r79-wheel-chip--active"
+                      : "r79-wheel-chip"
+                  }
+                  onClick={() => setBopOn(true)}
+                  style={{
+                    ...styles.toggleButton,
+                    ...(bopOn ? styles.toggleButtonActive : null),
+                  }}
+                >
+                  On
+                </button>
+                <button
+                  type="button"
+                  className={
+                    !bopOn
+                      ? "r79-wheel-chip r79-wheel-chip--active"
+                      : "r79-wheel-chip"
+                  }
+                  onClick={() => setBopOn(false)}
+                  style={{
+                    ...styles.toggleButton,
+                    ...(!bopOn ? styles.toggleButtonActive : null),
+                  }}
+                >
+                  Off
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <MobileFilterRow
+            icon="🚗"
+            label="Car"
+            value={selectedCar?.name ?? "Select a car…"}
+          >
+            <select
+              value={carId}
+              onChange={(event) => setCarId(event.target.value)}
+              className="r79-mobile-filter-row__select"
+            >
+              <option value="">Select a car…</option>
+              {filteredCars.map((car) => (
+                <option key={car.id} value={car.id}>
+                  {car.name}
+                </option>
+              ))}
+            </select>
+          </MobileFilterRow>
+
+          <MobileFilterRow
+            icon="🏁"
+            label="Track"
+            value={
+              selectedTrack
+                ? getTrackDisplayName(selectedTrack)
+                : "Select a track…"
+            }
+          >
+            <select
+              value={trackId}
+              onChange={(event) => setTrackId(event.target.value)}
+              className="r79-mobile-filter-row__select"
+            >
+              <option value="">Select a track…</option>
+              {filteredTracks.map((track) => (
+                <option key={track.id} value={track.id}>
+                  {getTrackDisplayName(track)}
+                </option>
+              ))}
+            </select>
+          </MobileFilterRow>
+
+          <MobileFilterRow icon="🛞" label="Tyre" value={tyreCompound}>
+            <select
+              value={tyreCompound}
+              onChange={(event) => setTyreCompound(event.target.value)}
+              className="r79-mobile-filter-row__select"
+            >
+              {TYRE_COMPOUND_OPTIONS.map((compound) => (
+                <option key={compound} value={compound}>
+                  {compound}
+                </option>
+              ))}
+            </select>
+          </MobileFilterRow>
+
+          <MobileWearMultiplierRow
+            fuelMultiplier={fuelMultiplier}
+            tyreMultiplier={tyreMultiplier}
+            onFuelChange={setFuelMultiplier}
+            onTyreChange={setTyreMultiplier}
+          />
+
+          <MobileFilterRow icon="🎮" label="Wheel Base" value={wheelLabel}>
+            <select
+              value={wheelBase}
+              onChange={(event) => setWheelBase(event.target.value)}
+              className="r79-mobile-filter-row__select"
+            >
+              {WHEEL_BASE_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </MobileFilterRow>
+        </div>
+
+        <div className="r79-wheel-filters-desktop">
         <div className="r79-wheel-filters-grid" style={styles.filtersGrid}>
           <label className="r79-wheel-field" style={styles.fieldLabel}>
             Game
@@ -410,6 +693,7 @@ export default function WheelSettingsHub({
               </button>
             </div>
           </label>
+        </div>
         </div>
       </div>
 

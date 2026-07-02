@@ -30,6 +30,8 @@ const PREFERENCES_STORAGE_KEY = "r79-wheel-settings-preferences";
  * @property {string} [trackId]
  * @property {string} [tyreCompound]
  * @property {boolean} [bopOn]
+ * @property {number} [fuelMultiplier]
+ * @property {number} [tyreMultiplier]
  */
 
 /**

@@ -35,6 +35,8 @@ import PitstopStrategy from "./components/PitstopStrategy.jsx";
 
 import R79AppNav from "./components/branding/R79AppNav.jsx";
 import R79BrandBar from "./components/branding/R79BrandBar.jsx";
+import R79MobileBottomNav from "./components/branding/R79MobileBottomNav.jsx";
+import R79ScrollToTop from "./components/branding/R79ScrollToTop.jsx";
 
 import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
 
@@ -97,6 +99,7 @@ function AppShell() {
   const [showSplash, setShowSplash] = useState(() => !hasSeenSplash());
 
   const [showFounderConsole, setShowFounderConsole] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const logoClickCount = useRef(0);
 
@@ -257,6 +260,8 @@ function AppShell() {
           setGameVersion={setGameVersion}
           gameOptions={gameOptions}
           allPages={PAGES}
+          moreOpen={mobileMenuOpen}
+          onMoreOpenChange={setMobileMenuOpen}
         />
       </div>
 
@@ -276,6 +281,13 @@ function AppShell() {
 
       {renderPage()}
       </main>
+
+      <R79MobileBottomNav
+        page={page}
+        setPage={setPage}
+        onOpenMenu={() => setMobileMenuOpen(true)}
+      />
+      <R79ScrollToTop />
 
 
 
