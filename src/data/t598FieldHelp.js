@@ -153,7 +153,10 @@ export function getT598FieldMeta(fieldKey, value, carClass) {
       label: fieldKey,
       value: displayValue,
       description: "",
-      reason: displayValue !== "—" ? `Recommended value: ${displayValue}` : "",
+      reason:
+        displayValue !== "—"
+          ? `${fieldKey} at ${displayValue} is the tested setting for this validated profile.`
+          : "",
     };
   }
 

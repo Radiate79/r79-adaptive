@@ -108,6 +108,29 @@ const BASE_STARTER_WHEEL_SETUPS = [
     },
   },
   {
+    id: "starter_g_pro_spa_mercedes",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "logitech_g_pro",
+    carId: "mercedes_amg_gt3_20",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      trueforceAudio: 50,
+      trueforceStrength: 50,
+      ffbStrength: 5,
+      filter: 5,
+      dampener: 5,
+      angle: 900,
+      brakeForce: 8,
+      brakeBalance: "52% front / 48% rear",
+      notes:
+        "Starter G Pro profile for high-speed circuits. Reduce Trueforce strength if kerb hits feel harsh.",
+    },
+  },
+  {
     id: "starter_fanatec_daytona_nissan",
     label: STARTER_SETUP_LABEL,
     isStarter: true,
@@ -157,6 +180,22 @@ const BASE_STARTER_WHEEL_SETUPS = [
       brakeBalance: "51% front / 49% rear",
       notes:
         "Demo placeholder for balanced road circuits. Tune road sensitivity after practice.",
+    },
+  },
+  {
+    id: "starter_other_custom_spa_mercedes",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "other_custom",
+    carId: "mercedes_amg_gt3_20",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    values: {
+      brakeBalance: "52% front / 48% rear",
+      notes:
+        "Generic reference for custom wheel bases. Start from your manufacturer defaults, then refine FFB and bias after a few laps.",
     },
   },
   {
@@ -219,7 +258,7 @@ const BASE_STARTER_WHEEL_SETUPS = [
       dpr: 48,
       brf: 58,
       brakeBalance: "52% front / 48% rear",
-      notes: "Technical seaside circuit — FR stability focus.",
+      notes: "Technical seaside circuit — stable inputs through the Esses.",
     },
   },
   {
@@ -285,7 +324,25 @@ const BASE_STARTER_WHEEL_SETUPS = [
       ...T598_BASE_VALUES,
       damper: "40%",
       brakeBalance: "52% front / 48% rear",
-      notes: "Nürburgring GP — FR stability for Hatzenbach and Schwedenkreuz.",
+      notes: "Nürburgring GP — stable inputs through Hatzenbach and Schwedenkreuz.",
+    },
+  },
+  {
+    id: "starter_t598_trial_mountain_aston",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "thrustmaster_t598",
+    carId: "aston_martin_v12_vantage_gt3_12",
+    trackId: "trial_mountain",
+    tyreCompound: "S",
+    bopOn: true,
+    values: {
+      ...T598_GR3_STARTER,
+      damper: "30%",
+      brakeBalance: "52% front / 48% rear",
+      notes:
+        "Confirmed ALR finding: heavy front-right tyre wear on Racing Softs with BOP. Softer damper and stable inputs protect the right-front through the Esses.",
     },
   },
   {
