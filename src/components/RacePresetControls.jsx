@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { RACE_FORMATS, resolveRaceFormatId } from "../data/racePresets.js";
+import { commitLapCountInput } from "../utils/raceDistance.js";
 /**
  * @param {Object} props
  * @param {string} [props.presetId]
@@ -30,6 +32,9 @@ export default function RacePresetControls({
   onLapCountChange,
   style,
 }) {
+  const [distanceLapDraft, setDistanceLapDraft] = useState(
+    /** @type {string | null} */ (null),
+  );
   const wearSliders = (
     <div style={styles.multiplierRow}>
       <label style={styles.multiplierField}>
@@ -68,7 +73,7 @@ export default function RacePresetControls({
 
   if (lapsOnly) {
     return (
-      <div style={{ ...styles.wrap, ...style }}>
+      <div className="r79-race-preset-controls" style={{ ...styles.wrap, ...style }}>
         <label style={styles.presetField}>
           Number of Laps
           <input
@@ -94,7 +99,7 @@ export default function RacePresetControls({
   const selectedPreset = RACE_FORMATS.find((preset) => preset.id === resolvedId);
 
   return (
-    <div style={{ ...styles.wrap, ...style }}>
+    <div className="r79-race-preset-controls" style={{ ...styles.wrap, ...style }}>
       <label style={styles.presetField}>
         {distanceMode ? "Distance" : "Race format"}
         <select
@@ -112,14 +117,35 @@ export default function RacePresetControls({
           <>
             <span style={styles.lapLabel}>Number of laps</span>
             <input
-              type="number"
-              min="1"
-              max="999"
-              step="1"
-              value={lapCount}
-              onChange={(event) =>
-                onLapCountChange?.(Number(event.target.value))
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={
+                distanceLapDraft !== null
+                  ? distanceLapDraft
+                  : String(lapCount)
               }
+              onFocus={() => {
+                if (distanceLapDraft === null) {
+                  setDistanceLapDraft(String(lapCount));
+                }
+              }}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value === "" || /^\d{0,3}$/.test(value)) {
+                  setDistanceLapDraft(value);
+                  if (value !== "") {
+                    onLapCountChange?.(commitLapCountInput(value));
+                  }
+                }
+              }}
+              onBlur={() => {
+                const committed = commitLapCountInput(
+                  distanceLapDraft !== null ? distanceLapDraft : lapCount,
+                );
+                onLapCountChange?.(committed);
+                setDistanceLapDraft(null);
+              }}
               style={styles.lapInput}
             />
           </>

@@ -56,6 +56,7 @@ import { hasSeenSplash } from "./utils/splashStorage.js";
 
 const PAGES = [
   { id: "wheel-settings", label: "Wheel Settings" },
+  { id: "podium", label: "Podium" },
   { id: "todays-race", label: "Today's Race" },
   { id: "ai-engineer", label: "AI Race Engineer" },
   { id: "advisor", label: "Championship Advisor" },
@@ -132,8 +133,9 @@ function AppShell() {
           />,
         );
       case "wheel-settings":
+      case "podium":
         return wrap(
-          "Wheel Settings",
+          page === "podium" ? "Podium" : "Wheel Settings",
           <WheelSettingsHub
             prefill={wheelSettingsPrefill}
             onPrefillConsumed={() => setWheelSettingsPrefill(null)}

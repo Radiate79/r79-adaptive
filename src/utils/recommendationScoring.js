@@ -26,6 +26,8 @@ export const COMMUNITY_CONFIDENCE_REASON_THRESHOLD = 75;
 /** Community reflects real GT7 competitive use alongside track fit. */
 export const COMMUNITY_MAX_MODIFIER = 12;
 export const HISTORICAL_MAX_MODIFIER = 6;
+/** Historical ALR (PRE_1_71) is supporting evidence only — never primary over track fit / current data. */
+export const HISTORICAL_ALR_IS_SUPPORTING_ONLY = true;
 export const COMMUNITY_BASELINE = DEFAULT_COMMUNITY_CONFIDENCE;
 export const TRACK_SUITABILITY_PRIORITY_GAP = 1.25;
 export const COMPETITIVE_USE_HIGH_MODIFIER = 2.5;

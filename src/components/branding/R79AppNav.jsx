@@ -3,8 +3,11 @@ import { GAME_CATALOG } from "../../data/gameVersions.js";
 import {
   getPrimaryNavItem,
   MOBILE_FEATURE_CARD_ORDER,
+  MOBILE_WHEEL_HERO_ID,
   PRIMARY_NAV_ITEMS,
 } from "../../data/appNavMeta.js";
+import R79Icon, { R79_FEATURE_ICONS } from "./R79Icon.jsx";
+import R79HeroWheel from "./R79HeroWheel.jsx";
 
 /**
  * @param {Object} props
@@ -33,6 +36,7 @@ export default function R79AppNav({
   const secondaryPages = allPages.filter((item) => !primaryIds.has(item.id));
   const desktopMoreIsActive = secondaryPages.some((item) => item.id === page);
 
+  const wheelHero = getPrimaryNavItem(MOBILE_WHEEL_HERO_ID);
   const mobileFeatureCards = MOBILE_FEATURE_CARD_ORDER.map((id) =>
     getPrimaryNavItem(id),
   ).filter(Boolean);
@@ -69,9 +73,10 @@ export default function R79AppNav({
     onMoreOpenChange(false);
   };
 
+  const wheelHeroActive = page === "wheel-settings" || page === "podium";
+
   return (
     <div className="r79-app-nav-shell">
-      {/* Desktop navigation — unchanged */}
       <nav className="r79-app-nav r79-app-nav--desktop" aria-label="Primary navigation">
         {PRIMARY_NAV_ITEMS.map((item) => {
           const isActive = page === item.id;
@@ -151,8 +156,40 @@ export default function R79AppNav({
         </div>
       </div>
 
-      {/* Mobile chrome — feature scroll, More, game selector */}
       <div className="r79-mobile-chrome">
+        {wheelHero ? (
+          <button
+            type="button"
+            className={
+              wheelHeroActive
+                ? "r79-wheel-hero-nav r79-wheel-hero-nav--active"
+                : "r79-wheel-hero-nav"
+            }
+            onClick={() => navigate(MOBILE_WHEEL_HERO_ID)}
+            aria-current={page === "wheel-settings" ? "page" : undefined}
+          >
+            <span className="r79-wheel-hero-nav__rim" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__trails" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__visual r79-holo-object r79-holo-object--hero" aria-hidden="true">
+              <span className="r79-holo-object__ring" />
+              <R79HeroWheel size={124} />
+            </span>
+            <span className="r79-wheel-hero-nav__copy">
+              <span className="r79-wheel-hero-nav__title">
+                <span>Wheel</span>
+                <span>Settings</span>
+              </span>
+              <span className="r79-wheel-hero-nav__subtitle">
+                Precision setup for your race
+              </span>
+              <span className="r79-wheel-hero-nav__accent" />
+            </span>
+            <span className="r79-wheel-hero-nav__chevron" aria-hidden="true">
+              <R79Icon name="chevron" size={28} accent="magenta" />
+            </span>
+          </button>
+        ) : null}
+
         <div
           className="r79-mobile-feature-scroll"
           role="navigation"
@@ -160,24 +197,54 @@ export default function R79AppNav({
         >
           {mobileFeatureCards.map((item) => {
             const isActive = page === item.id;
+            const iconMeta = R79_FEATURE_ICONS[item.id] ?? {
+              name: "more",
+              accent: "spectrum",
+            };
+            const accentClass =
+              item.id === "podium"
+                ? "r79-mobile-feature-card--podium"
+                : item.id === "todays-race"
+                  ? "r79-mobile-feature-card--today"
+                  : item.id === "ai-engineer"
+                    ? "r79-mobile-feature-card--ai"
+                    : item.id === "advisor"
+                      ? "r79-mobile-feature-card--champ"
+                      : item.id === "pitstop-strategy"
+                        ? "r79-mobile-feature-card--pit"
+                        : "";
+            const featureClass = [
+              "r79-mobile-feature-card",
+              isActive ? "r79-mobile-feature-card--active" : "",
+              accentClass,
+            ]
+              .filter(Boolean)
+              .join(" ");
             return (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => navigate(item.id)}
-                className={
-                  isActive
-                    ? "r79-mobile-feature-card r79-mobile-feature-card--active"
-                    : "r79-mobile-feature-card"
-                }
+                className={featureClass}
                 aria-current={isActive ? "page" : undefined}
               >
-                <span className="r79-mobile-feature-card__icon" aria-hidden="true">
-                  {item.icon}
+                <span className="r79-mobile-feature-card__icon r79-holo-object r79-icon-shell r79-icon-shell--feature" aria-hidden="true">
+                  <span className="r79-holo-object__ring" />
+                  <R79Icon
+                    name={iconMeta.name}
+                    accent={iconMeta.accent}
+                    size={62}
+                    withBase
+                  />
                 </span>
                 <span className="r79-mobile-feature-card__label">
                   {item.shortLabel}
                 </span>
+                {item.secondaryLabel ? (
+                  <span className="r79-mobile-feature-card__sub">
+                    {item.secondaryLabel}
+                  </span>
+                ) : null}
               </button>
             );
           })}
@@ -195,8 +262,10 @@ export default function R79AppNav({
             aria-haspopup="menu"
             onClick={() => onMoreOpenChange(!moreOpen)}
           >
-            <span className="r79-mobile-more-btn__icon" aria-hidden="true">
-              ☰
+            <span className="r79-mobile-more-btn__dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </span>
             <span>More</span>
           </button>
@@ -226,7 +295,7 @@ export default function R79AppNav({
           </div>
         </div>
       </div>
-
     </div>
   );
 }
+

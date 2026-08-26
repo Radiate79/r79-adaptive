@@ -24,39 +24,53 @@ export const WHEEL_FIELD_HELP = {
       `Vibration strength ${value} gives useful warnings without distracting mid-corner corrections.`,
   },
   trueforceAudio: {
-    description: "Controls Trueforce audio intensity on the G Pro wheel.",
+    description: "Controls TrueForce audio intensity on supported Logitech Direct Drive wheels.",
     getReason: (value) =>
-      `Trueforce audio at ${value} adds engine and surface cues without masking core force feedback.`,
+      value && value !== "—"
+        ? `TrueForce audio at ${value} adds engine and surface cues without masking core force feedback.`
+        : "TrueForce audio will be set after RS50 / G PRO validation under the current GT7 physics generation.",
   },
   trueforceStrength: {
-    description: "Sets the strength of Trueforce audio effects.",
+    description: "Sets the strength of TrueForce effects on supported Logitech wheels.",
     getReason: (value) =>
-      `Trueforce strength ${value} supports situational awareness while keeping focus on wheel load.`,
+      value && value !== "—"
+        ? `TrueForce strength ${value} supports situational awareness while keeping focus on wheel load.`
+        : "TrueForce strength pending validation — no fabricated value applied.",
   },
   ffbStrength: {
-    description: "Sets overall force feedback strength on the G Pro wheel.",
+    description: "Sets overall force feedback strength on supported Logitech Direct Drive wheels.",
     getReason: (value) =>
-      `FFB strength ${value} preserves detail and control for this car and track combination.`,
+      value && value !== "—"
+        ? `FFB strength ${value} preserves detail and control for this car and track combination.`
+        : "FFB strength pending validation for this wheel base — not invented.",
   },
   filter: {
     description: "Smooths high-frequency force feedback spikes.",
     getReason: (value) =>
-      `Filter ${value} reduces harsh spikes while keeping weight transfer readable.`,
+      value && value !== "—"
+        ? `Filter ${value} reduces harsh spikes while keeping weight transfer readable.`
+        : "Filter pending validation for this wheel base.",
   },
   dampener: {
     description: "Adds mechanical damping to on-centre steering feel.",
     getReason: (value) =>
-      `Dampener ${value} steadies the wheel between inputs for more consistent lap times.`,
+      value && value !== "—"
+        ? `Dampener ${value} steadies the wheel between inputs for more consistent lap times.`
+        : "Dampener pending validation for this wheel base.",
   },
   angle: {
     description: "Sets the usable steering angle range.",
     getReason: (value) =>
-      `A ${value}° angle matches GT7 lock and keeps full rotation available when required.`,
+      value && value !== "—"
+        ? `A ${value}° angle matches GT7 lock and keeps full rotation available when required.`
+        : "Steering angle pending validation for this wheel base.",
   },
   brakeForce: {
     description: "Sets the load-cell brake pedal force curve.",
     getReason: (value) =>
-      `Brake force ${value} gives predictable pedal travel for repeatable threshold braking.`,
+      value && value !== "—"
+        ? `Brake force ${value} gives predictable pedal travel for repeatable threshold braking.`
+        : "Brake force pending validation for this wheel base.",
   },
   sen: {
     description: "Fanatec steering sensitivity — degrees of rotation.",
@@ -113,6 +127,13 @@ export const WHEEL_FIELD_HELP = {
     getReason: (value) =>
       `DPR ${value} supports stable steering inputs through high-load sections.`,
   },
+  ful: {
+    description: "Fanatec FullForce effect intensity (where supported by base and Fanatec App).",
+    getReason: (value) =>
+      value && value !== "—"
+        ? `FUL ${value} is the tested FullForce level for this Fanatec base.`
+        : "FUL is available on FullForce-capable Fanatec bases — leave unset until validated for your firmware/app generation.",
+  },
   brf: {
     description: "Fanatec brake force on the load-cell pedal.",
     getReason: (value) =>
@@ -160,16 +181,20 @@ export const WHEEL_FIELD_HELP = {
   },
   brakeBalance: {
     description: "Suggested in-game brake bias for this car and class.",
-    getReason: (_, __, carClass) =>
-      carClass === "Gr.1"
+    getReason: (value, _, carClass) => {
+      if (!value || value === "—") {
+        return "Brake balance suggestion pending validation for this wheel base.";
+      }
+      return carClass === "Gr.1"
         ? "Slightly forward bias suits prototype downforce and long braking zones."
-        : "Validated bias balances entry rotation with rear stability under trail braking.",
+        : "Validated bias balances entry rotation with rear stability under trail braking.";
+    },
   },
   notes: {
     description: "Track-specific guidance from validated testing.",
     getReason: (value) =>
       value && value !== "—"
-        ? String(value)
+        ? `Setup note: ${String(value)}`
         : "Refine after a few laps if kerb feedback or tyre wear feels off.",
   },
 };
@@ -192,18 +217,21 @@ export function getWheelFieldMeta(fieldKey, label, value, carClass) {
       reason:
         displayValue !== "—"
           ? `${label} at ${displayValue} is the tested setting for this wheel base and car combination.`
-          : "",
+          : `${label} pending validation for this wheel base.`,
     };
   }
+
+  const reasonFromHelp = help.getReason(displayValue, label, carClass);
 
   return {
     label: help.description ? label : label,
     value: displayValue,
     description: help.description,
     reason:
-      displayValue !== "—"
-        ? help.getReason(displayValue, label, carClass)
-        : "",
+      reasonFromHelp ||
+      (displayValue !== "—"
+        ? `${label} at ${displayValue} is the tested setting for this wheel base and car combination.`
+        : `${label} pending validation for this wheel base.`),
   };
 }
 

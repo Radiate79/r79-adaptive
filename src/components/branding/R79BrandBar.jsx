@@ -2,7 +2,7 @@ import { R79_APP_TAGLINE } from "../../data/brandingMeta.js";
 import R79Emblem from "./R79Emblem.jsx";
 
 /**
- * R79 identity bar — icon logo and optional tagline.
+ * R79 identity bar — official logo + Adaptive wordmark (concept header).
  *
  * @param {Object} props
  * @param {"app" | "page"} [props.variant]
@@ -36,10 +36,36 @@ export default function R79BrandBar({
       )}
 
       <div className="r79-brand-bar__copy">
-        {showTagline ? (
-          <span className="r79-brand-bar__tagline">{R79_APP_TAGLINE}</span>
-        ) : null}
+        {variant === "app" ? (
+          <>
+            <span className="r79-brand-bar__wordmark">
+              <span className="r79-brand-bar__wordmark-r79">R79</span>
+              <span className="r79-brand-bar__wordmark-adaptive">Adaptive</span>
+            </span>
+            {showTagline ? (
+              <span className="r79-brand-bar__tagline">{R79_APP_TAGLINE}</span>
+            ) : null}
+          </>
+        ) : (
+          <>
+            <span className="r79-brand-bar__name">R79</span>
+            {showTagline ? (
+              <span className="r79-brand-bar__tagline">{R79_APP_TAGLINE}</span>
+            ) : null}
+          </>
+        )}
       </div>
+
+      {variant === "app" ? (
+        <div className="r79-brand-bar__online" aria-hidden="true">
+          <span className="r79-status-pulse r79-status-pulse--online" />
+          <span>Online</span>
+        </div>
+      ) : null}
+
+      {variant === "app" ? (
+        <span className="r79-brand-bar__circuit" aria-hidden="true" />
+      ) : null}
     </div>
   );
 }

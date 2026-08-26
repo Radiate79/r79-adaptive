@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { GAME_CATALOG } from "../data/gameVersions.js";
 import { WHEEL_BASE_OPTIONS } from "../data/wheelBases.js";
+import { formatWheelPlatformStatus } from "../data/wheelPlatformVersion.js";
 import {
   NO_EXACT_SETUP_MESSAGE,
   TYRE_COMPOUND_OPTIONS,
@@ -23,6 +24,10 @@ import {
   getTracksForGame,
 } from "../utils/gameData.js";
 import {
+  commitLapCountInput,
+  formatLapsSummary,
+} from "../utils/raceDistance.js";
+import {
   loadWheelSettingsPreferences,
   saveWheelSettingsPreferences,
 } from "../utils/wheelSetupsStorage.js";
@@ -34,23 +39,141 @@ import {
   R79_SECTION_TITLE,
 } from "../styles/r79Theme.js";
 import R79PageHeader from "./branding/R79PageHeader.jsx";
+import R79Icon, {
+  R79_FILTER_ICONS,
+  telemetryIconForLine,
+} from "./branding/R79Icon.jsx";
+
+function TelemetryStatusStrip({ lines }) {
+  return (
+    <div className="r79-telemetry" aria-label="Platform status">
+      <p className="r79-telemetry__label">Race engineering</p>
+      <div className="r79-telemetry__row">
+        {lines.map((line, index) => {
+          const isValidation =
+            /^(testing|validated|historical|unvalidated|unknown)$/i.test(line);
+          const isGt7 = /^GT7\s/i.test(line);
+          const kind =
+            index === 0
+              ? "primary"
+              : isValidation
+                ? "status"
+                : isGt7
+                  ? "ok"
+                  : "meta";
+          const iconMeta = telemetryIconForLine(line, index);
+          return (
+            <span
+              key={line}
+              className={`r79-telemetry__item r79-telemetry__item--${kind}`}
+            >
+              <span className="r79-telemetry__icon" aria-hidden="true">
+                <R79Icon
+                  name={iconMeta.name}
+                  accent={iconMeta.accent}
+                  size={22}
+                />
+              </span>
+              <span className="r79-telemetry__dot" aria-hidden="true" />
+              <span>{line}</span>
+              {isGt7 ? (
+                <span className="r79-telemetry__check" aria-hidden="true">
+                  <R79Icon name="check" accent="cyan" size={14} />
+                </span>
+              ) : null}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 /**
- * @param {{ icon: string, label: string, value: string, children: import("react").ReactNode }} props
+ * @param {{
+ *   iconName?: string,
+ *   iconAccent?: string,
+ *   label: string,
+ *   value: string,
+ *   children: import("react").ReactNode,
+ * }} props
  */
-function MobileFilterRow({ icon, label, value, children }) {
+function MobileFilterRow({
+  iconName = "car",
+  iconAccent = "cyan",
+  label,
+  value,
+  children,
+}) {
   return (
     <div className="r79-mobile-filter-row">
-      <span className="r79-mobile-filter-row__icon" aria-hidden="true">
-        {icon}
+      <span className="r79-mobile-filter-row__icon r79-icon-shell r79-holo-object" aria-hidden="true">
+        <span className="r79-holo-object__ring" />
+        <R79Icon name={iconName} accent={iconAccent} size={36} withBase />
       </span>
       <span className="r79-mobile-filter-row__label">{label}</span>
       <span className="r79-mobile-filter-row__value">{value}</span>
       <span className="r79-mobile-filter-row__arrow" aria-hidden="true">
-        ›
+        <R79Icon name="chevron" accent="spectrum" size={18} />
       </span>
       {children}
     </div>
+  );
+}
+
+/**
+ * Free-edit laps field: allows empty string while typing; commits on blur.
+ * @param {{
+ *   lapCount: number,
+ *   draft: string | null,
+ *   onDraftChange: (value: string | null) => void,
+ *   onCommit: (value: number) => void,
+ *   className?: string,
+ *   style?: import("react").CSSProperties,
+ *   id?: string,
+ * }} props
+ */
+function LapCountInput({
+  lapCount,
+  draft,
+  onDraftChange,
+  onCommit,
+  className,
+  style,
+  id,
+}) {
+  const displayValue = draft !== null ? draft : String(lapCount);
+
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="numeric"
+      autoComplete="off"
+      className={className}
+      style={style}
+      value={displayValue}
+      aria-label="Number of Laps"
+      onFocus={() => {
+        if (draft === null) {
+          onDraftChange(String(lapCount));
+        }
+      }}
+      onChange={(event) => {
+        const next = event.target.value;
+        if (next === "" || /^\d{0,3}$/.test(next)) {
+          onDraftChange(next);
+          if (next !== "") {
+            onCommit(commitLapCountInput(next));
+          }
+        }
+      }}
+      onBlur={() => {
+        const committed = commitLapCountInput(draft !== null ? draft : lapCount);
+        onCommit(committed);
+        onDraftChange(null);
+      }}
+    />
   );
 }
 
@@ -59,21 +182,26 @@ function MobileFilterRow({ icon, label, value, children }) {
  *   fuelMultiplier: number,
  *   tyreMultiplier: number,
  *   lapCount: number,
+ *   lapDraft: string | null,
  *   onFuelChange: (value: number) => void,
  *   onTyreChange: (value: number) => void,
  *   onLapCountChange: (value: number) => void,
+ *   onLapDraftChange: (value: string | null) => void,
  * }} props
  */
 function MobileWearMultiplierRow({
   fuelMultiplier,
   tyreMultiplier,
   lapCount,
+  lapDraft,
   onFuelChange,
   onTyreChange,
   onLapCountChange,
+  onLapDraftChange,
 }) {
   const [open, setOpen] = useState(false);
-  const valueText = `${lapCount} laps · Fuel x${fuelMultiplier} · Tyres x${tyreMultiplier}`;
+  const summaryLaps = lapDraft === "" ? 0 : lapCount;
+  const valueText = `${formatLapsSummary(summaryLaps)} · Fuel x${fuelMultiplier} · Tyres x${tyreMultiplier}`;
 
   return (
     <div
@@ -89,8 +217,13 @@ function MobileWearMultiplierRow({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
       >
-        <span className="r79-mobile-filter-row__icon" aria-hidden="true">
-          ⛽
+        <span className="r79-mobile-filter-row__icon r79-icon-shell" aria-hidden="true">
+          <R79Icon
+            name={R79_FILTER_ICONS.conditions.name}
+            accent={R79_FILTER_ICONS.conditions.accent}
+            size={36}
+            withBase
+          />
         </span>
         <span className="r79-mobile-filter-row__label">Race Conditions</span>
         <span className="r79-mobile-filter-row__value">{valueText}</span>
@@ -102,7 +235,7 @@ function MobileWearMultiplierRow({
           }
           aria-hidden="true"
         >
-          ›
+          <R79Icon name="chevron" accent="spectrum" size={18} />
         </span>
       </button>
 
@@ -111,20 +244,16 @@ function MobileWearMultiplierRow({
           <label className="r79-mobile-filter-panel__field">
             <span className="r79-mobile-filter-panel__label">Number of Laps</span>
             <div className="r79-mobile-filter-panel__control">
-              <input
-                type="number"
+              <LapCountInput
+                lapCount={lapCount}
+                draft={lapDraft}
+                onDraftChange={onLapDraftChange}
+                onCommit={onLapCountChange}
                 className="r79-mobile-filter-panel__number"
-                min="1"
-                max="999"
-                step="1"
-                value={lapCount}
-                onChange={(event) =>
-                  onLapCountChange(
-                    Math.max(1, Math.min(999, Number(event.target.value) || 1)),
-                  )
-                }
               />
-              <span className="r79-mobile-filter-panel__value">{lapCount} laps</span>
+              <span className="r79-mobile-filter-panel__value">
+                {formatLapsSummary(lapDraft === "" ? 0 : lapCount)}
+              </span>
             </div>
           </label>
 
@@ -214,8 +343,9 @@ export default function WheelSettingsHub({
     prefill?.tyreMultiplier ?? savedPrefs.tyreMultiplier ?? 1,
   );
   const [lapCount, setLapCount] = useState(
-    prefill?.lapCount ?? savedPrefs.lapCount ?? 1,
+    prefill?.lapCount ?? savedPrefs.lapCount ?? 0,
   );
+  const [lapDraft, setLapDraft] = useState(/** @type {string | null} */ (null));
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -256,7 +386,8 @@ export default function WheelSettingsHub({
       setTyreMultiplier(prefill.tyreMultiplier);
     }
     if (prefill.lapCount !== undefined) {
-      setLapCount(prefill.lapCount);
+      setLapCount(commitLapCountInput(prefill.lapCount));
+      setLapDraft(null);
     }
 
     onPrefillConsumed?.();
@@ -359,6 +490,7 @@ export default function WheelSettingsHub({
   const wheelLabel =
     WHEEL_BASE_OPTIONS.find((option) => option.id === wheelBase)?.label ??
     wheelBase;
+  const wheelPlatformStatus = formatWheelPlatformStatus(wheelBase);
 
   const resetWheelSettings = () => {
     setFilterGame(contextGameVersion);
@@ -370,7 +502,8 @@ export default function WheelSettingsHub({
     setBopOn(true);
     setFuelMultiplier(1);
     setTyreMultiplier(1);
-    setLapCount(1);
+    setLapCount(0);
+    setLapDraft(null);
     setSearchQuery("");
   };
 
@@ -386,7 +519,17 @@ export default function WheelSettingsHub({
 
   const wheelDataSourceDetails = (
     <>
-      <summary>Where does the wheel data come from?</summary>
+      <summary className="r79-wheel-details__summary">
+        <span className="r79-wheel-details__icon" aria-hidden="true">
+          <R79Icon name="info" accent="cyan" size={18} />
+        </span>
+        <span className="r79-wheel-details__text">
+          Where does the wheel data come from?
+        </span>
+        <span className="r79-wheel-details__chevron" aria-hidden="true">
+          <R79Icon name="chevron" accent="violet" size={16} />
+        </span>
+      </summary>
       <p>
         R79 wheel profiles are built from GT7 testing, league racing experience,
         community feedback and continuous refinement. Settings are designed as
@@ -409,32 +552,34 @@ export default function WheelSettingsHub({
         {wheelDataSourceDetails}
       </details>
 
-      <div className="r79-card r79-wheel-intro-card" style={styles.introPanel}>
-        <h2 className="r79-wheel-mobile-heading">Wheel Settings</h2>
-        <p className="r79-wheel-mobile-subtitle">
-          Professional wheel-base settings for Gran Turismo 7.
-        </p>
+      <div className="r79-wheel-intro-card">
+        <TelemetryStatusStrip lines={wheelPlatformStatus.lines} />
         <details className="r79-details r79-wheel-details r79-wheel-details--mobile">
           {wheelDataSourceDetails}
         </details>
       </div>
 
-      <div className="r79-card r79-wheel-filters" style={styles.filtersPanel}>
-        <div style={styles.filtersHeader}>
-          <h3 className="r79-section-title r79-wheel-filters-title" style={styles.panelTitle}>
-            Filters
-          </h3>
+      <div className="r79-card r79-wheel-filters">
+        <div className="r79-wheel-filters-heading">
+          <h3 className="r79-section-title r79-wheel-filters-title">Filters</h3>
+          <span className="r79-wheel-filters-title-icon" aria-hidden="true">
+            <R79Icon name="filter" accent="magenta" size={20} />
+          </span>
         </div>
-        <label className="r79-wheel-search r79-wheel-search--mobile" style={styles.searchField}>
+        <label className="r79-wheel-search r79-wheel-search--mobile">
           <span className="r79-wheel-search__label">Search</span>
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="e.g. Ferrari, Spa, T598"
-            className="r79-wheel-search-input"
-            style={styles.searchInput}
-          />
+          <span className="r79-wheel-search__shell">
+            <span className="r79-wheel-search__icon" aria-hidden="true">
+              <R79Icon name="search" accent="cyan" size={18} />
+            </span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="e.g. Ferrari, Spa, T598"
+              className="r79-wheel-search-input"
+            />
+          </span>
         </label>
         {searchQuery.trim() && searchMatches.length > 0 ? (
           <div className="r79-wheel-search-results" style={styles.searchResults}>
@@ -478,7 +623,7 @@ export default function WheelSettingsHub({
         <div className="r79-wheel-filters-mobile">
           <div className="r79-wheel-mobile-class-row">
             <span className="r79-wheel-mobile-class-label">Car Class</span>
-            <div className="r79-wheel-chip-row" style={styles.toggleRow}>
+            <div className="r79-wheel-chip-row">
               {CAR_CLASS_OPTIONS.map((value) => {
                 const isActive = carClass === value;
                 return (
@@ -495,10 +640,6 @@ export default function WheelSettingsHub({
                       setCarId("");
                       setTrackId("");
                     }}
-                    style={{
-                      ...styles.toggleButton,
-                      ...(isActive ? styles.toggleButtonActive : null),
-                    }}
                   >
                     {value}
                   </button>
@@ -508,7 +649,8 @@ export default function WheelSettingsHub({
           </div>
 
           <MobileFilterRow
-            icon="🚗"
+            iconName={R79_FILTER_ICONS.car.name}
+            iconAccent={R79_FILTER_ICONS.car.accent}
             label="Car"
             value={selectedCar?.name ?? "Select a car…"}
           >
@@ -528,7 +670,8 @@ export default function WheelSettingsHub({
           </MobileFilterRow>
 
           <MobileFilterRow
-            icon="🏁"
+            iconName={R79_FILTER_ICONS.track.name}
+            iconAccent={R79_FILTER_ICONS.track.accent}
             label="Track"
             value={
               selectedTrack
@@ -551,7 +694,12 @@ export default function WheelSettingsHub({
             </select>
           </MobileFilterRow>
 
-          <MobileFilterRow icon="🛞" label="Tyre" value={tyreCompound}>
+          <MobileFilterRow
+            iconName={R79_FILTER_ICONS.tyre.name}
+            iconAccent={R79_FILTER_ICONS.tyre.accent}
+            label="Tyre"
+            value={tyreCompound}
+          >
             <select
               value={tyreCompound}
               onChange={(event) => setTyreCompound(event.target.value)}
@@ -570,12 +718,19 @@ export default function WheelSettingsHub({
             fuelMultiplier={fuelMultiplier}
             tyreMultiplier={tyreMultiplier}
             lapCount={lapCount}
+            lapDraft={lapDraft}
             onFuelChange={setFuelMultiplier}
             onTyreChange={setTyreMultiplier}
             onLapCountChange={setLapCount}
+            onLapDraftChange={setLapDraft}
           />
 
-          <MobileFilterRow icon="⚖️" label="BOP" value={bopOn ? "On" : "Off"}>
+          <MobileFilterRow
+            iconName={R79_FILTER_ICONS.bop.name}
+            iconAccent={R79_FILTER_ICONS.bop.accent}
+            label="BOP"
+            value={bopOn ? "On" : "Off"}
+          >
             <select
               value={bopOn ? "on" : "off"}
               onChange={(event) => setBopOn(event.target.value === "on")}
@@ -587,7 +742,12 @@ export default function WheelSettingsHub({
             </select>
           </MobileFilterRow>
 
-          <MobileFilterRow icon="🎮" label="Wheel Base" value={wheelLabel}>
+          <MobileFilterRow
+            iconName={R79_FILTER_ICONS.wheel.name}
+            iconAccent={R79_FILTER_ICONS.wheel.accent}
+            label="Wheel Base"
+            value={wheelLabel}
+          >
             <select
               value={wheelBase}
               onChange={(event) => setWheelBase(event.target.value)}
@@ -601,6 +761,9 @@ export default function WheelSettingsHub({
               ))}
             </select>
           </MobileFilterRow>
+          <p className="r79-wheel-platform-status" aria-label="Wheel platform status">
+            {wheelPlatformStatus.summary}
+          </p>
         </div>
 
         <div className="r79-wheel-filters-desktop">
@@ -678,6 +841,9 @@ export default function WheelSettingsHub({
                   </option>
                 ))}
               </select>
+              <span className="r79-wheel-platform-status r79-wheel-platform-status--desktop">
+                {wheelPlatformStatus.summary}
+              </span>
           </label>
 
           <label className="r79-wheel-field" style={styles.fieldLabel}>
@@ -768,17 +934,11 @@ export default function WheelSettingsHub({
 
           <label className="r79-wheel-field" style={styles.fieldLabel}>
             Number of Laps
-            <input
-              type="number"
-              min="1"
-              max="999"
-              step="1"
-              value={lapCount}
-              onChange={(event) =>
-                setLapCount(
-                  Math.max(1, Math.min(999, Number(event.target.value) || 1)),
-                )
-              }
+            <LapCountInput
+              lapCount={lapCount}
+              draft={lapDraft}
+              onDraftChange={setLapDraft}
+              onCommit={setLapCount}
               className="r79-wheel-control-select"
               style={styles.controlSelect}
             />
@@ -819,40 +979,41 @@ export default function WheelSettingsHub({
         </div>
       </div>
 
-      <div className="r79-wheel-results" style={styles.resultsPanel}>
-        <div style={styles.resultsHeader}>
-          <h3 style={styles.panelTitle}>Wheel Setup</h3>
+      <div className="r79-wheel-results">
+        <div className="r79-wheel-results-header">
+          <h3 className="r79-wheel-results-title">Wheel Setup</h3>
         </div>
 
         {!canShowSetup ? (
-          <p style={styles.emptyState}>Select a car, track and wheel base to load settings.</p>
+          <p className="r79-wheel-empty-state">Select a car, track and wheel base to load settings.</p>
         ) : lookup.setup ? (
           <>
-            <p className="r79-wheel-context" style={styles.contextLine}>
+            <p className="r79-wheel-context">
               {GAME_CATALOG[filterGame]?.shortLabel} · {carClass} · {wheelLabel} ·{" "}
               {selectedCar?.name} · {getTrackDisplayName(selectedTrack)} · {tyreCompound} · BOP{" "}
-              {bopOn ? "On" : "Off"} · {lapCount} laps · Tyre x{tyreMultiplier} · Fuel x
+              {bopOn ? "On" : "Off"} · {formatLapsSummary(lapDraft === "" ? 0 : lapCount)} · Tyre x{tyreMultiplier} · Fuel x
               {fuelMultiplier}
             </p>
+            <div className="r79-wheel-status-chip-row r79-wheel-status-chip-row--results">
+              <TelemetryStatusStrip lines={wheelPlatformStatus.lines} />
+            </div>
             {lookup.message ? (
-              <p style={styles.matchNotice}>{lookup.message}</p>
+              <p className="r79-wheel-match-notice">{lookup.message}</p>
             ) : null}
             {setupRows[0]?.narrative ? (
-              <div className="r79-wheel-podium-summary" style={styles.podiumSummary}>
-                <span style={styles.podiumExplanationLabel}>Recommendation based on:</span>
-                <ul className="r79-wheel-podium-context" style={styles.podiumContextList}>
+              <div className="r79-wheel-podium-summary">
+                <span className="r79-wheel-podium-summary__label">Recommendation based on</span>
+                <ul className="r79-wheel-podium-context">
                   {setupRows[0].contextLines.map((line) => (
-                    <li key={line} style={styles.podiumContextItem}>
-                      {line}
-                    </li>
+                    <li key={line}>{line}</li>
                   ))}
                 </ul>
-                <p className="r79-wheel-podium-narrative" style={styles.podiumNarrative}>
+                <p className="r79-wheel-podium-narrative">
                   {setupRows[0].narrative}
                 </p>
               </div>
             ) : null}
-            <div className="r79-wheel-values-grid" style={styles.valuesGrid}>
+            <div className="r79-wheel-values-grid">
               {setupRows.map((row) => (
                 <div
                   key={row.key}
@@ -861,35 +1022,31 @@ export default function WheelSettingsHub({
                       ? "r79-wheel-value-card r79-wheel-value-card--adjusted"
                       : "r79-wheel-value-card"
                   }
-                  style={{
-                    ...styles.valueCard,
-                    ...(row.adjusted ? styles.valueCardAdjusted : null),
-                  }}
                 >
-                  <span style={styles.valueLabel}>{row.label}</span>
+                  <span className="r79-wheel-value-card__name">{row.label}</span>
                   {row.description ? (
-                    <p className="r79-wheel-field-description" style={styles.fieldDescription}>
+                    <p className="r79-wheel-field-description">
                       {row.description}
                     </p>
                   ) : null}
-                  <div style={styles.recommendedBlock}>
-                    <span style={styles.recommendedLabel}>Recommended value:</span>
-                    <span className="r79-wheel-value-text" style={styles.valueText}>
+                  <div className="r79-wheel-value-card__value-block">
+                    <span className="r79-wheel-value-card__value-label">Value</span>
+                    <span className="r79-wheel-value-text">
                       {String(row.value)}
                     </span>
                   </div>
                   {row.reason ? (
-                    <div style={styles.reasonBlock}>
-                      <span style={styles.reasonLabel}>Reason:</span>
-                      <p className="r79-wheel-reason-text" style={styles.reasonText}>
+                    <div className="r79-wheel-value-card__why">
+                      <span className="r79-wheel-value-card__why-label">Why</span>
+                      <p className="r79-wheel-reason-text">
                         {row.reason}
                       </p>
                     </div>
                   ) : null}
                   {row.podiumReason ? (
-                    <div style={styles.podiumExplanation}>
-                      <span style={styles.podiumExplanationLabel}>Podium Engine:</span>
-                      <p className="r79-wheel-podium-field-reason" style={styles.podiumFieldReason}>
+                    <div className="r79-wheel-value-card__podium">
+                      <span className="r79-wheel-value-card__why-label">Podium Engine</span>
+                      <p className="r79-wheel-podium-field-reason">
                         {row.podiumReason}
                       </p>
                     </div>
@@ -898,17 +1055,17 @@ export default function WheelSettingsHub({
               ))}
             </div>
             {lookup.setup.lastUpdated ? (
-              <p style={styles.lastUpdated}>
+              <p className="r79-wheel-last-updated">
                 Last Updated: {lookup.setup.lastUpdated}
               </p>
             ) : null}
           </>
         ) : (
-          <p style={styles.emptyState}>{NO_EXACT_SETUP_MESSAGE}</p>
+          <p className="r79-wheel-empty-state">{NO_EXACT_SETUP_MESSAGE}</p>
         )}
       </div>
 
-      <div className="r79-wheel-reset-row" style={styles.resetRow}>
+      <div className="r79-wheel-reset-row">
         <button
           type="button"
           onClick={handleResetWheelSettings}

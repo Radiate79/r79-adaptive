@@ -69,6 +69,23 @@ const T598_GR4_STARTER = {
  * @property {string} tyreCompound
  * @property {boolean} bopOn
  * @property {Record<string, string | number>} values
+ * Optional physics-awareness fields (backwards compatible — omit on legacy records):
+ * @property {string} [gameVersionPatch] GT7 patch e.g. "1.71"
+ * @property {string} [physicsGeneration] e.g. GT7_1_71_PHYSICS | PRE_1_71
+ * @property {'CURRENT' | 'HISTORICAL' | 'TESTING' | 'UNVALIDATED'} [dataStatus]
+ * @property {'validated' | 'testing' | 'unvalidated' | 'historical'} [validationStatus]
+ * @property {string} [wheelValidationStatus] CURRENT|VALIDATED|TESTING|HISTORICAL|UNVALIDATED|UNKNOWN
+ * @property {string} [firmwareVersion]
+ * @property {string} [softwarePlatform]
+ * @property {string} [softwareVersion]
+ * @property {boolean} [validatedAfterUpdate]
+ * @property {number} [fuelMultiplier]
+ * @property {number} [tyreWearMultiplier]
+ * @property {number} [laps]
+ * @property {string} [reasoning]
+ * @property {Record<string, string | number>} [recommendedSettings]
+ * @property {boolean} [isValidated]
+ * @property {string} [lastUpdated]
  */
 
 /** @type {WheelSetupRecord[]} */
@@ -128,6 +145,26 @@ const BASE_STARTER_WHEEL_SETUPS = [
       brakeBalance: "52% front / 48% rear",
       notes:
         "Starter G Pro profile for high-speed circuits. Reduce Trueforce strength if kerb hits feel harsh.",
+    },
+  },
+  {
+    id: "starter_rs50_spa_mercedes",
+    label: STARTER_SETUP_LABEL,
+    isStarter: true,
+    gameVersion: "gt7",
+    wheelBase: "logitech_rs50",
+    carId: "mercedes_amg_gt3_20",
+    trackId: "spa",
+    tyreCompound: "M",
+    bopOn: true,
+    validationStatus: "UNVALIDATED",
+    wheelValidationStatus: "UNVALIDATED",
+    firmwareVersion: "UNKNOWN",
+    physicsGeneration: "GT7_1_71_PHYSICS",
+    dataStatus: "TESTING",
+    values: {
+      notes:
+        "Logitech RS50 Direct Drive / TRUEFORCE — selectable and schema-ready. Recommended FFB values are not fabricated; status UNVALIDATED / TESTING under GT7 1.71 until R79 testing confirms them.",
     },
   },
   {

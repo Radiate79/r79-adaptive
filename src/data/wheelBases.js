@@ -1,4 +1,4 @@
-/** @typedef {'t598' | 'logitech_g923' | 'logitech_g_pro' | 'fanatec' | 'moza' | 'other'} WheelTemplateFamily */
+/** @typedef {'t598' | 'logitech_g923' | 'logitech_g_pro' | 'logitech_rs50' | 'fanatec' | 'moza' | 'other'} WheelTemplateFamily */
 
 function buildPercentRange(step) {
   const values = [];
@@ -35,17 +35,18 @@ export const T598_OPTION_RANGES = {
 /** @type {WheelBaseOption[]} */
 export const WHEEL_BASE_OPTIONS = [
   { id: "thrustmaster_t598", label: "Thrustmaster T598", templateFamily: "t598" },
-  { id: "logitech_g923", label: "Logitech G923", templateFamily: "logitech_g923" },
+  { id: "logitech_rs50", label: "Logitech RS50", templateFamily: "logitech_rs50" },
   {
     id: "logitech_g_pro",
     label: "Logitech G Pro Racing Wheel",
     templateFamily: "logitech_g_pro",
   },
+  { id: "logitech_g923", label: "Logitech G923", templateFamily: "logitech_g923" },
   { id: "fanatec_gt_dd_pro", label: "Fanatec GT DD Pro", templateFamily: "fanatec" },
   { id: "fanatec_csl_dd", label: "Fanatec CSL DD", templateFamily: "fanatec" },
   {
     id: "fanatec_clubsport_dd",
-    label: "Fanatec ClubSport DD",
+    label: "Fanatec ClubSport DD+",
     templateFamily: "fanatec",
   },
   { id: "moza_r3", label: "Moza R3", templateFamily: "moza" },
@@ -54,7 +55,13 @@ export const WHEEL_BASE_OPTIONS = [
   { id: "other_custom", label: "Other / Custom", templateFamily: "other" },
 ];
 
-/** @type {Record<WheelTemplateFamily, { key: string, label: string }[]>} */
+/**
+ * Manufacturer-specific schemas — never share identical menus across brands.
+ * Fanatec uses Tuning Menu parameter names; T598 uses T598 menu names;
+ * Logitech schemas are per-model and independent.
+ *
+ * @type {Record<WheelTemplateFamily, { key: string, label: string }[]>}
+ */
 export const WHEEL_TEMPLATE_FIELDS = {
   t598: [
     { key: "ffb", label: "FFB" },
@@ -94,6 +101,18 @@ export const WHEEL_TEMPLATE_FIELDS = {
     { key: "brakeBalance", label: "Brake Balance suggestion" },
     { key: "notes", label: "Notes" },
   ],
+  /** Independent RS50 schema — do not copy T598 or G PRO numeric recommendations. */
+  logitech_rs50: [
+    { key: "trueforceAudio", label: "TrueForce Audio" },
+    { key: "trueforceStrength", label: "TrueForce Strength" },
+    { key: "ffbStrength", label: "FFB Strength" },
+    { key: "filter", label: "Filter" },
+    { key: "dampener", label: "Dampener" },
+    { key: "angle", label: "Steering Angle" },
+    { key: "brakeForce", label: "Brake Force" },
+    { key: "brakeBalance", label: "Brake Balance suggestion" },
+    { key: "notes", label: "Notes" },
+  ],
   fanatec: [
     { key: "sen", label: "SEN" },
     { key: "ff", label: "FF" },
@@ -106,6 +125,7 @@ export const WHEEL_TEMPLATE_FIELDS = {
     { key: "for", label: "FOR" },
     { key: "spr", label: "SPR" },
     { key: "dpr", label: "DPR" },
+    { key: "ful", label: "FUL" },
     { key: "brf", label: "BRF" },
     { key: "brakeBalance", label: "Brake Balance suggestion" },
     { key: "notes", label: "Notes" },

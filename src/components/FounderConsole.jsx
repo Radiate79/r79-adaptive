@@ -8,15 +8,16 @@ export default function FounderConsole({ onClose }) {
   const stats = getFounderStats();
 
   return (
-    <div style={styles.overlay} onClick={onClose} role="presentation">
+    <div className="r79-modal-overlay" style={styles.overlay} onClick={onClose} role="presentation">
       <div
+        className="r79-modal-panel"
         style={styles.panel}
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-label="Founder Console"
       >
         <div style={styles.header}>
-          <h3 style={styles.title}>Founder Console</h3>
+          <h3 className="r79-modal-panel__title" style={styles.title}>Founder Console</h3>
           <button type="button" onClick={onClose} style={styles.closeButton}>
             ×
           </button>

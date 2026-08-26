@@ -12,8 +12,10 @@ import { getCarsForGame, getTrackDisplayName, getTracksForGame } from "../utils/
 import { resolveLapCount } from "../utils/raceDistance.js";
 import {
   getConfirmedPodiumEvidence,
+  getPodiumEvidenceCaveat,
   isPodiumTestingPending,
 } from "../data/podiumEvidence.js";
+import { ACTIVE_PHYSICS_GENERATION } from "../data/gt7PhysicsVersion.js";
 import { calculateRaceWearProfile } from "./pitstopStrategyEngine.js";
 
 /** @typedef {'maximumPace' | 'stability' | 'tyrePreservation' | 'fuelEfficiency' | 'consistency'} PodiumPriorityId */
@@ -30,6 +32,8 @@ export const PODIUM_PRIORITY_LABELS = {
 /**
  * @typedef {Object} PodiumEngineInput
  * @property {string} [gameVersion]
+ * @property {string} [gameVersionPatch]
+ * @property {string} [physicsGeneration]
  * @property {string} carId
  * @property {string} trackId
  * @property {string} tyreCompound
@@ -66,6 +70,8 @@ export const PODIUM_PRIORITY_LABELS = {
  * @property {Record<string, string | number>} adjustedValues
  * @property {PodiumFieldAdjustment[]} adjustments
  * @property {{ laps: number, tyreStress: number, fuelStress: number, combinedStress: number }} wearProfile
+ * @property {string | null} [evidenceCaveat]
+ * @property {string} [physicsGeneration]
  */
 
 /**
@@ -306,7 +312,9 @@ export function buildPodiumNarrative(priorities, wearProfile, input) {
   const testingPending = isPodiumTestingPending(input);
 
   if (confirmedEvidence) {
-    return `${confirmedEvidence.summary} The Podium Engine biases ${leaders.join(" and ")} to protect the front-right tyre through the stint.`;
+    const caveat = getPodiumEvidenceCaveat(input);
+    const base = `${confirmedEvidence.summary} The Podium Engine biases ${leaders.join(" and ")} to protect the front-right tyre through the stint.`;
+    return caveat ? `${base} ${caveat}` : base;
   }
 
   if (
@@ -538,7 +546,7 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
     return { adjustedValues: adjusted, adjustments };
   }
 
-  if (family === "logitech_g923" || family === "logitech_g_pro") {
+  if (family === "logitech_g923" || family === "logitech_g_pro" || family === "logitech_rs50") {
     const torqueKey =
       family === "logitech_g923"
         ? "forceFeedbackMaxTorque"
@@ -627,6 +635,9 @@ export function buildPodiumRecommendation(input) {
 
   const contextLines = buildPodiumContextLines(input, car, track);
   const narrative = buildPodiumNarrative(priorities, wearProfile, input);
+  const evidenceCaveat = getPodiumEvidenceCaveat(input);
+  const physicsGeneration =
+    input.physicsGeneration ?? ACTIVE_PHYSICS_GENERATION;
 
   return {
     priorities,
@@ -647,5 +658,7 @@ export function buildPodiumRecommendation(input) {
       fuelStress: wearProfile.fuelStress,
       combinedStress: wearProfile.combinedStress,
     },
+    evidenceCaveat,
+    physicsGeneration,
   };
 }

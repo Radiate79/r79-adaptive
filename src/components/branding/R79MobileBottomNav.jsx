@@ -1,4 +1,5 @@
 import { MOBILE_BOTTOM_NAV_ITEMS, MOBILE_MORE_PINNED_ITEMS } from "../../data/appNavMeta.js";
+import R79Icon, { R79_FEATURE_ICONS } from "./R79Icon.jsx";
 
 /**
  * @param {Object} props
@@ -42,6 +43,10 @@ export default function R79MobileBottomNav({
       return moreOpen || isMoreRoute(page);
     }
 
+    if (item.pageId === "wheel-settings") {
+      return page === "wheel-settings" || page === "podium";
+    }
+
     return page === item.pageId;
   };
 
@@ -49,6 +54,10 @@ export default function R79MobileBottomNav({
     <nav className="r79-mobile-bottom-nav" aria-label="Mobile bottom navigation">
       {MOBILE_BOTTOM_NAV_ITEMS.map((item) => {
         const active = isActive(item);
+        const iconMeta = R79_FEATURE_ICONS[item.pageId] ?? {
+          name: "more",
+          accent: "violet",
+        };
         return (
           <button
             key={item.id}
@@ -62,7 +71,16 @@ export default function R79MobileBottomNav({
             aria-current={active && item.pageId !== "more" ? "page" : undefined}
           >
             <span className="r79-mobile-bottom-nav__icon" aria-hidden="true">
-              {item.icon}
+              <R79Icon
+                name={iconMeta.name}
+                accent={iconMeta.accent}
+                size={32}
+                withBase={
+                  item.pageId === "wheel-settings" ||
+                  item.pageId === "ai-engineer" ||
+                  item.pageId === "pitstop-strategy"
+                }
+              />
             </span>
             <span className="r79-mobile-bottom-nav__label">{item.label}</span>
           </button>

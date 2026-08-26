@@ -33,6 +33,7 @@ import {
   R79_SECTION_TITLE,
 } from "../styles/r79Theme.js";
 import R79PageHeader from "./branding/R79PageHeader.jsx";
+import R79Icon from "./branding/R79Icon.jsx";
 
 function ConfidenceMeter({ value }) {
   return (
@@ -579,38 +580,46 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
             </div>
             <div style={styles.detailGrid}>
               <OutputRow
-                icon="🏎"
+                iconName="car"
+                iconAccent="cyan"
                 label="Recommended Car"
                 value={analysis.recommendedCar.name}
                 highlight
               />
               <OutputRow
-                icon="🌐"
+                iconName="pulse"
+                iconAccent="violet"
                 label="Community Confidence"
                 value={`${analysis.recommendedCar.communityConfidence ?? 60}/100`}
               />
               <OutputRow
-                icon="⚖"
+                iconName="chip"
+                iconAccent="gold"
                 label="Recommended Brake Balance"
                 value={analysis.brakeBalance}
               />
               <OutputRow
-                icon="🛞"
+                iconName="wheel"
+                iconAccent="spectrum"
                 label="Recommended Wheel Settings"
                 value={analysis.wheelSettings}
               />
               <OutputRow
-                icon="⏱"
+                iconName="pitstop"
+                iconAccent="pit"
                 label="Recommended Pit Window"
                 value={analysis.pitWindow}
               />
             </div>
 
-            <div style={styles.reasoningPanel}>
-              <h4 style={styles.reasoningTitle}>🧠 AI Reasoning</h4>
-              <ul style={styles.reasoningList}>
+            <div className="r79-ai-reasoning-panel">
+              <h4 className="r79-ai-reasoning-panel__title">
+                <R79Icon name="ai" accent="ai" size={20} />
+                AI Reasoning
+              </h4>
+              <ul className="r79-ai-reasoning-panel__list">
                 {(analysis.aiReasoning ?? []).map((line) => (
-                  <li key={line} style={styles.reasoningItem}>
+                  <li key={line} className="r79-ai-reasoning-panel__item">
                     {line}
                   </li>
                 ))}
@@ -976,20 +985,19 @@ function ReportSection({ title, items, text }) {
   );
 }
 
-function OutputRow({ icon, label, value, highlight = false }) {
+function OutputRow({ iconName, iconAccent = "cyan", label, value, highlight = false }) {
   return (
     <div
-      style={{
-        ...styles.outputRow,
-        ...(highlight ? styles.outputRowHighlight : null),
-      }}
+      className={
+        highlight ? "r79-output-row r79-output-row--highlight" : "r79-output-row"
+      }
     >
-      <span style={styles.outputIcon} aria-hidden="true">
-        {icon}
+      <span className="r79-output-row__icon r79-icon-shell" aria-hidden="true">
+        <R79Icon name={iconName} accent={iconAccent} size={22} />
       </span>
-      <div style={styles.outputContent}>
-        <span style={styles.outputLabel}>{label}</span>
-        <span style={styles.outputValue}>{value}</span>
+      <div className="r79-output-row__content">
+        <span className="r79-output-row__label">{label}</span>
+        <span className="r79-output-row__value">{value}</span>
       </div>
     </div>
   );

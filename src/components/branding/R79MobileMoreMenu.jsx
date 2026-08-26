@@ -1,9 +1,11 @@
 import { useEffect, useRef } from "react";
 import {
   getMobileMoreSecondaryItems,
-  getSecondaryNavIcon,
+  getMorePinnedIconMeta,
+  getSecondaryNavIconMeta,
   MOBILE_MORE_PINNED_ITEMS,
 } from "../../data/appNavMeta.js";
+import R79Icon from "./R79Icon.jsx";
 
 /**
  * @param {Object} props
@@ -129,6 +131,7 @@ export default function R79MobileMoreMenu({
         <div className="r79-mobile-more-panel__body">
           {MOBILE_MORE_PINNED_ITEMS.map((item) => {
             const active = isPinnedActive(item);
+            const iconMeta = getMorePinnedIconMeta(item.id);
             return (
               <button
                 key={item.id}
@@ -141,8 +144,12 @@ export default function R79MobileMoreMenu({
                 }
                 onClick={() => handlePinned(item)}
               >
-                <span className="r79-mobile-more-panel__icon" aria-hidden="true">
-                  {item.icon}
+                <span className="r79-mobile-more-panel__icon r79-icon-shell" aria-hidden="true">
+                  <R79Icon
+                    name={iconMeta.name}
+                    accent={iconMeta.accent}
+                    size={22}
+                  />
                 </span>
                 <span className="r79-mobile-more-panel__label">{item.label}</span>
               </button>
@@ -157,6 +164,7 @@ export default function R79MobileMoreMenu({
 
               {secondaryItems.map((item) => {
                 const active = page === item.id;
+                const iconMeta = getSecondaryNavIconMeta(item.id);
                 return (
                   <button
                     key={item.id}
@@ -169,8 +177,12 @@ export default function R79MobileMoreMenu({
                     }
                     onClick={() => handlePage(item.id)}
                   >
-                    <span className="r79-mobile-more-panel__icon" aria-hidden="true">
-                      {getSecondaryNavIcon(item.id)}
+                    <span className="r79-mobile-more-panel__icon r79-icon-shell" aria-hidden="true">
+                      <R79Icon
+                        name={iconMeta.name}
+                        accent={iconMeta.accent}
+                        size={22}
+                      />
                     </span>
                     <span className="r79-mobile-more-panel__label">{item.label}</span>
                   </button>
