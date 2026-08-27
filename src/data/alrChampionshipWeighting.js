@@ -37,3 +37,17 @@ export const ALR_HISTORICAL_SEASON_FROM = 20;
 export const ALR_HISTORICAL_SEASON_TO = 22;
 
 export const ALR_HISTORICAL_SEASONS = [20, 21, 22];
+
+/**
+ * Physics-generation classification capability for ALR seasons.
+ * Season 24 (and earlier stored seasons) → PRE_1_71 / HISTORICAL.
+ * Season 25+ testing can target GT7_1_71_PHYSICS when tagged.
+ * Does not fabricate missing season datasets — tags existing windows only.
+ */
+export const ALR_SEASON_PHYSICS_META = {
+  20: { season: 20, physicsGeneration: "PRE_1_71", dataStatus: "HISTORICAL" },
+  21: { season: 21, physicsGeneration: "PRE_1_71", dataStatus: "HISTORICAL" },
+  22: { season: 22, physicsGeneration: "PRE_1_71", dataStatus: "HISTORICAL" },
+  23: { season: 23, physicsGeneration: "PRE_1_71", dataStatus: "HISTORICAL" },
+  24: { season: 24, physicsGeneration: "PRE_1_71", dataStatus: "HISTORICAL" },
+};

@@ -61,7 +61,7 @@ export function ReportIssueButton({
  *   onClose: () => void,
  * }} props
  */
-function ReportIssueModal({
+export function ReportIssueModal({
   sourcePage,
   itemName,
   defaultIssueType,
@@ -116,8 +116,9 @@ function ReportIssueModal({
   };
 
   return (
-    <div style={styles.overlay} role="presentation" onClick={onClose}>
+    <div className="r79-modal-overlay" style={styles.overlay} role="presentation" onClick={onClose}>
       <div
+        className="r79-modal-panel"
         style={styles.modal}
         role="dialog"
         aria-modal="true"
@@ -126,7 +127,7 @@ function ReportIssueModal({
       >
         <div style={styles.modalHeader}>
           <div>
-            <h3 id="report-issue-title" style={styles.modalTitle}>
+            <h3 id="report-issue-title" className="r79-modal-panel__title" style={styles.modalTitle}>
               Report Incorrect Data
             </h3>
             <p style={styles.modalTagline}>{DATA_CORRECTION_TAGLINE}</p>
@@ -192,7 +193,7 @@ function ReportIssueModal({
               type="text"
               value={contactName}
               onChange={(event) => setContactName(event.target.value)}
-              placeholder="Pathfinder callsign or email"
+              placeholder="Callsign or email"
               style={styles.input}
             />
           </label>

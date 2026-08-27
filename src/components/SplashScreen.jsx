@@ -7,7 +7,6 @@ import {
 import { APP_VERSION } from "../data/founderMeta.js";
 import { markSplashSeen } from "../utils/splashStorage.js";
 import R79Emblem from "./branding/R79Emblem.jsx";
-import R79Wordmark from "./branding/R79Wordmark.jsx";
 
 export default function SplashScreen({ onEnter }) {
   const handleEnter = () => {
@@ -31,17 +30,23 @@ export default function SplashScreen({ onEnter }) {
       `}</style>
 
       <div className="r79-splash__panel">
-        <div className="r79-splash__brand">
+        <div className="r79-splash__hero">
+          <span className="r79-splash__hero-glow" aria-hidden="true" />
+
           <div className="r79-splash__emblem">
             <R79Emblem variant="splash" pulse />
           </div>
 
-          <div className="r79-splash__wordmark">
-            <R79Wordmark variant="hero" />
+          <div className="r79-splash__identity">
+            <span className="r79-brand-bar__wordmark r79-splash__wordmark">
+              <span className="r79-brand-bar__wordmark-r79">R79</span>
+              <span className="r79-brand-bar__wordmark-adaptive">Adaptive</span>
+            </span>
+            <span className="r79-brand-bar__tagline r79-splash__product-tagline">
+              {R79_APP_TAGLINE}
+            </span>
           </div>
         </div>
-
-        <p className="r79-splash__tagline">{R79_APP_TAGLINE}</p>
 
         <div className="r79-splash__motto">
           {SPLASH_COPY.motto.map((line) => (

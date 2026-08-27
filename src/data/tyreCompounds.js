@@ -22,6 +22,24 @@ export function getCompoundTyreModifier(compound) {
  * @param {string} [compound]
  * @returns {string}
  */
+export function getTyreCompoundDisplayLabel(compound) {
+  const value = normalizeTyreCompound(compound);
+  return TYRE_COMPOUND_DISPLAY_LABELS[value] ?? value;
+}
+
+/** GT7 compound codes → user-facing labels for recommendations. */
+export const TYRE_COMPOUND_DISPLAY_LABELS = {
+  S: "Racing Softs",
+  M: "Racing Mediums",
+  H: "Racing Hards",
+  IM: "Intermediates",
+  W: "Wet Tyres",
+};
+
+/**
+ * @param {string} [compound]
+ * @returns {string}
+ */
 export function normalizeTyreCompound(compound) {
   const value = String(compound ?? "M").trim().toUpperCase();
   return TYRE_COMPOUND_OPTIONS.includes(value) ? value : "M";

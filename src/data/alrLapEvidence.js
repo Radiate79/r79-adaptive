@@ -1,6 +1,11 @@
 /**
  * ALR race lap evidence — qualifying, sprint, and feature fastest laps.
  * Seeded from ALR Season 23 Gr.3 championship PDF data.
+ *
+ * Physics classification (do not fabricate missing fields on each row):
+ * Season 23 → PRE_1_71 / HISTORICAL until re-validated under GT7_1_71_PHYSICS.
+ * Season 24 capability: PRE_1_71 / HISTORICAL.
+ * Season 25+ testing can use GT7_1_71_PHYSICS when tagged.
  */
 
 /** @typedef {'qualifying' | 'sprint' | 'feature'} AlrLapSessionType */

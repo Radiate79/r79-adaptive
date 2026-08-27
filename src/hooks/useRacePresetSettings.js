@@ -6,6 +6,7 @@ import {
   matchRaceConditionPreset,
   resolveRaceFormatId,
 } from "../data/racePresets.js";
+import { commitLapCountInput } from "../utils/raceDistance.js";
 
 /**
  * @param {string} [initialPresetId]
@@ -56,7 +57,7 @@ export function useRacePresetSettings(
 
   const setLapCount = useCallback(
     (value) => {
-      const nextLaps = Math.max(1, Math.min(999, Math.round(Number(value) || 1)));
+      const nextLaps = commitLapCountInput(value);
       setLapCountState(nextLaps);
 
       if (nextLaps !== getRaceFormatDefaultLaps(presetId)) {

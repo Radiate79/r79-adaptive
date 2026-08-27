@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { GAME_CATALOG } from "../../data/gameVersions.js";
-
-const PRIMARY_NAV = [
-  { id: "todays-race", label: "Today's Race" },
-  { id: "ai-engineer", label: "AI Race Engineer" },
-  { id: "wheel-settings", label: "Wheel Settings" },
-  { id: "advisor", label: "Championship Advisor" },
-  { id: "pitstop-strategy", label: "🏁 Pitstop Strategy" },
-];
+import {
+  getPrimaryNavItem,
+  MOBILE_FEATURE_CARD_ORDER,
+  MOBILE_WHEEL_HERO_ID,
+  PRIMARY_NAV_ITEMS,
+} from "../../data/appNavMeta.js";
+import R79Icon from "./R79Icon.jsx";
+import R79HeroWheel from "./R79HeroWheel.jsx";
+import R79Object, { R79_FEATURE_OBJECTS } from "./R79Object.jsx";
 
 /**
  * @param {Object} props
@@ -17,6 +18,8 @@ const PRIMARY_NAV = [
  * @param {(version: string) => void} props.setGameVersion
  * @param {string[]} props.gameOptions
  * @param {{ id: string, label: string }[]} props.allPages
+ * @param {boolean} props.moreOpen
+ * @param {(open: boolean) => void} props.onMoreOpenChange
  */
 export default function R79AppNav({
   page,
@@ -25,13 +28,19 @@ export default function R79AppNav({
   setGameVersion,
   gameOptions,
   allPages,
+  moreOpen,
+  onMoreOpenChange,
 }) {
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef(null);
+  const desktopMoreRef = useRef(null);
 
-  const primaryIds = new Set(PRIMARY_NAV.map((item) => item.id));
+  const primaryIds = new Set(PRIMARY_NAV_ITEMS.map((item) => item.id));
   const secondaryPages = allPages.filter((item) => !primaryIds.has(item.id));
-  const moreIsActive = secondaryPages.some((item) => item.id === page);
+  const desktopMoreIsActive = secondaryPages.some((item) => item.id === page);
+
+  const wheelHero = getPrimaryNavItem(MOBILE_WHEEL_HERO_ID);
+  const mobileFeatureCards = MOBILE_FEATURE_CARD_ORDER.map((id) =>
+    getPrimaryNavItem(id),
+  ).filter(Boolean);
 
   useEffect(() => {
     if (!moreOpen) {
@@ -39,29 +48,38 @@ export default function R79AppNav({
     }
 
     const handlePointer = (event) => {
-      if (moreRef.current && !moreRef.current.contains(event.target)) {
-        setMoreOpen(false);
+      if (!window.matchMedia("(min-width: 769px)").matches) {
+        return;
       }
+
+      if (desktopMoreRef.current?.contains(event.target)) {
+        return;
+      }
+
+      onMoreOpenChange(false);
     };
 
-    document.addEventListener("mousedown", handlePointer);
-    document.addEventListener("touchstart", handlePointer);
+    const timer = window.setTimeout(() => {
+      document.addEventListener("mousedown", handlePointer);
+    }, 0);
 
     return () => {
+      window.clearTimeout(timer);
       document.removeEventListener("mousedown", handlePointer);
-      document.removeEventListener("touchstart", handlePointer);
     };
-  }, [moreOpen]);
+  }, [moreOpen, onMoreOpenChange]);
 
   const navigate = (id) => {
     setPage(id);
-    setMoreOpen(false);
+    onMoreOpenChange(false);
   };
+
+  const wheelHeroActive = page === "wheel-settings" || page === "podium";
 
   return (
     <div className="r79-app-nav-shell">
-      <nav className="r79-app-nav" aria-label="Primary navigation">
-        {PRIMARY_NAV.map((item) => {
+      <nav className="r79-app-nav r79-app-nav--desktop" aria-label="Primary navigation">
+        {PRIMARY_NAV_ITEMS.map((item) => {
           const isActive = page === item.id;
           return (
             <button
@@ -77,17 +95,17 @@ export default function R79AppNav({
           );
         })}
 
-        <div className="r79-nav-more" ref={moreRef}>
+        <div className="r79-nav-more" ref={desktopMoreRef}>
           <button
             type="button"
             className={
-              moreIsActive || moreOpen
+              desktopMoreIsActive || moreOpen
                 ? "r79-nav-pill r79-nav-pill--active r79-nav-more__trigger"
                 : "r79-nav-pill r79-nav-more__trigger"
             }
             aria-expanded={moreOpen}
             aria-haspopup="menu"
-            onClick={() => setMoreOpen((open) => !open)}
+            onClick={() => onMoreOpenChange(!moreOpen)}
           >
             More
           </button>
@@ -117,7 +135,7 @@ export default function R79AppNav({
         </div>
       </nav>
 
-      <div className="r79-app-game-selector">
+      <div className="r79-app-game-selector r79-app-game-selector--desktop">
         <span className="r79-app-game-label">Game</span>
         <div className="r79-app-game-buttons">
           {gameOptions.map((version) => {
@@ -138,6 +156,146 @@ export default function R79AppNav({
           })}
         </div>
       </div>
+
+      <div className="r79-mobile-chrome">
+        {wheelHero ? (
+          <button
+            type="button"
+            className={
+              wheelHeroActive
+                ? "r79-wheel-hero-nav r79-wheel-hero-nav--active"
+                : "r79-wheel-hero-nav"
+            }
+            onClick={() => navigate(MOBILE_WHEEL_HERO_ID)}
+            aria-current={page === "wheel-settings" ? "page" : undefined}
+          >
+            <span className="r79-wheel-hero-nav__rim" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__trails" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__atmosphere" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__visual r79-holo-object r79-holo-object--hero" aria-hidden="true">
+              <span className="r79-holo-object__ring" />
+              <span className="r79-wheel-hero-nav__rings">
+                <span />
+                <span />
+                <span />
+              </span>
+              <span className="r79-wheel-hero-nav__pedestal" />
+              <R79HeroWheel />
+            </span>
+            <span className="r79-wheel-hero-nav__copy">
+              <span className="r79-wheel-hero-nav__title">
+                <span className="r79-wheel-hero-nav__title-wheel">Wheel</span>
+                <span className="r79-wheel-hero-nav__title-settings">Settings</span>
+              </span>
+              <span className="r79-wheel-hero-nav__subtitle">
+                Precision setup for your race
+              </span>
+              <span className="r79-wheel-hero-nav__accent" />
+            </span>
+            <span className="r79-wheel-hero-nav__chevron" aria-hidden="true">
+              <R79Icon name="chevron" size={18} accent="magenta" />
+            </span>
+          </button>
+        ) : null}
+
+        <div
+          className="r79-mobile-feature-scroll"
+          role="navigation"
+          aria-label="Features"
+        >
+          {mobileFeatureCards.map((item) => {
+            const isActive = page === item.id;
+            const objectName = R79_FEATURE_OBJECTS[item.id] ?? "podium";
+            const accentClass =
+              item.id === "podium"
+                ? "r79-mobile-feature-card--podium"
+                : item.id === "todays-race"
+                  ? "r79-mobile-feature-card--today"
+                  : item.id === "ai-engineer"
+                    ? "r79-mobile-feature-card--ai"
+                    : item.id === "advisor"
+                      ? "r79-mobile-feature-card--champ"
+                      : item.id === "pitstop-strategy"
+                        ? "r79-mobile-feature-card--pit"
+                        : "";
+            const featureClass = [
+              "r79-mobile-feature-card",
+              isActive ? "r79-mobile-feature-card--active" : "",
+              accentClass,
+            ]
+              .filter(Boolean)
+              .join(" ");
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => navigate(item.id)}
+                className={featureClass}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <span className="r79-mobile-feature-card__icon r79-holo-object r79-icon-shell r79-icon-shell--feature" aria-hidden="true">
+                  <span className="r79-holo-object__ring" />
+                  <R79Object name={objectName} size={108} />
+                </span>
+                <span className="r79-mobile-feature-card__label">
+                  {item.shortLabel}
+                </span>
+                {item.secondaryLabel ? (
+                  <span className="r79-mobile-feature-card__sub">
+                    {item.secondaryLabel}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="r79-mobile-more-wrap">
+          <button
+            type="button"
+            className={
+              moreOpen
+                ? "r79-mobile-more-btn r79-mobile-more-btn--active"
+                : "r79-mobile-more-btn"
+            }
+            aria-expanded={moreOpen}
+            aria-haspopup="menu"
+            onClick={() => onMoreOpenChange(!moreOpen)}
+          >
+            <span className="r79-mobile-more-btn__dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+            <span>More</span>
+          </button>
+        </div>
+
+        <div className="r79-mobile-game-panel">
+          <span className="r79-mobile-game-panel__label">Game</span>
+          <div className="r79-mobile-game-panel__pills">
+            {gameOptions.map((version) => {
+              const entry = GAME_CATALOG[version];
+              const isActive = gameVersion === version;
+              return (
+                <button
+                  key={version}
+                  type="button"
+                  onClick={() => setGameVersion(version)}
+                  className={
+                    isActive
+                      ? "r79-mobile-game-pill r79-mobile-game-pill--active"
+                      : "r79-mobile-game-pill"
+                  }
+                >
+                  {entry.shortLabel}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+

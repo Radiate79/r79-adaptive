@@ -78,6 +78,11 @@ export function getValidatedT598ValuesForClass(carClass) {
  * @property {string} tyreCompound
  * @property {boolean} bopOn
  * @property {Record<string, string | number>} values
+ * Physics fields optional — legacy validated profiles stay usable without claiming 1.71 re-validation.
+ * @property {string} [physicsGeneration]
+ * @property {'CURRENT' | 'HISTORICAL' | 'TESTING' | 'UNVALIDATED'} [dataStatus]
+ * @property {'validated' | 'testing' | 'unvalidated' | 'historical'} [validationStatus]
+ * @property {boolean} [validatedAfterUpdate]
  */
 
 /**

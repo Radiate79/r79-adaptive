@@ -20,6 +20,7 @@ import DataReports from "./DataReports.jsx";
 import R79Archive from "./R79Archive.jsx";
 import R79PageHeader from "./branding/R79PageHeader.jsx";
 import R79Wordmark from "./branding/R79Wordmark.jsx";
+import { ReportIssueModal } from "./ReportIssue.jsx";
 
 const VIEWS = {
   settings: "settings",
@@ -27,24 +28,23 @@ const VIEWS = {
   archive: "archive",
   founder: "founder",
   dataReports: "dataReports",
+  feedback: "feedback",
 };
 
 /**
  * @param {{ bootView?: string | null, onBootViewConsumed?: () => void }} props
  */
 export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
-  const [view, setView] = useState(
-    bootView === VIEWS.dataReports ? VIEWS.dataReports : VIEWS.settings,
-  );
+  const [view, setView] = useState(VIEWS.settings);
 
   useEffect(() => {
-    if (bootView !== VIEWS.dataReports) {
+    if (!bootView || !(bootView in VIEWS)) {
       return;
     }
 
-    setView(VIEWS.dataReports);
+    setView(bootView);
     onBootViewConsumed?.();
-  }, [bootView]);
+  }, [bootView, onBootViewConsumed]);
   const stats = useMemo(() => getFounderStats(), [view]);
 
   if (view === VIEWS.archive) {
@@ -144,12 +144,40 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
             <Breadcrumb
               items={[
                 { label: "Settings", onClick: () => setView(VIEWS.settings) },
-                { label: "Data Reports", active: true },
+                { label: "Data Sources", active: true },
               ]}
             />
           }
           onBack={() => setView(VIEWS.settings)}
         />
+      </section>
+    );
+  }
+
+  if (view === VIEWS.feedback) {
+    return (
+      <section className="r79-page r79-page--wide">
+        <Breadcrumb
+          items={[
+            { label: "Settings", onClick: () => setView(VIEWS.settings) },
+            { label: "Feedback / Request Feature", active: true },
+          ]}
+        />
+
+        <R79PageHeader
+          title="Feedback / Request Feature"
+          subtitle="Report data issues or suggest improvements for R79."
+        />
+
+        <div className="r79-settings-feedback-shell">
+          <ReportIssueModal
+            sourcePage="r79-settings"
+            itemName=""
+            defaultIssueType="other"
+            gameVersion=""
+            onClose={() => setView(VIEWS.settings)}
+          />
+        </div>
       </section>
     );
   }
@@ -166,7 +194,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
         <R79PageHeader
           title="About R79"
-          subtitle="Radiate79's Gran Turismo race engineering toolkit — championship analysis, race intelligence, and daily race strategy."
+          subtitle="R79 Adaptive — Gran Turismo race engineering toolkit. Championship analysis, race intelligence, and daily race strategy."
         />
 
         <div style={styles.aboutIdentity}>
@@ -235,7 +263,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
         style={styles.settingsRow}
       >
         <span style={styles.settingsRowLabel}>About R79</span>
-        <span style={styles.settingsRowHint}>Version, Pathfinder, founder</span>
+        <span style={styles.settingsRowHint}>Version, membership, founder</span>
         <span style={styles.chevron}>›</span>
       </button>
 
