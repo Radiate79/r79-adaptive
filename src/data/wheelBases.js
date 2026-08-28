@@ -19,7 +19,7 @@ export const T598_OPTION_RANGES = {
   boostHigh: ["-2", "-1", "0", "+1", "+2"],
   speed: ["Low", "Mid", "High", "Extreme"],
   damper: buildPercentRange(10),
-  damperGain: ["Low", "Mid", "High", "Extreme"],
+  damperGain: ["Low", "Mid", "High"],
   spring: buildPercentRange(5),
   gearJolt: ["Off", "Low", "Medium", "High"],
   endStop: ["Low", "Mid", "High"],

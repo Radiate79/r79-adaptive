@@ -193,7 +193,7 @@ export function ReportIssueModal({
               type="text"
               value={contactName}
               onChange={(event) => setContactName(event.target.value)}
-              placeholder="Pathfinder callsign or email"
+              placeholder="Callsign or email"
               style={styles.input}
             />
           </label>

@@ -26,6 +26,15 @@ import {
   resolveDualValidationState,
 } from "../data/wheelPlatformVersion.js";
 import { buildPodiumRecommendation, isPodiumInputComplete } from "./podiumEngine.js";
+import { sanitizeWheelFieldValue } from "./wheelSchemaValidation.js";
+import {
+  resolveRecommendationConfidence,
+  valuesLookEmpty,
+} from "./recommendationConfidence.js";
+import {
+  buildRecommendationCacheKey,
+  getCachedRecommendation,
+} from "./recommendationCache.js";
 
 /**
  * @typedef {Object} WheelSetupFilters
@@ -154,13 +163,47 @@ export function searchWheelSetups(query, gameVersion) {
 
 /**
  * @param {WheelSetupFilters} filters
+ * @param {object} result
  */
-export function findWheelSetup(filters) {
+function enrichLookupConfidence(filters, result) {
+  const setup = result.setup;
+  const physicsMeta = result.physicsMeta ?? (setup ? normalizeWheelSetupPhysics(setup) : null);
+  const platformMeta =
+    result.platformMeta ??
+    normalizeWheelPlatformMeta(filters.wheelBase ?? setup?.wheelBase, setup ?? undefined);
+  const confidence = resolveRecommendationConfidence({
+    matchType: result.matchType,
+    isValidated: Boolean(setup?.isValidated),
+    hasEmptyValues: valuesLookEmpty(setup?.values),
+    podiumAdjusted: false,
+    physicsHistorical: Boolean(
+      physicsMeta?.dataStatus === "HISTORICAL" ||
+        physicsMeta?.validationStatus === "historical" ||
+        result.physicsCaveat,
+    ),
+    platformValidationState: platformMeta?.validationStatus,
+    dualBothValidated: Boolean(result.dualValidation?.bothValidated),
+  });
+
+  return {
+    ...result,
+    physicsMeta,
+    platformMeta,
+    confidence: confidence.confidence,
+    confidenceLabel: confidence.label,
+    confidenceNote: confidence.note,
+  };
+}
+
+/**
+ * @param {WheelSetupFilters} filters
+ */
+function findWheelSetupUncached(filters) {
   const exact = findInPool(filters, () => true);
 
   if (exact) {
     const platformMeta = normalizeWheelPlatformMeta(filters.wheelBase ?? exact.wheelBase, exact);
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: exact.isValidated ? "validated" : "exact",
       setup: exact,
       physicsMeta: normalizeWheelSetupPhysics(exact),
@@ -172,7 +215,7 @@ export function findWheelSetup(filters) {
       }),
       physicsCaveat: getWheelHistoricalCaveat(exact),
       message: null,
-    };
+    });
   }
 
   const similar = findSimilarInPool(filters, () => true, {
@@ -181,13 +224,13 @@ export function findWheelSetup(filters) {
   });
 
   if (similar) {
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: similar.isValidated ? "validatedSimilar" : "similar",
       setup: similar,
       physicsMeta: normalizeWheelSetupPhysics(similar),
       physicsCaveat: getWheelHistoricalCaveat(similar),
       message: "Showing closest match — tyre compound or BOP may differ.",
-    };
+    });
   }
 
   const carTrackMatches = WHEEL_SETUP_POOL.filter(
@@ -200,13 +243,13 @@ export function findWheelSetup(filters) {
   const carTrack = pickBestPhysicsAwareSetup(carTrackMatches);
 
   if (carTrack) {
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: carTrack.isValidated ? "validatedCarTrack" : "carTrack",
       setup: carTrack,
       physicsMeta: normalizeWheelSetupPhysics(carTrack),
       physicsCaveat: getWheelHistoricalCaveat(carTrack),
       message: null,
-    };
+    });
   }
 
   const carOnlyMatches = WHEEL_SETUP_POOL.filter(
@@ -218,7 +261,7 @@ export function findWheelSetup(filters) {
   const carOnly = pickBestPhysicsAwareSetup(carOnlyMatches);
 
   if (carOnly) {
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: carOnly.isValidated ? "validatedCarOnly" : "carOnly",
       setup: carOnly,
       physicsMeta: normalizeWheelSetupPhysics(carOnly),
@@ -226,7 +269,7 @@ export function findWheelSetup(filters) {
       message: carOnly.isValidated
         ? null
         : "Showing starter profile for this car on a different track.",
-    };
+    });
   }
 
   const selectedCar = getCarsForGame(filters.gameVersion).find(
@@ -252,7 +295,7 @@ export function findWheelSetup(filters) {
     const classStarter = pickBestPhysicsAwareSetup(classMatches);
 
     if (classStarter) {
-      return {
+      return enrichLookupConfidence(filters, {
         matchType: classStarter.isValidated ? "validatedClass" : "classStarter",
         setup: classStarter,
         physicsMeta: normalizeWheelSetupPhysics(classStarter),
@@ -260,7 +303,7 @@ export function findWheelSetup(filters) {
         message: classStarter.isValidated
           ? null
           : `Showing ${carClass} starter profile — refine per car after testing.`,
-      };
+      });
     }
   }
 
@@ -272,13 +315,13 @@ export function findWheelSetup(filters) {
   const wheelOnly = pickBestPhysicsAwareSetup(wheelOnlyMatches);
 
   if (wheelOnly) {
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: wheelOnly.isValidated ? "validatedWheelOnly" : "wheelOnly",
       setup: wheelOnly,
       physicsMeta: normalizeWheelSetupPhysics(wheelOnly),
       physicsCaveat: getWheelHistoricalCaveat(wheelOnly),
       message: "Showing starter reference for this wheel base only.",
-    };
+    });
   }
 
   const selectedFamily = getTemplateFamilyForWheelBase(filters.wheelBase ?? "");
@@ -296,22 +339,30 @@ export function findWheelSetup(filters) {
   const familyReference = pickBestPhysicsAwareSetup(familyMatches);
 
   if (familyReference) {
-    return {
+    return enrichLookupConfidence(filters, {
       matchType: familyReference.isValidated ? "validatedWheelFamily" : "wheelFamily",
       setup: familyReference,
       physicsMeta: normalizeWheelSetupPhysics(familyReference),
       physicsCaveat: getWheelHistoricalCaveat(familyReference),
       message: `Showing closest ${getWheelBaseOption(filters.wheelBase)?.label ?? "wheel"} reference profile.`,
-    };
+    });
   }
 
-  return {
+  return enrichLookupConfidence(filters, {
     matchType: "none",
     setup: null,
     physicsMeta: null,
     physicsCaveat: null,
     message: NO_EXACT_SETUP_MESSAGE,
-  };
+  });
+}
+
+/**
+ * @param {WheelSetupFilters} filters
+ */
+export function findWheelSetup(filters) {
+  const key = buildRecommendationCacheKey("findWheelSetup", filters);
+  return getCachedRecommendation(key, () => findWheelSetupUncached(filters));
 }
 
 /**
@@ -370,40 +421,71 @@ export function findWheelSetupForRaceEngineer(filters) {
  */
 export function buildWheelSetupPresentation(setup, podiumInput) {
   const templateWheelBaseId = podiumInput?.wheelBase ?? setup?.wheelBase;
+  const cacheKey = buildRecommendationCacheKey("presentation", {
+    setupId: setup?.id,
+    setupWheel: setup?.wheelBase,
+    values: setup?.values,
+    podiumInput,
+    templateWheelBaseId,
+  });
 
-  if (!setup || !podiumInput || !isPodiumInputComplete(podiumInput)) {
+  return getCachedRecommendation(cacheKey, () => {
+    if (!setup || !podiumInput || !isPodiumInputComplete(podiumInput)) {
+      return {
+        rows: setup
+          ? formatWheelSetupValues(setup, { templateWheelBaseId })
+          : [],
+        podium: null,
+        confidence: null,
+      };
+    }
+
+    const podium = buildPodiumRecommendation({
+      ...podiumInput,
+      gameVersion: podiumInput.gameVersion ?? setup.gameVersion,
+      wheelBase: podiumInput.wheelBase ?? setup.wheelBase,
+      physicsGeneration:
+        podiumInput.physicsGeneration ??
+        normalizeWheelSetupPhysics(setup).physicsGeneration,
+      baseValues: setup.values ?? {},
+      carClass: getCarsForGame(setup.gameVersion).find(
+        (car) => car.id === setup.carId,
+      )?.class,
+    });
+
+    const rows = formatWheelSetupValues(setup, {
+      templateWheelBaseId: podiumInput.wheelBase ?? setup.wheelBase,
+      valueOverrides: podium?.adjustedValues,
+      fieldReasons: podium?.fieldReasons ?? {},
+      podiumContext: {
+        contextLines: podium?.contextLines ?? [],
+        narrative: podium?.narrative ?? "",
+      },
+    });
+
+    const platformMeta = normalizeWheelPlatformMeta(
+      podiumInput.wheelBase ?? setup.wheelBase,
+      setup,
+    );
+    const physicsMeta = normalizeWheelSetupPhysics(setup);
+    const confidence = resolveRecommendationConfidence({
+      matchType: setup.isValidated ? "validated" : "exact",
+      isValidated: Boolean(setup.isValidated),
+      hasEmptyValues: valuesLookEmpty(podium?.adjustedValues ?? setup.values),
+      podiumAdjusted: Boolean(podium?.adjustments?.length),
+      physicsHistorical: Boolean(
+        physicsMeta?.dataStatus === "HISTORICAL" ||
+          physicsMeta?.validationStatus === "historical",
+      ),
+      platformValidationState: platformMeta?.validationStatus,
+    });
+
     return {
-      rows: setup
-        ? formatWheelSetupValues(setup, { templateWheelBaseId })
-        : [],
-      podium: null,
+      rows,
+      podium,
+      confidence,
     };
-  }
-
-  const podium = buildPodiumRecommendation({
-    ...podiumInput,
-    gameVersion: podiumInput.gameVersion ?? setup.gameVersion,
-    wheelBase: podiumInput.wheelBase ?? setup.wheelBase,
-    physicsGeneration:
-      podiumInput.physicsGeneration ??
-      normalizeWheelSetupPhysics(setup).physicsGeneration,
-    baseValues: setup.values ?? {},
-    carClass: getCarsForGame(setup.gameVersion).find(
-      (car) => car.id === setup.carId,
-    )?.class,
   });
-
-  const rows = formatWheelSetupValues(setup, {
-    templateWheelBaseId: podiumInput.wheelBase ?? setup.wheelBase,
-    valueOverrides: podium?.adjustedValues,
-    fieldReasons: podium?.fieldReasons ?? {},
-    podiumContext: {
-      contextLines: podium?.contextLines ?? [],
-      narrative: podium?.narrative ?? "",
-    },
-  });
-
-  return { rows, podium };
 }
 
 /**
@@ -488,7 +570,15 @@ export function formatWheelSetupValues(setup, options = {}) {
   };
 
   const rows = fields.map((field) => {
-    const value = values[field.key] ?? "—";
+    const rawValue =
+      values[field.key] == null || values[field.key] === ""
+        ? "—"
+        : values[field.key];
+    const value = sanitizeWheelFieldValue(
+      templateFamily,
+      field.key,
+      rawValue,
+    );
 
     if (templateFamily === "t598") {
       const meta = getT598FieldMeta(field.key, value, carClass);
@@ -510,24 +600,6 @@ export function formatWheelSetupValues(setup, options = {}) {
       meta.reason,
     );
   });
-
-  const knownKeys = new Set(fields.map((field) => field.key));
-  for (const [key, value] of Object.entries(values)) {
-    if (knownKeys.has(key) || value == null || value === "") {
-      continue;
-    }
-
-    if (templateFamily === "t598") {
-      const meta = getT598FieldMeta(key, value, carClass);
-      rows.push(
-        buildRowMeta(key, meta.label, meta.value, meta.description, meta.reason),
-      );
-      continue;
-    }
-
-    const meta = getWheelFieldMeta(key, key, value, carClass);
-    rows.push(buildRowMeta(key, meta.label, meta.value, meta.description, meta.reason));
-  }
 
   return rows;
 }

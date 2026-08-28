@@ -12,6 +12,7 @@ import {
   buildWheelSetupPresentation,
 } from "../src/engine/wheelSettingsEngine.js";
 import { isInvalidWheelReason } from "../src/data/wheelFieldHelp.js";
+import { findIllegalPresentationRows } from "../src/engine/wheelSchemaValidation.js";
 
 const TEST_CASE = {
   gameVersion: "gt7",
@@ -69,6 +70,27 @@ for (const option of WHEEL_BASE_OPTIONS) {
   if (rows[0]?.label !== expectedFields[0]?.label) {
     console.error(
       `FAIL ${option.label}: first field is ${rows[0]?.label}, expected ${expectedFields[0]?.label}`,
+    );
+    failures += 1;
+    continue;
+  }
+
+  const allowedKeys = new Set(expectedFields.map((field) => field.key));
+  const leaked = rows.find((row) => !allowedKeys.has(row.key));
+  if (leaked) {
+    console.error(
+      `FAIL ${option.label}: leaked field ${leaked.key} (${leaked.label})`,
+    );
+    failures += 1;
+    continue;
+  }
+
+  const illegal = findIllegalPresentationRows(option.id, rows);
+  if (illegal.length) {
+    console.error(
+      `FAIL ${option.label}: illegal values ${illegal
+        .map((item) => `${item.key}=${item.value}`)
+        .join(", ")}`,
     );
     failures += 1;
     continue;

@@ -61,7 +61,7 @@ export default function DataReports({ onBack, breadcrumb = null }) {
 
       <R79PageHeader
         title="Data Reports"
-        subtitle="Review user and Pathfinder reports of incorrect car, track, class, scoring or recommendation data."
+        subtitle="Review driver and community reports of incorrect car, track, class, scoring or recommendation data."
       >
         <p style={styles.tagline}>{DATA_CORRECTION_TAGLINE}</p>
         <div style={styles.headerActions}>

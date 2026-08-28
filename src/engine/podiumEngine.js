@@ -17,6 +17,12 @@ import {
 } from "../data/podiumEvidence.js";
 import { ACTIVE_PHYSICS_GENERATION } from "../data/gt7PhysicsVersion.js";
 import { calculateRaceWearProfile } from "./pitstopStrategyEngine.js";
+import { sanitizeWheelValues } from "./wheelSchemaValidation.js";
+import {
+  buildInteractionFieldReason,
+  computeCarTrackInteraction,
+  inferRaceObjective,
+} from "./carTrackInteraction.js";
 
 /** @typedef {'maximumPace' | 'stability' | 'tyrePreservation' | 'fuelEfficiency' | 'consistency'} PodiumPriorityId */
 
@@ -72,6 +78,8 @@ export const PODIUM_PRIORITY_LABELS = {
  * @property {{ laps: number, tyreStress: number, fuelStress: number, combinedStress: number }} wearProfile
  * @property {string | null} [evidenceCaveat]
  * @property {string} [physicsGeneration]
+ * @property {'qualifying' | 'sprint' | 'race' | 'endurance'} [raceObjective]
+ * @property {string[]} [interactionFactors]
  */
 
 /**
@@ -130,9 +138,10 @@ function normalizePriorityWeights(raw) {
  * @param {import("../data/gt7/cars.js").CarRecord | null} car
  * @param {import("../data/gt7/tracks.js").TrackRecord | null} track
  * @param {ReturnType<typeof calculateRaceWearProfile>} wearProfile
+ * @param {ReturnType<typeof computeCarTrackInteraction>} [interaction]
  * @returns {Record<PodiumPriorityId, number>}
  */
-function computeRawPriorities(input, car, track, wearProfile) {
+function computeRawPriorities(input, car, track, wearProfile, interaction) {
   const laps = wearProfile.laps;
   const compound = normalizeTyreCompound(input.tyreCompound);
   const compoundWear = getCompoundTyreModifier(compound);
@@ -143,8 +152,13 @@ function computeRawPriorities(input, car, track, wearProfile) {
   const trackTyres = Number(track?.tyres ?? 5) / 10;
   const trackFuel = Number(track?.fuel ?? 5) / 10;
   const trackTraction = Number(track?.traction ?? 5) / 10;
+  const trackKerbs = Number(track?.kerbs ?? 5) / 10;
+  const trackTopSpeed = Number(track?.topSpeed ?? 5) / 10;
   const carTyres = Number(car?.tyres ?? 6);
+  const carRotation = Number(car?.rotation ?? 5) / 10;
+  const carStability = Number(car?.stability ?? 5) / 10;
   const confirmedEvidence = getConfirmedPodiumEvidence(input);
+  const objective = inferRaceObjective(laps, tyreMultiplier, fuelMultiplier);
 
   /** @type {Record<PodiumPriorityId, number>} */
   const raw = {
@@ -160,13 +174,13 @@ function computeRawPriorities(input, car, track, wearProfile) {
   const isHighTyreWear = tyreMultiplier >= 4 || wearProfile.tyreStress >= 6;
   const isHighFuelWear = fuelMultiplier >= 4 || wearProfile.fuelStress >= 6;
 
-  if (isLowWearRace) {
+  if (objective === "qualifying" || isLowWearRace) {
     raw.maximumPace += 0.42;
     raw.stability -= 0.04;
-  } else if (laps <= 12) {
+  } else if (objective === "sprint" || laps <= 12) {
     raw.maximumPace += 0.18;
     raw.consistency += 0.08;
-  } else if (laps <= 25) {
+  } else if (objective === "race" || laps <= 25) {
     raw.consistency += 0.16;
     raw.tyrePreservation += 0.1;
     raw.fuelEfficiency += 0.08;
@@ -193,7 +207,16 @@ function computeRawPriorities(input, car, track, wearProfile) {
   raw.stability +=
     trackStability * 0.24 +
     trackTraction * 0.08 +
+    carStability * 0.08 +
+    trackKerbs * 0.12 +
     (compound === "W" || compound === "IM" ? 0.3 : 0);
+
+  raw.maximumPace += carRotation * 0.06;
+
+  if (carRotation >= 0.8 && trackTopSpeed >= 0.8) {
+    raw.stability += 0.08;
+    raw.consistency += 0.04;
+  }
 
   raw.consistency +=
     (laps >= 20 ? 0.12 : 0) +
@@ -238,6 +261,15 @@ function computeRawPriorities(input, car, track, wearProfile) {
     raw.tyrePreservation += 0.16;
     raw.stability += 0.12;
     raw.maximumPace -= 0.06;
+  }
+
+  // Bounded car × track interaction (never overwrites validated base lookup).
+  if (interaction?.priorityDeltas) {
+    for (const [key, delta] of Object.entries(interaction.priorityDeltas)) {
+      if (key in raw && Number.isFinite(delta)) {
+        raw[/** @type {PodiumPriorityId} */ (key)] += /** @type {number} */ (delta);
+      }
+    }
   }
 
   return normalizePriorityWeights(raw);
@@ -286,7 +318,7 @@ export function buildPodiumContextLines(input, car, track) {
     getWheelBaseOption(input.wheelBase)?.label ?? input.wheelBase;
 
   return [
-    `${lapCount} laps`,
+    `${lapCount === 1 ? "1 lap" : `${lapCount} laps`}`,
     `Fuel x${fuelMultiplier}`,
     `Tyres x${tyreMultiplier}`,
     getTyreCompoundDisplayLabel(input.tyreCompound),
@@ -301,8 +333,18 @@ export function buildPodiumContextLines(input, car, track) {
  * @param {PodiumPriority[]} priorities
  * @param {ReturnType<typeof calculateRaceWearProfile>} wearProfile
  * @param {PodiumEngineInput} input
+ * @param {ReturnType<typeof computeCarTrackInteraction>} [interaction]
+ * @param {import("../data/gt7/cars.js").CarRecord | null} [car]
+ * @param {import("../data/gt7/tracks.js").TrackRecord | null} [track]
  */
-export function buildPodiumNarrative(priorities, wearProfile, input) {
+export function buildPodiumNarrative(
+  priorities,
+  wearProfile,
+  input,
+  interaction,
+  car,
+  track,
+) {
   const leaders = priorities.slice(0, 2).map((entry) => entry.label.toLowerCase());
   const laps = wearProfile.laps;
   const tyreMultiplier = normalizeMultiplier(input.tyreMultiplier);
@@ -310,6 +352,10 @@ export function buildPodiumNarrative(priorities, wearProfile, input) {
   const compound = getTyreCompoundDisplayLabel(input.tyreCompound);
   const confirmedEvidence = getConfirmedPodiumEvidence(input);
   const testingPending = isPodiumTestingPending(input);
+  const objective = inferRaceObjective(laps, tyreMultiplier, fuelMultiplier);
+  const carName = car?.name ?? "this car";
+  const trackName = track ? getTrackDisplayName(track) : "this circuit";
+  const interactionFactor = interaction?.factors?.[0];
 
   if (confirmedEvidence) {
     const caveat = getPodiumEvidenceCaveat(input);
@@ -317,28 +363,28 @@ export function buildPodiumNarrative(priorities, wearProfile, input) {
     return caveat ? `${base} ${caveat}` : base;
   }
 
-  if (
-    laps <= 8 &&
-    tyreMultiplier <= 1 &&
-    fuelMultiplier <= 1
-  ) {
-    return `With only ${laps} laps and low fuel and tyre wear, the Podium Engine favours sharper pace and responsive steering rather than stint conservation.`;
+  if (objective === "qualifying") {
+    return `Short-run emphasis for ${carName} at ${trackName}${interactionFactor ? ` — ${interactionFactor}` : ""}. Settings favour sharper usable detail on ${compound.toLowerCase()} rather than stint conservation.`;
   }
 
   if (tyreMultiplier >= 4 || wearProfile.tyreStress >= 6) {
-    return `Tyre wear multiplier x${tyreMultiplier} over ${laps} laps calls for smoother steering, stronger stability and less scrub. Settings lean toward ${leaders.join(" and ")} to protect ${compound.toLowerCase()} life.`;
+    return `Tyre wear multiplier x${tyreMultiplier} over ${laps} laps with ${carName} at ${trackName} calls for smoother steering and progressive load. Settings lean toward ${leaders.join(" and ")} to help the driver manage ${compound.toLowerCase()} life — not to change GT7 wear maths.`;
   }
 
   if (fuelMultiplier >= 4 || wearProfile.fuelStress >= 6) {
-    return `Fuel multiplier x${fuelMultiplier} increases stint demands, so the recommendation favours traction, consistency and smoother control across the run.`;
+    return `Fuel multiplier x${fuelMultiplier} increases stint demands for ${carName}, so the recommendation favours traction, consistency and smoother control across the run at ${trackName}.`;
   }
 
-  if (laps >= 20) {
-    return `Across ${laps} laps the Podium Engine prioritises sustained race pace over one-lap aggression, with emphasis on ${leaders.join(" and ")}.`;
+  if (objective === "endurance" || laps >= 20) {
+    return `Across ${laps} laps the Podium Engine prioritises sustained race pace for ${carName} at ${trackName}${interactionFactor ? ` (${interactionFactor})` : ""}, with emphasis on ${leaders.join(" and ")}.`;
   }
 
   if (testingPending) {
-    return `Track-specific tyre behaviour for this car is still being validated. Settings follow the tested base profile with Podium adjustments for your selected fuel, tyre wear and lap count only.`;
+    return `Track-specific tyre behaviour for ${carName} is still being validated. Settings follow the tested base profile with Podium adjustments for your selected fuel, tyre wear and lap count only.`;
+  }
+
+  if (interactionFactor) {
+    return `The Podium Engine balanced ${leaders.join(" and ")} for ${carName} at ${trackName}: ${interactionFactor}.`;
   }
 
   return `The Podium Engine balanced ${leaders.join(" and ")} for these race conditions using your selected car, track, compound, BOP, fuel multiplier, tyre wear and lap count.`;
@@ -390,8 +436,15 @@ function adjustBrakeBalance(value, weights) {
  * @param {string} fieldKey
  * @param {string} baseValue
  * @param {Record<PodiumPriorityId, number>} weights
+ * @param {{
+ *   interaction: ReturnType<typeof computeCarTrackInteraction>,
+ *   objective: ReturnType<typeof inferRaceObjective>,
+ *   carName?: string,
+ *   trackName?: string,
+ *   compoundLabel?: string,
+ * }} [context]
  */
-function adjustT598Field(fieldKey, baseValue, weights) {
+function adjustT598Field(fieldKey, baseValue, weights, context) {
   const options = getT598OptionsForField(fieldKey);
   if (!options) {
     return { value: baseValue, changed: false, reason: "" };
@@ -399,85 +452,65 @@ function adjustT598Field(fieldKey, baseValue, weights) {
 
   let delta = 0;
   let reason = "";
+  const interaction = context?.interaction;
+  const objective = context?.objective ?? "race";
+
+  // Bounded car×track nudges on top of race-priority deltas.
+  if (interaction) {
+    if (fieldKey === "damper" || fieldKey === "inertia" || fieldKey === "friction") {
+      delta += interaction.catchabilityNeed * 0.45 + interaction.kerbLoad * 0.25;
+      delta -= interaction.rotationNeed * 0.2;
+    }
+    if (fieldKey === "speed" || fieldKey === "damperGain") {
+      delta += interaction.detailNeed * 0.25 - interaction.fatigueRisk * 0.3;
+    }
+    if (fieldKey === "endStop") {
+      delta += interaction.highSpeedNeed * 0.2 + interaction.kerbLoad * 0.15;
+    }
+  }
 
   switch (fieldKey) {
     case "damper":
-      delta =
+      delta +=
         weights.stability * 2 +
         weights.tyrePreservation * 1.4 +
         weights.consistency * 0.8 +
         weights.fuelEfficiency * 0.5 -
         weights.maximumPace * 1.8;
-      reason =
-        delta > 0.35
-          ? "Higher damper smooths steering and adds stability as tyre wear builds through the stint."
-          : delta < -0.35
-            ? "Lower damper frees rotation for maximum responsiveness in this short, low-wear race."
-            : "";
       break;
     case "inertia":
-      delta =
+      delta +=
         weights.stability * 1.5 +
         weights.tyrePreservation * 0.9 +
         weights.fuelEfficiency * 0.8 +
         weights.consistency * 0.5 -
         weights.maximumPace * 1.2;
-      reason =
-        delta > 0.4
-          ? "Added virtual mass keeps the car planted and easier to control over a long stint."
-          : delta < -0.35
-            ? "Lighter inertia sharpens turn-in for outright lap time."
-            : "";
       break;
     case "friction":
-      delta =
+      delta +=
         weights.stability * 0.9 +
         weights.consistency * 0.8 +
         weights.fuelEfficiency * 0.4 -
         weights.maximumPace * 0.55;
-      reason =
-        delta > 0.25
-          ? "More mechanical friction calms on-centre movement and reduces nervous corrections."
-          : "";
       break;
     case "speed":
-      delta = weights.maximumPace * 1.3 - weights.stability * 0.75 - weights.consistency * 0.35;
-      reason =
-        delta > 0.35
-          ? "Higher wheel speed keeps up with fast corrections when attacking for lap time."
-          : delta < -0.25
-            ? "Reduced wheel speed softens high-load feedback for sustained race performance."
-            : "";
+      delta += weights.maximumPace * 1.3 - weights.stability * 0.75 - weights.consistency * 0.35;
       break;
     case "damperGain":
-      delta =
+      delta +=
         weights.stability * 0.9 +
         weights.consistency * 0.6 -
         weights.tyrePreservation * 0.95 -
         weights.maximumPace * 0.3;
-      reason =
-        delta < -0.25
-          ? "Lower damper gain reduces tyre scrub feedback as rubber wears."
-          : delta > 0.25
-            ? "Higher damper gain improves weight-transfer readability under load."
-            : "";
       break;
     case "endStop":
-      delta = weights.stability * 1.15 - weights.maximumPace * 0.45;
-      reason =
-        delta > 0.3
-          ? "Stronger end stops protect full-lock moments on this circuit."
-          : "";
+      delta += weights.stability * 1.15 - weights.maximumPace * 0.45;
       break;
     case "gearJolt":
-      delta =
+      delta +=
         weights.consistency * 0.9 +
         weights.fuelEfficiency * 0.4 -
         weights.maximumPace * 0.55;
-      reason =
-        delta < -0.2
-          ? "Reduced shift jolt keeps focus on traction and stint management."
-          : "";
       break;
     default:
       return { value: baseValue, changed: false, reason: "" };
@@ -488,9 +521,72 @@ function adjustT598Field(fieldKey, baseValue, weights) {
   }
 
   const nextValue = stepOption(options, baseValue, delta);
+  if (nextValue === baseValue) {
+    return { value: baseValue, changed: false, reason: "" };
+  }
+
+  const direction = delta > 0 ? "up" : "down";
+  const fieldLabels = {
+    damper: "Wheel Damper",
+    inertia: "Inertia",
+    friction: "Friction",
+    speed: "Speed",
+    damperGain: "Damper Gain",
+    endStop: "End Stop",
+    gearJolt: "Gear Jolt",
+  };
+  if (interaction && context) {
+    reason = buildInteractionFieldReason({
+      fieldLabel: fieldLabels[fieldKey] ?? fieldKey,
+      direction,
+      carName: context.carName,
+      trackName: context.trackName,
+      interaction,
+      objective,
+      compoundLabel: context.compoundLabel,
+    });
+  }
+
+  if (!reason) {
+    if (fieldKey === "damper") {
+      reason =
+        direction === "up"
+          ? "Higher damper smooths steering and adds stability as tyre wear builds through the stint."
+          : "Lower damper frees rotation for maximum responsiveness in this short, low-wear race.";
+    } else if (fieldKey === "inertia") {
+      reason =
+        direction === "up"
+          ? "Added virtual mass keeps the car planted and easier to control over a long stint."
+          : "Lighter inertia sharpens turn-in for outright lap time.";
+    } else if (fieldKey === "friction") {
+      reason =
+        direction === "up"
+          ? "More mechanical friction calms on-centre movement and reduces nervous corrections."
+          : "";
+    } else if (fieldKey === "speed") {
+      reason =
+        direction === "up"
+          ? "Higher wheel speed keeps up with fast corrections when attacking for lap time."
+          : "Reduced wheel speed softens high-load feedback for sustained race performance.";
+    } else if (fieldKey === "damperGain") {
+      reason =
+        direction === "down"
+          ? "Lower damper gain reduces tyre scrub feedback as rubber wears."
+          : "Higher damper gain improves weight-transfer readability under load.";
+    } else if (fieldKey === "endStop") {
+      reason =
+        direction === "up" ? "Stronger end stops protect full-lock moments on this circuit." : "";
+    } else if (fieldKey === "gearJolt") {
+      reason =
+        direction === "down"
+          ? "Reduced shift jolt keeps focus on traction and stint management."
+          : "";
+    }
+  }
+
   return {
     value: nextValue,
-    changed: nextValue !== baseValue,
+    changed: true,
     reason,
   };
 }
@@ -499,12 +595,24 @@ function adjustT598Field(fieldKey, baseValue, weights) {
  * @param {Record<string, string | number>} baseValues
  * @param {string} wheelBaseId
  * @param {Record<PodiumPriorityId, number>} weights
+ * @param {{
+ *   interaction: ReturnType<typeof computeCarTrackInteraction>,
+ *   objective: ReturnType<typeof inferRaceObjective>,
+ *   carName?: string,
+ *   trackName?: string,
+ *   compoundLabel?: string,
+ * }} [context]
  */
-function adjustWheelValues(baseValues, wheelBaseId, weights) {
+function adjustWheelValues(baseValues, wheelBaseId, weights, context) {
   const family = getTemplateFamilyForWheelBase(wheelBaseId);
   const adjusted = { ...baseValues };
   /** @type {PodiumFieldAdjustment[]} */
   const adjustments = [];
+  const interaction = context?.interaction;
+  const objective = context?.objective ?? "race";
+  const carName = context?.carName;
+  const trackName = context?.trackName;
+  const compoundLabel = context?.compoundLabel;
 
   if (family === "t598") {
     for (const fieldKey of Object.keys(baseValues)) {
@@ -519,8 +627,8 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
             to,
             reason:
               weights.stability >= weights.maximumPace
-                ? "Slightly forward bias improves braking stability for these conditions."
-                : "A touch more rear bias protects tyre life through traction zones.",
+                ? `Slightly forward bias improves braking stability for ${carName ?? "this car"} at ${trackName ?? "this circuit"}.`
+                : `A touch more rear bias protects tyre life through traction zones at ${trackName ?? "this circuit"}.`,
           });
         }
         continue;
@@ -530,6 +638,7 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
         fieldKey,
         String(baseValues[fieldKey] ?? ""),
         weights,
+        context,
       );
 
       if (result.changed) {
@@ -543,7 +652,10 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
       }
     }
 
-    return { adjustedValues: adjusted, adjustments };
+    return {
+      adjustedValues: sanitizeWheelValues(wheelBaseId, adjusted),
+      adjustments,
+    };
   }
 
   if (family === "logitech_g923" || family === "logitech_g_pro" || family === "logitech_rs50") {
@@ -553,12 +665,15 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
         : "ffbStrength";
     const torque = Number(baseValues[torqueKey]);
     if (Number.isFinite(torque)) {
-      const delta = Math.round(
+      let delta = Math.round(
         weights.maximumPace * 1.2 -
           weights.stability * 0.8 -
           weights.tyrePreservation * 0.5 -
           weights.fuelEfficiency * 0.4,
       );
+      if (interaction) {
+        delta += Math.round(interaction.detailNeed * 0.6 - interaction.fatigueRisk * 0.8);
+      }
       const next = Math.max(1, Math.min(10, torque + delta));
       if (next !== torque) {
         adjusted[torqueKey] = next;
@@ -567,15 +682,182 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
           from: String(torque),
           to: String(next),
           reason:
-            next > torque
+            buildInteractionFieldReason({
+              fieldLabel: "FFB strength",
+              direction: next > torque ? "up" : "down",
+              carName,
+              trackName,
+              interaction: interaction ?? computeCarTrackInteraction(null, null),
+              objective,
+              compoundLabel,
+            }) ||
+            (next > torque
               ? "Slightly stronger FFB supports responsive inputs in a short race."
-              : "Softer FFB reduces fatigue and supports traction over a full stint.",
+              : "Softer FFB reduces fatigue and supports traction over a full stint."),
+        });
+      }
+    }
+
+    const dampenerKey =
+      family === "logitech_g923" ? null : "dampener";
+    if (dampenerKey && Number.isFinite(Number(baseValues[dampenerKey]))) {
+      const dampener = Number(baseValues[dampenerKey]);
+      let delta = Math.round(
+        weights.stability * 1.2 +
+          weights.consistency * 0.6 -
+          weights.maximumPace * 0.9,
+      );
+      if (interaction) {
+        delta += Math.round(interaction.catchabilityNeed * 0.8 + interaction.kerbLoad * 0.5);
+      }
+      const next = Math.max(0, Math.min(10, dampener + delta));
+      if (next !== dampener) {
+        adjusted[dampenerKey] = next;
+        adjustments.push({
+          field: dampenerKey,
+          from: String(dampener),
+          to: String(next),
+          reason:
+            buildInteractionFieldReason({
+              fieldLabel: "Dampener",
+              direction: next > dampener ? "up" : "down",
+              carName,
+              trackName,
+              interaction: interaction ?? computeCarTrackInteraction(null, null),
+              objective,
+              compoundLabel,
+            }) ||
+            (next > dampener
+              ? "Extra dampener calms kerb and mid-corner oscillation."
+              : "Lower dampener keeps the rim livelier for short-run precision."),
         });
       }
     }
   }
 
-  if (baseValues.brakeBalance) {
+  if (family === "fanatec") {
+    const ff = Number(baseValues.ff);
+    if (Number.isFinite(ff)) {
+      let delta = Math.round(
+        weights.maximumPace * 8 -
+          weights.stability * 6 -
+          weights.tyrePreservation * 4,
+      );
+      if (interaction) {
+        delta += Math.round(interaction.detailNeed * 4 - interaction.fatigueRisk * 5);
+      }
+      const next = Math.max(0, Math.min(100, ff + delta));
+      if (next !== ff) {
+        adjusted.ff = next;
+        adjustments.push({
+          field: "ff",
+          from: String(ff),
+          to: String(next),
+          reason:
+            buildInteractionFieldReason({
+              fieldLabel: "FF",
+              direction: next > ff ? "up" : "down",
+              carName,
+              trackName,
+              interaction: interaction ?? computeCarTrackInteraction(null, null),
+              objective,
+              compoundLabel,
+            }) ||
+            (next > ff
+              ? "Higher FF keeps front-end detail available for a short, low-wear run."
+              : "Lower FF reduces steering load so inputs stay consistent as the stint develops."),
+        });
+      }
+    }
+
+    const ndp = Number(baseValues.ndp);
+    if (Number.isFinite(ndp)) {
+      let delta = Math.round(
+        weights.stability * 6 +
+          weights.consistency * 3 -
+          weights.maximumPace * 5,
+      );
+      if (interaction) {
+        delta += Math.round(interaction.catchabilityNeed * 5 + interaction.kerbLoad * 4);
+      }
+      const next = Math.max(0, Math.min(100, ndp + delta));
+      if (next !== ndp) {
+        adjusted.ndp = next;
+        adjustments.push({
+          field: "ndp",
+          from: String(ndp),
+          to: String(next),
+          reason:
+            buildInteractionFieldReason({
+              fieldLabel: "NDP",
+              direction: next > ndp ? "up" : "down",
+              carName,
+              trackName,
+              interaction: interaction ?? computeCarTrackInteraction(null, null),
+              objective,
+              compoundLabel,
+            }) ||
+            (next > ndp
+              ? "Added natural damper calms on-centre movement for longer or kerb-heavy stints."
+              : "Reduced natural damper frees rotation for qualifying-style short runs."),
+        });
+      }
+    }
+  }
+
+  if (family === "moza") {
+    const intensity = Number(baseValues.gameFfbIntensity);
+    if (Number.isFinite(intensity)) {
+      let delta = Math.round(
+        weights.maximumPace * 8 -
+          weights.stability * 6 -
+          weights.tyrePreservation * 4,
+      );
+      if (interaction) {
+        delta += Math.round(interaction.detailNeed * 4 - interaction.fatigueRisk * 5);
+      }
+      const next = Math.max(0, Math.min(100, intensity + delta));
+      if (next !== intensity) {
+        adjusted.gameFfbIntensity = next;
+        adjustments.push({
+          field: "gameFfbIntensity",
+          from: String(intensity),
+          to: String(next),
+          reason:
+            next > intensity
+              ? `Higher game FFB intensity preserves detail for ${carName ?? "this car"} on a short, precise run.`
+              : `Softer game FFB intensity supports smoother steering as tyres and driver load build at ${trackName ?? "this circuit"}.`,
+        });
+      }
+    }
+
+    const damper = Number(baseValues.wheelDamper);
+    if (Number.isFinite(damper)) {
+      let delta = Math.round(
+        weights.stability * 6 +
+          weights.consistency * 3 -
+          weights.maximumPace * 5,
+      );
+      if (interaction) {
+        delta += Math.round(interaction.catchabilityNeed * 5 + interaction.kerbLoad * 4);
+      }
+      const next = Math.max(0, Math.min(100, damper + delta));
+      if (next !== damper) {
+        adjusted.wheelDamper = next;
+        adjustments.push({
+          field: "wheelDamper",
+          from: String(damper),
+          to: String(next),
+          reason:
+            next > damper
+              ? `Extra wheel damper steadies corrections through high-load and kerb sections at ${trackName ?? "this circuit"}.`
+              : `Lower wheel damper keeps the rim livelier for short-run rotation confidence with ${carName ?? "this car"}.`,
+        });
+      }
+    }
+  }
+
+  if (baseValues.brakeBalance && family !== "t598") {
     const from = String(baseValues.brakeBalance);
     const to = adjustBrakeBalance(from, weights);
     if (to !== from) {
@@ -584,12 +866,15 @@ function adjustWheelValues(baseValues, wheelBaseId, weights) {
         field: "brakeBalance",
         from,
         to,
-        reason: "Brake bias tuned for the auto-detected race priorities.",
+        reason: `Brake bias tuned for ${carName ?? "this car"} at ${trackName ?? "this circuit"} under the detected race objective.`,
       });
     }
   }
 
-  return { adjustedValues: adjusted, adjustments };
+  return {
+    adjustedValues: sanitizeWheelValues(wheelBaseId, adjusted),
+    adjustments,
+  };
 }
 
 /**
@@ -610,6 +895,11 @@ export function buildPodiumRecommendation(input) {
   const tyreMultiplier = normalizeMultiplier(input.tyreMultiplier);
   const fuelMultiplier = normalizeMultiplier(input.fuelMultiplier);
   const lapCount = resolveLapCount({ lapCount: input.lapCount });
+  const objective = inferRaceObjective(lapCount, tyreMultiplier, fuelMultiplier);
+  const interaction = computeCarTrackInteraction(car, track);
+  const compoundLabel = getTyreCompoundDisplayLabel(input.tyreCompound);
+  const carName = car?.name;
+  const trackName = track ? getTrackDisplayName(track) : undefined;
 
   const wearProfile = calculateRaceWearProfile(car ?? {}, track ?? {}, {
     lapCount,
@@ -617,7 +907,13 @@ export function buildPodiumRecommendation(input) {
     tyreMultiplier,
   });
 
-  const weights = computeRawPriorities(input, car, track, wearProfile);
+  const weights = computeRawPriorities(
+    input,
+    car,
+    track,
+    wearProfile,
+    interaction,
+  );
   const priorities = rankPodiumPriorities(weights);
   const dominantPriorityIds = priorities
     .filter((entry, index) => index < 2 && entry.weight >= 0.16)
@@ -627,6 +923,13 @@ export function buildPodiumRecommendation(input) {
     input.baseValues,
     input.wheelBase,
     weights,
+    {
+      interaction,
+      objective,
+      carName,
+      trackName,
+      compoundLabel,
+    },
   );
 
   const adjustmentReasons = Object.fromEntries(
@@ -634,7 +937,14 @@ export function buildPodiumRecommendation(input) {
   );
 
   const contextLines = buildPodiumContextLines(input, car, track);
-  const narrative = buildPodiumNarrative(priorities, wearProfile, input);
+  const narrative = buildPodiumNarrative(
+    priorities,
+    wearProfile,
+    input,
+    interaction,
+    car,
+    track,
+  );
   const evidenceCaveat = getPodiumEvidenceCaveat(input);
   const physicsGeneration =
     input.physicsGeneration ?? ACTIVE_PHYSICS_GENERATION;
@@ -660,5 +970,7 @@ export function buildPodiumRecommendation(input) {
     },
     evidenceCaveat,
     physicsGeneration,
+    raceObjective: objective,
+    interactionFactors: interaction.factors,
   };
 }

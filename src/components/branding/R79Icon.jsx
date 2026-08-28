@@ -25,6 +25,7 @@ export default function R79Icon({
   const accents = {
     spectrum: { a: "#22d3ee", b: "#38bdf8", c: "#6366f1", d: "#c026d3", e: "#8b5cf6" },
     gold: { a: "#fbbf24", b: "#f59e0b", c: "#fde68a", d: "#a855f7", e: "#8b5cf6" },
+    podium: { a: "#22d3ee", b: "#38bdf8", c: "#8b5cf6", d: "#d946ef", e: "#64748b" },
     cyan: { a: "#22d3ee", b: "#38bdf8", c: "#67e8f9", d: "#0ea5e9", e: "#6366f1" },
     violet: { a: "#8b5cf6", b: "#6366f1", c: "#a855f7", d: "#38bdf8", e: "#c026d3" },
     magenta: { a: "#d946ef", b: "#c026d3", c: "#f0abfc", d: "#8b5cf6", e: "#38bdf8" },
@@ -71,6 +72,37 @@ export default function R79Icon({
         <stop offset="55%" stopColor={c.b} stopOpacity="0.35" />
         <stop offset="100%" stopColor={c.e} stopOpacity="0" />
       </radialGradient>
+      <linearGradient id={g("goldCup")} x1="18%" y1="0%" x2="88%" y2="100%">
+        <stop offset="0%" stopColor="#fff8dc" />
+        <stop offset="18%" stopColor="#fde68a" />
+        <stop offset="42%" stopColor="#fbbf24" />
+        <stop offset="68%" stopColor="#d97706" />
+        <stop offset="100%" stopColor="#92400e" />
+      </linearGradient>
+      <linearGradient id={g("goldStem")} x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#92400e" />
+        <stop offset="28%" stopColor="#f59e0b" />
+        <stop offset="55%" stopColor="#fde68a" />
+        <stop offset="78%" stopColor="#d97706" />
+        <stop offset="100%" stopColor="#78350f" />
+      </linearGradient>
+      <linearGradient id={g("goldBase")} x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="#fde68a" />
+        <stop offset="40%" stopColor="#f59e0b" />
+        <stop offset="100%" stopColor="#92400e" />
+      </linearGradient>
+      <linearGradient id={g("trophyRim")} x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.85" />
+        <stop offset="35%" stopColor="#fbbf24" />
+        <stop offset="65%" stopColor="#a855f7" stopOpacity="0.9" />
+        <stop offset="100%" stopColor="#d946ef" stopOpacity="0.75" />
+      </linearGradient>
+      <radialGradient id={g("trophyGlow")} cx="42%" cy="28%" r="62%">
+        <stop offset="0%" stopColor="#fffbeb" stopOpacity="0.95" />
+        <stop offset="35%" stopColor="#fbbf24" stopOpacity="0.55" />
+        <stop offset="70%" stopColor="#a855f7" stopOpacity="0.22" />
+        <stop offset="100%" stopColor="#22d3ee" stopOpacity="0" />
+      </radialGradient>
       <filter id={g("soft")} x="-35%" y="-35%" width="170%" height="170%">
         <feGaussianBlur stdDeviation="1.1" result="b" />
         <feMerge>
@@ -107,173 +139,130 @@ export default function R79Icon({
   const glyphs = {
     wheel: (
       <g transform={`translate(0 ${yOff})`}>
-        <circle cx="24" cy="22.5" r="18.5" fill={`url(#${g("glow")})`} opacity="0.9" />
+        <ellipse cx="24" cy="40.5" rx="11" ry="2.4" fill={`url(#${g("glow")})`} opacity="0.55" />
+        <circle cx="24" cy="22" r="17" fill={`url(#${g("glow")})`} opacity="0.5" />
         <circle
           cx="24"
-          cy="22.5"
-          r="16"
-          fill={`url(#${g("metal")})`}
+          cy="22"
+          r="15.2"
+          fill="#0b1220"
           stroke={`url(#${g("rim")})`}
-          strokeWidth="3"
+          strokeWidth="4.2"
         />
-        <circle
-          cx="24"
-          cy="22.5"
-          r="12.2"
-          fill="none"
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1.8"
-          opacity="0.95"
-        />
-        <circle
-          cx="24"
-          cy="22.5"
-          r="8.4"
-          fill={`url(#${g("face")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1.2"
-        />
-        <circle
-          cx="24"
-          cy="22.5"
-          r="4.6"
-          fill={`url(#${g("core")})`}
-          stroke="#fff"
-          strokeOpacity="0.75"
-          strokeWidth="1"
-        />
-        {/* paddle / grip accents */}
-        <path
-          d="M11.5 14.5c2.2-3.2 6-5.2 12.5-5.2s10.3 2 12.5 5.2"
-          fill="none"
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          opacity="0.85"
-        />
-        <path
-          d="M24 7.5v6.2M24 31.5v6.2M8 22.5h6.2M33.8 22.5H40"
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="2.6"
-          strokeLinecap="round"
-        />
-        <rect x="20.2" y="18.8" width="7.6" height="7.4" rx="1.6" fill="#0b1220" opacity="0.35" />
-        <circle cx="18.8" cy="16.8" r="1.8" fill="#fff" opacity="0.65" />
-        <circle cx="29.4" cy="16.8" r="1.2" fill={c.a} opacity="0.8" />
+        <circle cx="24" cy="22" r="11.4" fill="none" stroke={`url(#${g("metal")})`} strokeWidth="2.4" />
+        <path d="M24 9.2v7.2M24 27.6v7.2M9.2 22h7.2M31.6 22h7.2" stroke={`url(#${g("rim")})`} strokeWidth="2.8" strokeLinecap="round" />
+        <circle cx="24" cy="22" r="6.4" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.1" />
+        <circle cx="24" cy="22" r="3.4" fill={`url(#${g("core")})`} />
+        <circle cx="21.8" cy="20" r="1.2" fill="#fff" opacity="0.7" />
       </g>
     ),
     podium: (
       <g transform={`translate(0 ${yOff})`}>
+        <ellipse cx="24" cy="24" rx="10" ry="12" fill={`url(#${g("glow")})`} opacity="0.45" />
         <path
-          d="M11 36h7.5V23h11v13H37V17.5L24 7.5 11 17.5V36z"
+          d="M16.6 12.4c-3.1.5-4.4 3.4-3.4 6.5.5 1.7 2 2.9 3.7 3.2"
+          fill="none"
+          stroke={`url(#${g("metal")})`}
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M31.4 12.4c3.1.5 4.4 3.4 3.4 6.5-.5 1.7-2 2.9-3.7 3.2"
+          fill="none"
+          stroke={`url(#${g("metal")})`}
+          strokeWidth="1.9"
+          strokeLinecap="round"
+        />
+        <path
+          d="M16.8 10.2h14.4c.32 0 .55.3.5.62L30.2 23c-.32 2.5-2.5 4.3-5.05 4.3h-2.3c-2.55 0-4.73-1.8-5.05-4.3L16.3 10.82c-.05-.32.18-.62.5-.62z"
           fill={`url(#${g("metal")})`}
           stroke={`url(#${g("rim")})`}
-          strokeWidth="1.6"
+          strokeWidth="1.05"
         />
-        <path d="M18.5 36V23h11v13" fill={`url(#${g("core")})`} opacity="0.5" />
         <path
-          d="M24 9.5l2.4 4.8 5.2.55-3.9 3.5 1 5.1L24 20.8l-4.7 2.45 1-5.1-3.9-3.5 5.2-.55z"
-          fill={c.a}
-          stroke={c.c}
-          strokeWidth="0.6"
+          d="M18.6 12h10.8c.22 0 .4.2.37.42l-1.05 8.4c-.22 1.7-1.7 3-3.45 3h-1.84c-1.75 0-3.23-1.3-3.45-3L18.23 12.42c-.03-.22.15-.42.37-.42z"
+          fill={`url(#${g("core")})`}
+          opacity="0.72"
         />
-        <circle cx="16.5" cy="15.5" r="1.5" fill="#fff" opacity="0.55" />
+        <ellipse cx="24" cy="17.8" rx="2.8" ry="4.8" fill="#67e8f9" opacity="0.55" />
+        <path d="M17.6 10.4c1.6-.9 4.2-1.4 6.4-1.4s4.8.5 6.4 1.4" fill="none" stroke="#38bdf8" strokeWidth="1.15" strokeLinecap="round" />
+        <path d="M20.4 10h7.2" fill="none" stroke="#fde68a" strokeWidth="0.8" strokeLinecap="round" opacity="0.75" />
+        <path d="M22.4 27.6h3.2l.5 4.4h-4.2z" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="0.6" />
+        <rect x="23.15" y="27.8" width="0.85" height="4" rx="0.3" fill="#22d3ee" opacity="0.55" />
+        <path
+          d="M18.4 37.6h11.2c.8 0 1.28-.66 1.08-1.38l-.9-2.55c-.18-.55-.74-.92-1.32-.92H19.54c-.58 0-1.14.37-1.32.92l-.9 2.55c-.2.72.28 1.38 1.08 1.38z"
+          fill={`url(#${g("metal")})`}
+          stroke={`url(#${g("rim")})`}
+          strokeWidth="0.85"
+        />
+        <path d="M19.8 37.35h8.4" fill="none" stroke="#fbbf24" strokeWidth="0.65" strokeLinecap="round" opacity="0.55" />
       </g>
     ),
     today: (
       <g transform={`translate(0 ${yOff})`}>
-        <rect
-          x="28"
-          y="8"
-          width="3.2"
-          height="28"
-          rx="1.2"
-          fill={`url(#${g("metal")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="0.8"
-        />
+        <ellipse cx="24" cy="40" rx="10" ry="2.2" fill={`url(#${g("glow")})`} opacity="0.4" />
+        <rect x="29.2" y="7.5" width="3.4" height="30" rx="1.4" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="0.8" />
         <path
-          d="M31.2 9.5H14.5c-1.2 0-1.8 1.4-1 2.2l4.2 4.2c.4.4.4 1 0 1.4l-4.2 4.2c-.8.8-.2 2.2 1 2.2H31.2"
+          d="M32.4 9.2H14.8c-1.15 0-1.7 1.35-.95 2.15l4 4.05c.38.38.38.98 0 1.36l-4 4.05c-.75.8-.2 2.15.95 2.15h17.6"
           fill={`url(#${g("face")})`}
           stroke={`url(#${g("rim")})`}
-          strokeWidth="1.2"
+          strokeWidth="1.15"
         />
-        <path d="M16.2 12.2h3.6v3.6h-3.6z" fill="#0b1220" opacity="0.9" />
-        <path d="M19.8 12.2h3.6v3.6h-3.6z" fill="#f8fafc" opacity="0.92" />
-        <path d="M23.4 12.2h3.6v3.6h-3.6z" fill="#0b1220" opacity="0.9" />
-        <path d="M16.2 15.8h3.6v3.6h-3.6z" fill="#f8fafc" opacity="0.9" />
-        <path d="M19.8 15.8h3.6v3.6h-3.6z" fill="#0b1220" opacity="0.88" />
-        <path d="M23.4 15.8h3.6v3.6h-3.6z" fill="#f8fafc" opacity="0.9" />
-        <path d="M16.2 19.4h3.6v3.2h-3.6z" fill="#0b1220" opacity="0.88" />
-        <path d="M19.8 19.4h3.6v3.2h-3.6z" fill="#f8fafc" opacity="0.88" />
-        <circle cx="18" cy="11" r="1.1" fill="#fff" opacity="0.55" />
+        <path d="M16.4 11.6h3.5v3.5h-3.5z" fill="#06101f" />
+        <path d="M19.9 11.6h3.5v3.5h-3.5z" fill="#f8fafc" />
+        <path d="M23.4 11.6h3.5v3.5h-3.5z" fill="#06101f" />
+        <path d="M16.4 15.1h3.5v3.5h-3.5z" fill="#f8fafc" />
+        <path d="M19.9 15.1h3.5v3.5h-3.5z" fill="#06101f" />
+        <path d="M23.4 15.1h3.5v3.5h-3.5z" fill="#f8fafc" />
+        <path d="M16.4 18.6h3.5v3.2h-3.5z" fill="#06101f" />
+        <path d="M19.9 18.6h3.5v3.2h-3.5z" fill="#f8fafc" />
+        <circle cx="18.2" cy="10.6" r="1.1" fill="#fff" opacity="0.55" />
       </g>
     ),
     ai: (
       <g transform={`translate(0 ${yOff})`}>
+        <polygon points="24,7 38,15.2 38,31.2 24,39.4 10,31.2 10,15.2" fill={`url(#${g("glow")})`} opacity="0.5" />
         <polygon
-          points="24,7.5 37,15 37,30 24,37.5 11,30 11,15"
-          fill={`url(#${g("glow")})`}
-          opacity="0.55"
-        />
-        <polygon
-          points="24,9 35.5 15.5 35.5 29.5 24,36 12.5 29.5 12.5 15.5"
+          points="24,9.2 35.8 16 35.8 29.6 24,36.4 12.2 29.6 12.2 16"
           fill={`url(#${g("metal")})`}
           stroke={`url(#${g("rim")})`}
-          strokeWidth="1.6"
+          strokeWidth="1.5"
         />
-        <polygon
-          points="24,14.5 30.5 18.2 30.5 25.8 24,29.5 17.5 25.8 17.5 18.2"
-          fill={`url(#${g("core")})`}
-          opacity="0.9"
-        />
-        <circle cx="24" cy="22" r="2.4" fill="#fff" opacity="0.85" />
-        <circle cx="20.2" cy="19.8" r="1.3" fill={c.a} opacity="0.95" />
-        <circle cx="27.8" cy="19.8" r="1.3" fill={c.b} opacity="0.95" />
-        <circle cx="20.2" cy="24.2" r="1.3" fill={c.e} opacity="0.9" />
-        <circle cx="27.8" cy="24.2" r="1.3" fill={c.d} opacity="0.9" />
-        <path
-          d="M20.2 19.8L24 22M27.8 19.8L24 22M20.2 24.2L24 22M27.8 24.2L24 22"
-          stroke="#fff"
-          strokeOpacity="0.55"
-          strokeWidth="0.9"
-        />
-        <circle cx="17" cy="15" r="1.2" fill="#fff" opacity="0.5" />
+        <polygon points="24,14.2 30.8 18.2 30.8 26.2 24,30.2 17.2 26.2 17.2 18.2" fill={`url(#${g("core")})`} opacity="0.92" />
+        <circle cx="24" cy="22.2" r="2.6" fill="#fff" opacity="0.9" />
+        <circle cx="20.2" cy="19.8" r="1.25" fill={c.a} />
+        <circle cx="27.8" cy="19.8" r="1.25" fill={c.b} />
+        <circle cx="20.2" cy="24.6" r="1.25" fill={c.e} />
+        <circle cx="27.8" cy="24.6" r="1.25" fill={c.d} />
+        <path d="M20.2 19.8L24 22.2M27.8 19.8L24 22.2M20.2 24.6L24 22.2M27.8 24.6L24 22.2" stroke="#fff" strokeOpacity="0.5" strokeWidth="0.9" />
       </g>
     ),
     championship: (
       <g transform={`translate(0 ${yOff})`}>
         <path
-          d="M24 8c7 0 12 3.5 12 8v8c0 7-5.5 12.5-12 15-6.5-2.5-12-8-12-15v-8c0-4.5 5-8 12-8z"
-          fill={`url(#${g("metal")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1.7"
+          d="M24 7.5c7.4 0 13 3.6 13 8.4v8.4c0 7.4-5.8 13.2-13 16-7.2-2.8-13-8.6-13-16V15.9c0-4.8 5.6-8.4 13-8.4z"
+          fill={`url(#${g("glow")})`}
+          opacity="0.4"
         />
         <path
-          d="M24 14l1.8 3.6 4 .4-3 2.7.8 3.9L24 22.5l-3.6 2.1.8-3.9-3-2.7 4-.4z"
-          fill={c.d === "#fbbf24" || accent === "champ" ? "#fbbf24" : c.a}
+          d="M24 8.8c6.8 0 12 3.2 12 7.6v7.8c0 6.8-5.4 12.2-12 14.8-6.6-2.6-12-8-12-14.8V16.4c0-4.4 5.2-7.6 12-7.6z"
+          fill={`url(#${g("metal")})`}
+          stroke={`url(#${g("rim")})`}
+          strokeWidth="1.6"
         />
-        <circle cx="18" cy="16" r="1.2" fill="#fff" opacity="0.5" />
+        <path d="M24 13.5c4.6 0 8 2 8 4.8v5c0 4.4-3.6 8-8 9.8-4.4-1.8-8-5.4-8-9.8v-5c0-2.8 3.4-4.8 8-4.8z" fill={`url(#${g("core")})`} opacity="0.35" />
+        <path d="M24 16.2l1.5 3.1 3.4.35-2.55 2.3.7 3.3L24 23.4l-3.05 1.85.7-3.3-2.55-2.3 3.4-.35z" fill="#fbbf24" opacity="0.9" />
+        <circle cx="18.2" cy="16" r="1.15" fill="#fff" opacity="0.5" />
       </g>
     ),
     pitstop: (
       <g transform={`translate(0 ${yOff})`}>
-        <path
-          d="M15 34l-3.5-3.5 8-8 2 2 4.2-4.2 6.2 6.2-4.2 4.2 2 2-8 8-2-2-4.5 4.5-6.2-6.2 4-4z"
-          fill={`url(#${g("metal")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1.5"
-        />
-        <circle
-          cx="31"
-          cy="13.5"
-          r="5.5"
-          fill={`url(#${g("core")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1.3"
-        />
-        <path d="M28.8 11.5h4.4M31 9.3v4.4" stroke="#0b1220" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="17.5" cy="19.5" r="1.3" fill="#fff" opacity="0.5" />
+        <ellipse cx="24" cy="40" rx="11" ry="2.2" fill={`url(#${g("glow")})`} opacity="0.4" />
+        <ellipse cx="18" cy="27" rx="8.4" ry="8.4" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.6" />
+        <ellipse cx="18" cy="27" rx="3.6" ry="3.6" fill="#06101f" stroke={c.a} strokeWidth="1.1" />
+        <path d="M24 14.5h8.5c1.5 0 2.7 1.2 2.7 2.7V32c0 1.4-1.1 2.6-2.5 2.7l-8.7.6" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.3" />
+        <rect x="27.2" y="17.5" width="5.2" height="11" rx="1.4" fill={`url(#${g("core")})`} opacity="0.8" />
+        <circle cx="29.8" cy="16.2" r="1.2" fill="#fff" opacity="0.5" />
       </g>
     ),
     more: (
@@ -295,59 +284,52 @@ export default function R79Icon({
     ),
     car: (
       <g transform={`translate(0 ${yOff})`}>
+        <ellipse cx="24" cy="39.5" rx="13" ry="2.4" fill={`url(#${g("glow")})`} opacity="0.35" />
         <path
-          d="M8 28c2-8.5 8-13 16-13s14 4.5 16 13l-2.2 6.5H10.2L8 28z"
+          d="M7.5 28.2c1.8-8.8 8.2-13.6 16.5-13.6s14.7 4.8 16.5 13.6l-2 6.6H9.5l-2-6.6z"
           fill={`url(#${g("metal")})`}
           stroke={`url(#${g("rim")})`}
           strokeWidth="1.5"
         />
-        <path d="M14 17.5h20c-2.2-3.2-6-4.5-10-4.5s-7.8 1.3-10 4.5z" fill={`url(#${g("core")})`} opacity="0.55" />
-        <circle cx="14" cy="32.5" r="3.3" fill="#0b1220" stroke={`url(#${g("rim")})`} strokeWidth="1.2" />
-        <circle cx="34" cy="32.5" r="3.3" fill="#0b1220" stroke={`url(#${g("rim")})`} strokeWidth="1.2" />
-        <circle cx="16" cy="20" r="1.2" fill="#fff" opacity="0.55" />
+        <path d="M14.2 17.2h19.6c-2.4-3.4-6.4-4.8-10-4.8s-7.6 1.4-9.6 4.8z" fill={`url(#${g("core")})`} opacity="0.55" />
+        <path d="M13 21.5h8.4v3.2H13z" fill="#06101f" opacity="0.45" />
+        <circle cx="14.2" cy="33.4" r="3.5" fill="#06101f" stroke={`url(#${g("rim")})`} strokeWidth="1.2" />
+        <circle cx="33.8" cy="33.4" r="3.5" fill="#06101f" stroke={`url(#${g("rim")})`} strokeWidth="1.2" />
+        <circle cx="16.5" cy="19.8" r="1.15" fill="#fff" opacity="0.55" />
       </g>
     ),
     track: (
       <g transform={`translate(0 ${yOff})`}>
-        <ellipse cx="24" cy="22" rx="14.5" ry="10.5" fill="none" stroke={`url(#${g("rim")})`} strokeWidth="4.5" opacity="0.28" />
-        <ellipse cx="24" cy="22" rx="14.5" ry="10.5" fill="none" stroke={`url(#${g("rim")})`} strokeWidth="2.2" />
-        <ellipse
-          cx="24"
-          cy="22"
-          rx="7.2"
-          ry="4.6"
-          fill={`url(#${g("metal")})`}
-          stroke={`url(#${g("rim")})`}
-          strokeWidth="1"
-        />
-        <path d="M18 22h12" stroke={`url(#${g("core")})`} strokeWidth="1.6" strokeLinecap="round" />
+        <ellipse cx="24" cy="23" rx="15.5" ry="11.2" fill={`url(#${g("glow")})`} opacity="0.28" />
+        <ellipse cx="24" cy="23" rx="14.6" ry="10.6" fill="none" stroke={`url(#${g("rim")})`} strokeWidth="4.2" opacity="0.35" />
+        <ellipse cx="24" cy="23" rx="14.6" ry="10.6" fill="none" stroke={`url(#${g("rim")})`} strokeWidth="2.3" />
+        <ellipse cx="24" cy="23" rx="7.4" ry="4.8" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1" />
+        <path d="M18 23h12" stroke={`url(#${g("core")})`} strokeWidth="1.7" strokeLinecap="round" />
+        <circle cx="32.5" cy="16.2" r="1.3" fill="#22d3ee" opacity="0.85" />
       </g>
     ),
     tyre: (
       <g transform={`translate(0 ${yOff})`}>
-        <ellipse cx="24" cy="33" rx="11" ry="3.2" fill={c.e} opacity="0.25" />
-        <circle cx="18" cy="26" r="8.2" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.6" />
-        <circle cx="18" cy="26" r="3.6" fill="#0b1220" stroke={c.a} strokeWidth="1" />
-        <circle cx="30" cy="26" r="8.2" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.6" />
-        <circle cx="30" cy="26" r="3.6" fill="#0b1220" stroke={c.b} strokeWidth="1" />
-        <circle cx="24" cy="17" r="9" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.8" />
-        <circle cx="24" cy="17" r="4.2" fill="#0b1220" stroke={`url(#${g("core")})`} strokeWidth="1.2" />
-        <circle cx="24" cy="17" r="1.8" fill={`url(#${g("core")})`} />
-        <circle cx="20" cy="13.5" r="1.1" fill="#fff" opacity="0.5" />
+        <ellipse cx="24" cy="38.8" rx="12" ry="2.6" fill={`url(#${g("glow")})`} opacity="0.3" />
+        <ellipse cx="24" cy="24" rx="13.2" ry="12.2" fill="#0b1220" stroke={`url(#${g("rim")})`} strokeWidth="3.4" />
+        <ellipse cx="24" cy="24" rx="7.4" ry="6.8" fill={`url(#${g("metal")})`} stroke={`url(#${g("rim")})`} strokeWidth="1.2" />
+        <ellipse cx="24" cy="24" rx="3.2" ry="2.9" fill="#06101f" stroke={c.a} strokeWidth="1.1" />
+        <path d="M16.5 18.5c2.4-3 6.2-4.6 10.2-3.6" stroke="#fff" strokeOpacity="0.35" strokeWidth="1.3" strokeLinecap="round" />
       </g>
     ),
     conditions: (
       <g transform={`translate(0 ${yOff})`}>
+        <ellipse cx="24" cy="39.6" rx="11" ry="2.2" fill={`url(#${g("glow")})`} opacity="0.3" />
         <path
-          d="M17 14h14l2.5 4.5V36c0 1.5-1.2 2.8-2.8 2.8H17.3c-1.6 0-2.8-1.3-2.8-2.8V18.5L17 14z"
+          d="M16.6 14.2h14.8l2.4 4.4V35.6c0 1.5-1.2 2.7-2.7 2.7H17c-1.5 0-2.7-1.2-2.7-2.7V18.6l2.3-4.4z"
           fill={`url(#${g("metal")})`}
           stroke={`url(#${g("rim")})`}
-          strokeWidth="1.5"
+          strokeWidth="1.45"
         />
-        <path d="M17 14l2.5-3h9L31 14" fill={`url(#${g("core")})`} opacity="0.55" />
-        <rect x="20" y="20" width="8" height="10" rx="1.5" fill={`url(#${g("core")})`} opacity="0.75" />
-        <path d="M22 24h4M22 27h4" stroke="#0b1220" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
-        <circle cx="18.5" cy="17" r="1.1" fill="#fff" opacity="0.5" />
+        <path d="M16.6 14.2 19 11h10l2.4 3.2" fill={`url(#${g("core")})`} opacity="0.55" />
+        <rect x="19.8" y="20" width="8.4" height="10.4" rx="1.5" fill={`url(#${g("core")})`} opacity="0.78" />
+        <path d="M21.8 23.6h4.4M21.8 27h4.4" stroke="#06101f" strokeWidth="1.3" strokeLinecap="round" opacity="0.7" />
+        <circle cx="18.4" cy="17" r="1.1" fill="#fff" opacity="0.5" />
       </g>
     ),
     chip: (
@@ -503,7 +485,7 @@ export default function R79Icon({
 /** @type {Record<string, { name: string, accent: string }>} */
 export const R79_FEATURE_ICONS = {
   "wheel-settings": { name: "wheel", accent: "spectrum" },
-  podium: { name: "podium", accent: "gold" },
+  podium: { name: "podium", accent: "podium" },
   "todays-race": { name: "today", accent: "today" },
   "ai-engineer": { name: "ai", accent: "ai" },
   advisor: { name: "championship", accent: "champ" },

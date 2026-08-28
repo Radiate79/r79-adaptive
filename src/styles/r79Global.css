@@ -696,7 +696,7 @@ td:has(> select) {
 /* Premium Adaptive chrome — primary product surface (all viewports) */
 .r79-mobile-chrome {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   max-width: 100%;
   width: 100%;
 }
@@ -710,27 +710,280 @@ td:has(> select) {
   display: none !important;
 }
 
-.r79-mobile-bottom-nav,
-.r79-mobile-more-root,
-.r79-scroll-to-top {
-  display: none;
+.r79-mobile-bottom-nav {
+  display: flex;
 }
 
-.r79-wheel-filters-mobile,
-.r79-wheel-mobile-title,
-.r79-wheel-filters-title,
-.r79-wheel-mobile-heading,
-.r79-wheel-intro-card,
-.r79-wheel-details--mobile {
-  display: none;
-}
-
-.r79-wheel-page-header-wrap {
+.r79-mobile-more-root {
   display: block;
 }
 
-.r79-app-game-selector--desktop {
+.r79-scroll-to-top {
   display: flex;
+}
+
+.r79-mobile-feature-scroll {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  padding: 4px 2px 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.r79-mobile-feature-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.r79-mobile-feature-card {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-family: inherit;
+  scroll-snap-align: start;
+}
+
+.r79-mobile-more-wrap {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* Prefer holographic filters console over desktop form layout */
+.r79-wheel-filters-desktop,
+.r79-wheel-page-header-wrap,
+.r79-wheel-details--desktop {
+  display: none !important;
+}
+
+.r79-wheel-filters-mobile {
+  display: grid;
+  gap: 6px;
+  max-width: 100%;
+  width: 100%;
+}
+
+.r79-wheel-filters-title,
+.r79-wheel-intro-card,
+.r79-wheel-details--mobile {
+  display: block;
+}
+
+.r79-wheel-mobile-title,
+.r79-wheel-mobile-heading {
+  display: none;
+}
+
+.r79-app-main {
+  padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+}
+
+.r79-app-shell {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Floating dock + chrome structure (all viewports) */
+.r79-mobile-bottom-nav {
+  align-items: stretch;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(4, 8, 16, 0.72);
+  border: none;
+  border-radius: 22px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 36px rgba(0, 0, 0, 0.45),
+    0 0 28px rgba(34, 211, 238, 0.06);
+  gap: 0;
+  justify-content: space-around;
+  left: max(10px, calc(50% - 230px));
+  outline: 1px solid rgba(255, 255, 255, 0.07);
+  outline-offset: -1px;
+  padding: 5px 4px;
+  position: fixed;
+  right: max(10px, calc(50% - 230px));
+  z-index: 60;
+}
+
+.r79-mobile-bottom-nav__item {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 16px;
+  color: rgba(180, 198, 230, 0.62);
+  cursor: pointer;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  font-family: inherit;
+  gap: 1px;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 4px 2px;
+}
+
+.r79-mobile-bottom-nav__label {
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.r79-scroll-to-top {
+  align-items: center;
+  background: var(--r79-gradient);
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  border-radius: 999px;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.35);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  height: 44px;
+  justify-content: center;
+  position: fixed;
+  right: max(14px, calc(50% - 226px));
+  width: 44px;
+  z-index: 55;
+}
+
+.r79-page--wheel-settings .r79-page-header {
+  display: none;
+}
+
+.r79-page--wheel-settings {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: grid;
+  gap: 6px;
+  margin-top: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 0 0 8px;
+}
+
+.r79-wheel-mobile-class-row {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 2px;
+  max-width: 100%;
+}
+
+.r79-mobile-filter-row {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.28);
+  border: none;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: grid;
+  grid-template-columns: 48px minmax(0, 0.7fr) minmax(0, 1.3fr) 22px;
+  min-height: 68px;
+  outline: 1px solid rgba(255, 255, 255, 0.04);
+  outline-offset: -1px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.r79-mobile-more-btn {
+  align-items: center;
+  background: rgba(8, 14, 30, 0.78);
+  border: none;
+  border-radius: 999px;
+  color: rgba(190, 205, 235, 0.78);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 550;
+  gap: 6px;
+  height: 28px;
+  justify-content: center;
+  letter-spacing: 0.02em;
+  min-height: 28px;
+  outline: 1px solid rgba(255, 255, 255, 0.06);
+  outline-offset: -1px;
+  padding: 0 12px;
+}
+
+.r79-mobile-more-btn__dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.r79-mobile-more-btn__dots span {
+  background: var(--r79-spectrum, linear-gradient(90deg, #22d3ee, #8b5cf6, #d946ef));
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(34, 211, 238, 0.55);
+  display: block;
+  height: 5px;
+  width: 5px;
+}
+
+.r79-mobile-game-panel {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  max-width: 100%;
+  padding: 1px 0 2px;
+  width: 100%;
+}
+
+.r79-mobile-game-panel__label {
+  color: rgba(170, 190, 230, 0.55);
+  font-size: 0.6rem;
+  font-weight: 550;
+  letter-spacing: 0.04em;
+}
+
+.r79-mobile-game-panel__pills {
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: flex;
+  gap: 2px;
+  outline: 1px solid rgba(255, 255, 255, 0.05);
+  outline-offset: -1px;
+  padding: 2px;
+}
+
+.r79-mobile-game-pill {
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  color: var(--r79-text-muted);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  height: 26px;
+  min-height: 26px;
+  padding: 0 14px;
+}
+
+.r79-mobile-game-pill--active {
+  background: rgba(34, 211, 238, 0.18);
+  box-shadow:
+    0 0 16px rgba(34, 211, 238, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  color: #e8fbff;
+  font-weight: 700;
 }
 
 /* Shared R79 brand bar */

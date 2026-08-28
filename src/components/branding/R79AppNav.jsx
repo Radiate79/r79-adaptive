@@ -6,8 +6,9 @@ import {
   MOBILE_WHEEL_HERO_ID,
   PRIMARY_NAV_ITEMS,
 } from "../../data/appNavMeta.js";
-import R79Icon, { R79_FEATURE_ICONS } from "./R79Icon.jsx";
+import R79Icon from "./R79Icon.jsx";
 import R79HeroWheel from "./R79HeroWheel.jsx";
+import R79Object, { R79_FEATURE_OBJECTS } from "./R79Object.jsx";
 
 /**
  * @param {Object} props
@@ -170,14 +171,21 @@ export default function R79AppNav({
           >
             <span className="r79-wheel-hero-nav__rim" aria-hidden="true" />
             <span className="r79-wheel-hero-nav__trails" aria-hidden="true" />
+            <span className="r79-wheel-hero-nav__atmosphere" aria-hidden="true" />
             <span className="r79-wheel-hero-nav__visual r79-holo-object r79-holo-object--hero" aria-hidden="true">
               <span className="r79-holo-object__ring" />
-              <R79HeroWheel size={124} />
+              <span className="r79-wheel-hero-nav__rings">
+                <span />
+                <span />
+                <span />
+              </span>
+              <span className="r79-wheel-hero-nav__pedestal" />
+              <R79HeroWheel />
             </span>
             <span className="r79-wheel-hero-nav__copy">
               <span className="r79-wheel-hero-nav__title">
-                <span>Wheel</span>
-                <span>Settings</span>
+                <span className="r79-wheel-hero-nav__title-wheel">Wheel</span>
+                <span className="r79-wheel-hero-nav__title-settings">Settings</span>
               </span>
               <span className="r79-wheel-hero-nav__subtitle">
                 Precision setup for your race
@@ -185,7 +193,7 @@ export default function R79AppNav({
               <span className="r79-wheel-hero-nav__accent" />
             </span>
             <span className="r79-wheel-hero-nav__chevron" aria-hidden="true">
-              <R79Icon name="chevron" size={28} accent="magenta" />
+              <R79Icon name="chevron" size={18} accent="magenta" />
             </span>
           </button>
         ) : null}
@@ -197,10 +205,7 @@ export default function R79AppNav({
         >
           {mobileFeatureCards.map((item) => {
             const isActive = page === item.id;
-            const iconMeta = R79_FEATURE_ICONS[item.id] ?? {
-              name: "more",
-              accent: "spectrum",
-            };
+            const objectName = R79_FEATURE_OBJECTS[item.id] ?? "podium";
             const accentClass =
               item.id === "podium"
                 ? "r79-mobile-feature-card--podium"
@@ -230,12 +235,7 @@ export default function R79AppNav({
               >
                 <span className="r79-mobile-feature-card__icon r79-holo-object r79-icon-shell r79-icon-shell--feature" aria-hidden="true">
                   <span className="r79-holo-object__ring" />
-                  <R79Icon
-                    name={iconMeta.name}
-                    accent={iconMeta.accent}
-                    size={62}
-                    withBase
-                  />
+                  <R79Object name={objectName} size={108} />
                 </span>
                 <span className="r79-mobile-feature-card__label">
                   {item.shortLabel}

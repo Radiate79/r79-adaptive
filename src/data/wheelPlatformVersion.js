@@ -316,6 +316,11 @@ export function formatWheelPlatformStatus(wheelBaseId) {
     meta.softwareVersion !== UNVERIFIED_FIRMWARE_VERSION
   ) {
     lines.push(`${meta.softwarePlatform} ${meta.softwareVersion}`);
+  } else if (
+    meta.firmwareStatus === "UNKNOWN" ||
+    meta.firmwareStatus === "UNVERIFIED"
+  ) {
+    lines.push("Needs verification");
   }
 
   lines.push(`GT7 ${ACTIVE_GT7_GAME_VERSION}`);

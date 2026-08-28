@@ -1,5 +1,6 @@
 import { MOBILE_BOTTOM_NAV_ITEMS, MOBILE_MORE_PINNED_ITEMS } from "../../data/appNavMeta.js";
-import R79Icon, { R79_FEATURE_ICONS } from "./R79Icon.jsx";
+import R79Icon from "./R79Icon.jsx";
+import R79Object, { R79_DOCK_OBJECTS } from "./R79Object.jsx";
 
 /**
  * @param {Object} props
@@ -54,10 +55,7 @@ export default function R79MobileBottomNav({
     <nav className="r79-mobile-bottom-nav" aria-label="Mobile bottom navigation">
       {MOBILE_BOTTOM_NAV_ITEMS.map((item) => {
         const active = isActive(item);
-        const iconMeta = R79_FEATURE_ICONS[item.pageId] ?? {
-          name: "more",
-          accent: "violet",
-        };
+        const objectName = R79_DOCK_OBJECTS[item.pageId];
         return (
           <button
             key={item.id}
@@ -71,16 +69,11 @@ export default function R79MobileBottomNav({
             aria-current={active && item.pageId !== "more" ? "page" : undefined}
           >
             <span className="r79-mobile-bottom-nav__icon" aria-hidden="true">
-              <R79Icon
-                name={iconMeta.name}
-                accent={iconMeta.accent}
-                size={32}
-                withBase={
-                  item.pageId === "wheel-settings" ||
-                  item.pageId === "ai-engineer" ||
-                  item.pageId === "pitstop-strategy"
-                }
-              />
+              {objectName ? (
+                <R79Object name={objectName} size={40} />
+              ) : (
+                <R79Icon name="more" accent="violet" size={34} withBase />
+              )}
             </span>
             <span className="r79-mobile-bottom-nav__label">{item.label}</span>
           </button>

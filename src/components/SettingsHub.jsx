@@ -194,7 +194,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
 
         <R79PageHeader
           title="About R79"
-          subtitle="Radiate79's Gran Turismo race engineering toolkit — championship analysis, race intelligence, and daily race strategy."
+          subtitle="R79 Adaptive — Gran Turismo race engineering toolkit. Championship analysis, race intelligence, and daily race strategy."
         />
 
         <div style={styles.aboutIdentity}>
@@ -263,7 +263,7 @@ export default function SettingsHub({ bootView = null, onBootViewConsumed }) {
         style={styles.settingsRow}
       >
         <span style={styles.settingsRowLabel}>About R79</span>
-        <span style={styles.settingsRowHint}>Version, Pathfinder, founder</span>
+        <span style={styles.settingsRowHint}>Version, membership, founder</span>
         <span style={styles.chevron}>›</span>
       </button>
 

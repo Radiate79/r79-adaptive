@@ -39,10 +39,11 @@ import {
   R79_SECTION_TITLE,
 } from "../styles/r79Theme.js";
 import R79PageHeader from "./branding/R79PageHeader.jsx";
-import R79Icon, {
-  R79_FILTER_ICONS,
-  telemetryIconForLine,
-} from "./branding/R79Icon.jsx";
+import R79Icon from "./branding/R79Icon.jsx";
+import R79Object, {
+  R79_FILTER_OBJECTS,
+  telemetryObjectForLine,
+} from "./branding/R79Object.jsx";
 
 function TelemetryStatusStrip({ lines }) {
   return (
@@ -61,18 +62,14 @@ function TelemetryStatusStrip({ lines }) {
                 : isGt7
                   ? "ok"
                   : "meta";
-          const iconMeta = telemetryIconForLine(line, index);
+          const objectName = telemetryObjectForLine(line, index);
           return (
             <span
               key={line}
               className={`r79-telemetry__item r79-telemetry__item--${kind}`}
             >
               <span className="r79-telemetry__icon" aria-hidden="true">
-                <R79Icon
-                  name={iconMeta.name}
-                  accent={iconMeta.accent}
-                  size={22}
-                />
+                <R79Object name={objectName} size={36} />
               </span>
               <span className="r79-telemetry__dot" aria-hidden="true" />
               <span>{line}</span>
@@ -91,16 +88,14 @@ function TelemetryStatusStrip({ lines }) {
 
 /**
  * @param {{
- *   iconName?: string,
- *   iconAccent?: string,
+ *   objectName?: string,
  *   label: string,
  *   value: string,
  *   children: import("react").ReactNode,
  * }} props
  */
 function MobileFilterRow({
-  iconName = "car",
-  iconAccent = "cyan",
+  objectName = "car",
   label,
   value,
   children,
@@ -109,7 +104,7 @@ function MobileFilterRow({
     <div className="r79-mobile-filter-row">
       <span className="r79-mobile-filter-row__icon r79-icon-shell r79-holo-object" aria-hidden="true">
         <span className="r79-holo-object__ring" />
-        <R79Icon name={iconName} accent={iconAccent} size={36} withBase />
+        <R79Object name={objectName} size={64} />
       </span>
       <span className="r79-mobile-filter-row__label">{label}</span>
       <span className="r79-mobile-filter-row__value">{value}</span>
@@ -217,13 +212,9 @@ function MobileWearMultiplierRow({
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
       >
-        <span className="r79-mobile-filter-row__icon r79-icon-shell" aria-hidden="true">
-          <R79Icon
-            name={R79_FILTER_ICONS.conditions.name}
-            accent={R79_FILTER_ICONS.conditions.accent}
-            size={36}
-            withBase
-          />
+        <span className="r79-mobile-filter-row__icon r79-icon-shell r79-holo-object" aria-hidden="true">
+          <span className="r79-holo-object__ring" />
+          <R79Object name={R79_FILTER_OBJECTS.conditions} size={64} />
         </span>
         <span className="r79-mobile-filter-row__label">Race Conditions</span>
         <span className="r79-mobile-filter-row__value">{valueText}</span>
@@ -649,8 +640,7 @@ export default function WheelSettingsHub({
           </div>
 
           <MobileFilterRow
-            iconName={R79_FILTER_ICONS.car.name}
-            iconAccent={R79_FILTER_ICONS.car.accent}
+            objectName={R79_FILTER_OBJECTS.car}
             label="Car"
             value={selectedCar?.name ?? "Select a car…"}
           >
@@ -670,8 +660,7 @@ export default function WheelSettingsHub({
           </MobileFilterRow>
 
           <MobileFilterRow
-            iconName={R79_FILTER_ICONS.track.name}
-            iconAccent={R79_FILTER_ICONS.track.accent}
+            objectName={R79_FILTER_OBJECTS.track}
             label="Track"
             value={
               selectedTrack
@@ -695,8 +684,7 @@ export default function WheelSettingsHub({
           </MobileFilterRow>
 
           <MobileFilterRow
-            iconName={R79_FILTER_ICONS.tyre.name}
-            iconAccent={R79_FILTER_ICONS.tyre.accent}
+            objectName={R79_FILTER_OBJECTS.tyre}
             label="Tyre"
             value={tyreCompound}
           >
@@ -726,8 +714,7 @@ export default function WheelSettingsHub({
           />
 
           <MobileFilterRow
-            iconName={R79_FILTER_ICONS.bop.name}
-            iconAccent={R79_FILTER_ICONS.bop.accent}
+            objectName={R79_FILTER_OBJECTS.bop}
             label="BOP"
             value={bopOn ? "On" : "Off"}
           >
@@ -743,8 +730,7 @@ export default function WheelSettingsHub({
           </MobileFilterRow>
 
           <MobileFilterRow
-            iconName={R79_FILTER_ICONS.wheel.name}
-            iconAccent={R79_FILTER_ICONS.wheel.accent}
+            objectName={R79_FILTER_OBJECTS.wheel}
             label="Wheel Base"
             value={wheelLabel}
           >
@@ -1000,6 +986,15 @@ export default function WheelSettingsHub({
             {lookup.message ? (
               <p className="r79-wheel-match-notice">{lookup.message}</p>
             ) : null}
+            {lookup.confidenceLabel || presentation.confidence?.label ? (
+              <p className="r79-wheel-match-notice">
+                Confidence:{" "}
+                {presentation.confidence?.label ?? lookup.confidenceLabel}
+                {(presentation.confidence?.note ?? lookup.confidenceNote)
+                  ? ` — ${presentation.confidence?.note ?? lookup.confidenceNote}`
+                  : ""}
+              </p>
+            ) : null}
             {setupRows[0]?.narrative ? (
               <div className="r79-wheel-podium-summary">
                 <span className="r79-wheel-podium-summary__label">Recommendation based on</span>
@@ -1023,6 +1018,7 @@ export default function WheelSettingsHub({
                       : "r79-wheel-value-card"
                   }
                 >
+                  <span className="r79-wheel-value-card__setting-label">Setting</span>
                   <span className="r79-wheel-value-card__name">{row.label}</span>
                   {row.description ? (
                     <p className="r79-wheel-field-description">

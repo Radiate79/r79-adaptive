@@ -6,7 +6,7 @@
 export const PATHFINDER_TITLE = "🌟 Pathfinder";
 
 export const PATHFINDER_DESCRIPTION = [
-  "Pathfinders are early explorers who help shape the future of R79 through testing, feedback, ideas and community support.",
+  "Early contributors who help shape R79 through testing, feedback, ideas and community support.",
 ];
 
 export const PATHFINDER_FOUNDER_CLARIFIER =
