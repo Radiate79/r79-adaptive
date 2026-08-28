@@ -1739,19 +1739,29 @@ body::before {
     drop-shadow(0 0 14px rgba(34, 211, 238, 0.45))
     drop-shadow(0 0 28px rgba(139, 92, 246, 0.32))
     drop-shadow(0 0 10px rgba(192, 38, 211, 0.22));
-  width: min(196px, 76vw);
+  width: min(245px, 76vw);
+}
+
+@media (max-width: 768px) {
+  .r79-splash .r79-brand-logo--splash {
+    width: min(360px, 90vw);
+  }
 }
 
 .r79-splash__identity {
   align-items: center;
   display: grid;
   gap: 8px;
+  justify-items: center;
   position: relative;
+  text-align: center;
   z-index: 1;
 }
 
 .r79-splash__wordmark {
   justify-content: center;
+  max-width: 100%;
+  width: fit-content;
 }
 
 .r79-splash__wordmark .r79-brand-bar__wordmark-r79,

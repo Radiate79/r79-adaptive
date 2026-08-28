@@ -722,9 +722,20 @@ body::before {
   filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.4));
 }
 
+.r79-splash__wordmark .r79-brand-bar__wordmark-digits {
+  letter-spacing: 0.03em;
+  margin-inline-start: -0.02em;
+  vertical-align: 0.07em;
+}
+
 .r79-splash__product-tagline {
+  display: block;
   font-size: 0.72rem !important;
   letter-spacing: 0.18em !important;
+  margin-inline: auto;
+  max-width: 100%;
+  text-align: center !important;
+  width: fit-content;
 }
 
 .r79-splash__emblem {

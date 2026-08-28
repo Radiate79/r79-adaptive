@@ -38,8 +38,13 @@ export default function SplashScreen({ onEnter }) {
           </div>
 
           <div className="r79-splash__identity">
-            <span className="r79-brand-bar__wordmark r79-splash__wordmark">
-              <span className="r79-brand-bar__wordmark-r79">R79</span>
+            <span
+              className="r79-brand-bar__wordmark r79-splash__wordmark"
+              aria-label="R79 Adaptive"
+            >
+              <span className="r79-brand-bar__wordmark-r79">
+                R<span className="r79-brand-bar__wordmark-digits">79</span>
+              </span>
               <span className="r79-brand-bar__wordmark-adaptive">Adaptive</span>
             </span>
             <span className="r79-brand-bar__tagline r79-splash__product-tagline">
