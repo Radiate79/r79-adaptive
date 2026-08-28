@@ -102,11 +102,15 @@ export function calculateRaceWearProfile(car, track, settings = {}) {
   const trackFuelDemand = Number(track?.fuel ?? 5);
 
   const tyreStress =
-    (trackTyreDemand * Math.max(0.35, tyreMultiplier) * lengthMods.tyreWeight) /
-    carTyreRating;
+    tyreMultiplier === 0
+      ? 0
+      : (trackTyreDemand * tyreMultiplier * lengthMods.tyreWeight) /
+        carTyreRating;
   const fuelStress =
-    (trackFuelDemand * Math.max(0.35, fuelMultiplier) * lengthMods.fuelWeight) /
-    carFuelRating;
+    fuelMultiplier === 0
+      ? 0
+      : (trackFuelDemand * fuelMultiplier * lengthMods.fuelWeight) /
+        carFuelRating;
   const combinedStress = tyreStress * 0.72 + fuelStress * 0.28;
 
   return {
@@ -123,7 +127,25 @@ export function calculateRaceWearProfile(car, track, settings = {}) {
  * @param {number} laps
  * @param {number} tyreMultiplier
  */
-function estimateStopCount(combinedStress, laps, tyreMultiplier) {
+/**
+ * @param {number} combinedStress
+ * @param {number} laps
+ * @param {number} tyreMultiplier
+ * @param {number} [fuelMultiplier=0]
+ */
+function estimateStopCount(combinedStress, laps, tyreMultiplier, fuelMultiplier = 0) {
+  if (tyreMultiplier === 0) {
+    if (fuelMultiplier === 0 || combinedStress <= 0) {
+      return 0;
+    }
+
+    if (laps >= 28 && fuelMultiplier >= 5 && combinedStress >= 3.5) {
+      return 1;
+    }
+
+    return 0;
+  }
+
   if (laps <= 6 && combinedStress < 4.5 && tyreMultiplier <= 2) {
     return 0;
   }
@@ -330,6 +352,7 @@ export function analyzePitstopStrategy(input = {}) {
     wear.combinedStress,
     wear.laps,
     tyreMultiplier,
+    fuelMultiplier,
   );
 
   if (evidence.stopAdjustment > 0 && evidence.matchedEntryId) {

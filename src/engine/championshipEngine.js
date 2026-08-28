@@ -1,5 +1,20 @@
 import { DEFAULT_GAME_VERSION } from "../data/gameVersions.js";
+import {
+  GR3_171_ATTRIBUTE_DELTAS,
+  getTrackProfileDemandBoosts,
+  getTrackRacingProfile,
+  resolveChampionshipCarAttributes,
+} from "../data/championshipAdvisor171.js";
 import { buildRecommendationContext } from "../data/dailyRaceEvidence.js";
+import {
+  ADVISOR_BLEND_WEIGHTS,
+  ADVISOR_EVIDENCE_WEIGHTS,
+  getAttributeWeaknessPenalty,
+  getRaceConditionImportance,
+  getRaceDistanceProfile,
+} from "./advisorScoringConfig.js";
+import { resolveAdvisorConfidence } from "./advisorConfidenceEngine.js";
+import { generateAdvisorReasons } from "./advisorExplanationEngine.js";
 import {
   filterEligibleRecommendationResults,
   filterRecommendationPool,
@@ -11,12 +26,10 @@ import {
   getTrackSurfaceModifiers,
 } from "../utils/trackClassification.js";
 import {
-  appendCommunityConfidenceReason,
   blendRecommendationScore,
   buildRecommendationBreakdown,
   compareRecommendationRanking,
   getAdjustedTechnicalScore,
-  getCommunityConfidence,
   getRecommendationHistoricalScore,
   passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
@@ -31,15 +44,6 @@ const DEFAULT_ROTATION = {
   "4WD": 6,
   FF: 5,
 };
-const ATTRIBUTE_REASON_MAP = {
-  topSpeed: "Excellent top speed",
-  traction: "Strong traction",
-  fuel: "Good fuel economy",
-  tyres: "Strong tyre management",
-  stability: "Stable under braking",
-  rotation: "Strong rotation and agility",
-};
-
 function normalizeMultiplier(value) {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
@@ -60,11 +64,13 @@ function getScoreWeights(raceSettings = {}) {
 }
 
 function getCarAttribute(car, field) {
+  const profile = resolveChampionshipCarAttributes(car);
+
   if (field === "rotation") {
-    return Number(car?.rotation ?? DEFAULT_ROTATION[car?.drivetrain] ?? 7);
+    return Number(profile?.rotation ?? DEFAULT_ROTATION[profile?.drivetrain] ?? 7);
   }
 
-  return Number(car?.[field] ?? 0);
+  return Number(profile?.[field] ?? 0);
 }
 
 function computeRotationDemand(track) {
@@ -102,17 +108,22 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
   const raceWeights = getScoreWeights(raceSettings);
   const surfaceModifiers = getTrackSurfaceModifiers(track);
   const kerbDifficulty = Math.max(0, 8 - Number(track?.kerbs ?? 6));
-  const attrs = {
-    topSpeed: Number(track?.topSpeed ?? 5),
-    traction: Number(track?.traction ?? 5),
-    fuel: Number(track?.fuel ?? 5),
-    tyres: Number(track?.tyres ?? 5),
-    stability: Number(track?.stability ?? 5),
-  };
-  const rotationValue = computeRotationDemand(track);
+  const attrs = getTrackAttributeTargets(track);
+  const rotationValue = attrs.rotation;
+  const profileBoosts = getTrackProfileDemandBoosts(getTrackRacingProfile(track));
+  const drivingStyle = track?.drivingStyle ?? "balanced";
+  const styleBoosts =
+    drivingStyle === "high_speed"
+      ? { topSpeed: 1.45, traction: 0.92, rotation: 0.88 }
+      : drivingStyle === "technical"
+        ? { traction: 1.4, rotation: 1.35, topSpeed: 0.82 }
+        : { topSpeed: 1.05, traction: 1.05, rotation: 1.05 };
 
   const applySurface = (field, weight) =>
-    weight * (surfaceModifiers[field] ?? 1);
+    weight *
+    (surfaceModifiers[field] ?? 1) *
+    (profileBoosts[field] ?? 1) *
+    (styleBoosts[field] ?? 1);
 
   return {
     topSpeed: applySurface(
@@ -215,27 +226,135 @@ function getDrivetrainTrackBonus(car, track) {
   return bonus;
 }
 
+function getTrackAttributeTargets(track) {
+  return {
+    topSpeed: Number(track?.topSpeed ?? 5),
+    traction: Number(track?.traction ?? 5),
+    fuel: Number(track?.fuel ?? 5),
+    tyres: Number(track?.tyres ?? 5),
+    stability: Number(track?.stability ?? 5),
+    rotation: computeRotationDemand(track),
+  };
+}
+
 function getWeightedTrackScore(car, track, raceSettings = {}) {
   const demands = getTrackDemandWeights(track, raceSettings);
+  const targets = getTrackAttributeTargets(track);
+  const raceImportance = getRaceConditionImportance(raceSettings);
   let weightedTotal = 0;
   let maxWeightedTotal = 0;
+  let weaknessTotal = 0;
 
   SCORING_FIELDS.forEach((field) => {
     const demand = demands[field] ?? 0;
     const carValue = getCarAttribute(car, field);
-    weightedTotal += carValue * demand;
-    maxWeightedTotal += 10 * demand;
+    const paceBoost =
+      field === "topSpeed" || field === "rotation"
+        ? raceImportance.paceEmphasis
+        : field === "fuel" || field === "tyres"
+          ? raceImportance.enduranceEmphasis
+          : 1;
+    const effectiveDemand = demand * paceBoost;
+
+    weightedTotal += carValue * effectiveDemand;
+    maxWeightedTotal += 10 * effectiveDemand;
+    weaknessTotal += getAttributeWeaknessPenalty(targets[field], carValue) * demand;
   });
 
   const fitScore =
     maxWeightedTotal > 0 ? (weightedTotal / maxWeightedTotal) * 100 : 0;
   const drivetrainBonus = getDrivetrainTrackBonus(car, track);
+  const penalty = Math.min(fitScore * 0.35, weaknessTotal * 2.4);
 
-  return fitScore + drivetrainBonus;
+  return Math.max(0, fitScore + drivetrainBonus - penalty);
+}
+
+function computeRaceConditionFitScore(car, track, raceSettings = {}) {
+  const raceImportance = getRaceConditionImportance(raceSettings);
+  const carFuel = getCarAttribute(car, "fuel");
+  const carTyres = getCarAttribute(car, "tyres");
+  const carStability = getCarAttribute(car, "stability");
+  const profile = getRaceDistanceProfile(raceSettings.lapCount);
+
+  let score = 50;
+
+  if (raceImportance.tyreImportance > 0) {
+    score += ((carTyres - 5) / 5) * raceImportance.tyreImportance * 18;
+    score +=
+      ((Number(track?.tyres ?? 5) - 5) / 5) *
+      raceImportance.tyreImportance *
+      6;
+  }
+
+  if (raceImportance.fuelImportance > 0) {
+    score += ((carFuel - 5) / 5) * raceImportance.fuelImportance * 16;
+  }
+
+  if (profile.paceEmphasis > 1) {
+    score +=
+      ((getCarAttribute(car, "topSpeed") + getCarAttribute(car, "traction")) /
+        20 -
+        0.5) *
+      (profile.paceEmphasis - 0.85) *
+      22;
+  }
+
+  if (profile.enduranceEmphasis > 1) {
+    score +=
+      ((carStability + carTyres) / 20 - 0.5) *
+      (profile.enduranceEmphasis - 0.85) *
+      18;
+  }
+
+  return Number(Math.max(0, Math.min(100, score)).toFixed(2));
+}
+
+function getDetailedStrengthContributions(
+  car,
+  championshipTracks,
+  raceSettings = {},
+) {
+  if (!Array.isArray(championshipTracks) || championshipTracks.length === 0) {
+    return SCORING_FIELDS.map((field) => ({
+      field,
+      contribution: 0,
+      carValue: getCarAttribute(car, field),
+      demand: 0,
+    }));
+  }
+
+  return SCORING_FIELDS.map((field) => {
+    const carValue = getCarAttribute(car, field);
+    const contribution =
+      championshipTracks.reduce((sum, track) => {
+        const demands = getTrackDemandWeights(track, raceSettings);
+        const targets = getTrackAttributeTargets(track);
+        const fit = carValue * (demands[field] ?? 0);
+        const weakness = getAttributeWeaknessPenalty(targets[field], carValue);
+        return sum + fit - weakness * 1.5;
+      }, 0) / championshipTracks.length;
+
+    const demand =
+      championshipTracks.reduce(
+        (sum, track) => sum + getTrackAttributeTargets(track)[field],
+        0,
+      ) / championshipTracks.length;
+
+    return {
+      field,
+      contribution,
+      carValue,
+      demand,
+    };
+  });
 }
 
 export function scoreCarForTrack(car, track, raceSettings = {}) {
   return Number(getWeightedTrackScore(car, track, raceSettings).toFixed(2));
+}
+
+export function scoreCarRaceConditionFit(car, track, raceSettings = {}) {
+  return computeRaceConditionFitScore(car, track, raceSettings);
 }
 
 export function scoreCarForChampionship(
@@ -247,46 +366,41 @@ export function scoreCarForChampionship(
     return 0;
   }
 
-  const total = championshipTracks.reduce((sum, track) => {
-    return sum + scoreCarForTrack(car, track, raceSettings);
-  }, 0);
+  const roundScores = championshipTracks.map((track) =>
+    computeRoundTechnicalScore(car, track, raceSettings),
+  );
+  const average =
+    roundScores.reduce((sum, score) => sum + score, 0) / roundScores.length;
+  const consistency = calculateConsistencyScore(
+    championshipTracks.map((track) => scoreCarForTrack(car, track, raceSettings)),
+  );
 
-  return Number((total / championshipTracks.length).toFixed(2));
+  return Number(
+    (
+      average * (1 - ADVISOR_BLEND_WEIGHTS.consistency) +
+      consistency * ADVISOR_BLEND_WEIGHTS.consistency
+    ).toFixed(2),
+  );
 }
 
-function getCarStrengthContributions(car, championshipTracks, raceSettings = {}) {
-  if (!Array.isArray(championshipTracks) || championshipTracks.length === 0) {
-    return SCORING_FIELDS.map((field) => ({
-      field,
-      contribution: 0,
-    }));
-  }
-
-  return SCORING_FIELDS.map((field) => {
-    const carValue = getCarAttribute(car, field);
-    const contribution =
-      championshipTracks.reduce((sum, track) => {
-        const demands = getTrackDemandWeights(track, raceSettings);
-        return sum + carValue * (demands[field] ?? 0);
-      }, 0) / championshipTracks.length;
-
-    return {
-      field,
-      contribution: contribution * (0.65 + carValue / 25),
-    };
-  });
-}
-
-function generateCarReasons(car, championshipTracks, raceSettings = {}, count = 3) {
-  const topAttributes = getCarStrengthContributions(
-    car,
-    championshipTracks,
+function generateCarReasons(car, championshipTracks, raceSettings = {}) {
+  return generateAdvisorReasons(
+    getDetailedStrengthContributions(car, championshipTracks, raceSettings),
     raceSettings,
-  )
-    .sort((a, b) => b.contribution - a.contribution)
-    .slice(0, count);
+    championshipTracks,
+  );
+}
 
-  return topAttributes.map(({ field }) => ATTRIBUTE_REASON_MAP[field] ?? field);
+function computeRoundTechnicalScore(car, track, raceSettings = {}) {
+  const trackFit = getWeightedTrackScore(car, track, raceSettings);
+  const raceConditionFit = computeRaceConditionFitScore(car, track, raceSettings);
+
+  return Number(
+    (
+      trackFit * ADVISOR_BLEND_WEIGHTS.trackFit +
+      raceConditionFit * ADVISOR_BLEND_WEIGHTS.raceConditionFit
+    ).toFixed(2),
+  );
 }
 
 function resolveTracksByIds(
@@ -601,12 +715,13 @@ export function recommendCarsForChampionship(
     raceSettings,
   );
 
-  if (candidateCars.length === 0) {
+  if (candidateCars.length === 0 || championshipTracks.length === 0) {
     return [];
   }
 
   const historicalScores = candidateCars.map((car) =>
-    getRecommendationHistoricalScore(car.id, gameVersion),
+    getRecommendationHistoricalScore(car.id, gameVersion) *
+      ADVISOR_EVIDENCE_WEIGHTS.historicalPre171Dampening,
   );
   const maxHistorical = Math.max(...historicalScores, 1);
   const recommendationContext = buildRecommendationContext({
@@ -621,16 +736,34 @@ export function recommendCarsForChampionship(
   return filterEligibleRecommendationResults(
     candidateCars
       .map((car, index) => {
+        const trackFitScore = Number(
+          (
+            championshipTracks.reduce(
+              (sum, track) => sum + scoreCarForTrack(car, track, raceSettings),
+              0,
+            ) / championshipTracks.length
+          ).toFixed(2),
+        );
+        const raceConditionFitScore = Number(
+          (
+            championshipTracks.reduce(
+              (sum, track) =>
+                sum + computeRaceConditionFitScore(car, track, raceSettings),
+              0,
+            ) / championshipTracks.length
+          ).toFixed(2),
+        );
+        const consistencyScore = scoreCarConsistency(
+          car,
+          championshipTracks,
+          raceSettings,
+        );
         const technicalScore = scoreCarForChampionship(
           car,
           championshipTracks,
           raceSettings,
         );
-        const reasons = appendCommunityConfidenceReason(
-          car,
-          generateCarReasons(car, championshipTracks, raceSettings, 3),
-          recommendationContext,
-        );
+        const reasons = generateCarReasons(car, championshipTracks, raceSettings);
         const scoreBreakdown = buildRecommendationBreakdown(
           technicalScore,
           car,
@@ -638,6 +771,27 @@ export function recommendCarsForChampionship(
           maxHistorical,
           recommendationContext,
         );
+        scoreBreakdown.trackFit = trackFitScore;
+        scoreBreakdown.technicalFit = Number(
+          getAdjustedTechnicalScore(technicalScore, car).toFixed(2),
+        );
+        scoreBreakdown.raceConditionFit = raceConditionFitScore;
+        scoreBreakdown.consistencyScore = consistencyScore;
+        scoreBreakdown.overallScore = blendRecommendationScore(
+          technicalScore,
+          car,
+          historicalScores[index],
+          maxHistorical,
+          recommendationContext,
+        );
+
+        const advisorConfidence = resolveAdvisorConfidence({
+          car,
+          trackFitScore,
+          historicalScore: historicalScores[index],
+          hasCurrent171Profile: car.class === "Gr.3",
+          hasTrackEvidence: historicalScores[index] > 0,
+        });
 
         return {
           ...car,
@@ -646,15 +800,17 @@ export function recommendCarsForChampionship(
             technicalScore,
             car,
           ),
-          trackFitScore: scoreBreakdown.trackFit,
+          trackFitScore,
+          raceConditionFitScore,
           technicalFitScore: scoreBreakdown.technicalFit,
           communityConfidence: scoreBreakdown.communityConfidence,
+          advisorConfidence,
           scoreBreakdown,
           score: scoreBreakdown.overallScore,
           reasons,
         };
       })
-      .filter((car) => passesCompetitiveUseGate(car, car.technicalScore))
+      .filter((car) => passesCompetitiveUseGate(car, car.trackFitScore))
       .sort(compareRecommendationRanking),
   );
 }

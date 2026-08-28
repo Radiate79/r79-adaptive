@@ -1,55 +1,40 @@
-import { useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 
 
 import { GameVersionProvider, useGameVersion } from "./context/GameVersionContext.jsx";
 
-import ALRDataEntry from "./components/ALRDataEntry.jsx";
-
-import ALRHistoricalRankings from "./components/ALRHistoricalRankings.jsx";
-
-import CarProfiles from "./components/CarProfiles.jsx";
-
-import ChampionshipAdvisor from "./components/ChampionshipAdvisor.jsx";
-
-import FounderConsole from "./components/FounderConsole.jsx";
-
-import AIRaceEngineer from "./components/AIRaceEngineer.jsx";
-
-import R79Archive from "./components/R79Archive.jsx";
-
-import R79Labs from "./components/R79Labs.jsx";
-
-import Membership from "./components/Membership.jsx";
-
-import Pathfinder from "./components/Pathfinder.jsx";
-
-import ThePromise from "./components/ThePromise.jsx";
-
-import ALRCorner from "./components/ALRCorner.jsx";
-
-import SettingsHub from "./components/SettingsHub.jsx";
-
-import SplashScreen from "./components/SplashScreen.jsx";
-
-import PitstopStrategy from "./components/PitstopStrategy.jsx";
-
+import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 import R79AppNav from "./components/branding/R79AppNav.jsx";
 import R79BrandBar from "./components/branding/R79BrandBar.jsx";
 import R79MobileBottomNav from "./components/branding/R79MobileBottomNav.jsx";
 import R79MobileMoreMenu from "./components/branding/R79MobileMoreMenu.jsx";
 import R79ScrollToTop from "./components/branding/R79ScrollToTop.jsx";
-
-import TeamCarShortlistAdvisor from "./components/TeamCarShortlistAdvisor.jsx";
-
-import TodaysRaceAdvisor from "./components/TodaysRaceAdvisor.jsx";
-
+import SplashScreen from "./components/SplashScreen.jsx";
 import WheelSettingsHub from "./components/WheelSettingsHub.jsx";
 
-import ALRPerformanceHub from "./components/ALRPerformanceHub.jsx";
-
-import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
-
 import { hasSeenSplash } from "./utils/splashStorage.js";
+
+const ChampionshipAdvisor = lazy(() => import("./components/ChampionshipAdvisor.jsx"));
+const PitstopStrategy = lazy(() => import("./components/PitstopStrategy.jsx"));
+const TodaysRaceAdvisor = lazy(() => import("./components/TodaysRaceAdvisor.jsx"));
+const AIRaceEngineer = lazy(() => import("./components/AIRaceEngineer.jsx"));
+const TeamCarShortlistAdvisor = lazy(() => import("./components/TeamCarShortlistAdvisor.jsx"));
+const ALRPerformanceHub = lazy(() => import("./components/ALRPerformanceHub.jsx"));
+const ALRDataEntry = lazy(() => import("./components/ALRDataEntry.jsx"));
+const ALRHistoricalRankings = lazy(() => import("./components/ALRHistoricalRankings.jsx"));
+const CarProfiles = lazy(() => import("./components/CarProfiles.jsx"));
+const ALRCorner = lazy(() => import("./components/ALRCorner.jsx"));
+const R79Archive = lazy(() => import("./components/R79Archive.jsx"));
+const R79Labs = lazy(() => import("./components/R79Labs.jsx"));
+const Membership = lazy(() => import("./components/Membership.jsx"));
+const Pathfinder = lazy(() => import("./components/Pathfinder.jsx"));
+const ThePromise = lazy(() => import("./components/ThePromise.jsx"));
+const SettingsHub = lazy(() => import("./components/SettingsHub.jsx"));
+const FounderConsole = lazy(() => import("./components/FounderConsole.jsx"));
+
+function PageFallback({ label }) {
+  return <p className="r79-notice">Loading {label}…</p>;
+}
 
 
 
@@ -115,7 +100,7 @@ function AppShell() {
   const renderPage = () => {
     const wrap = (label, node) => (
       <AppErrorBoundary key={label} label={label}>
-        {node}
+        <Suspense fallback={<PageFallback label={label} />}>{node}</Suspense>
       </AppErrorBoundary>
     );
 
@@ -134,12 +119,16 @@ function AppShell() {
         );
       case "wheel-settings":
       case "podium":
-        return wrap(
-          page === "podium" ? "Podium" : "Wheel Settings",
-          <WheelSettingsHub
-            prefill={wheelSettingsPrefill}
-            onPrefillConsumed={() => setWheelSettingsPrefill(null)}
-          />,
+        return (
+          <AppErrorBoundary
+            key={page === "podium" ? "Podium" : "Wheel Settings"}
+            label={page === "podium" ? "Podium" : "Wheel Settings"}
+          >
+            <WheelSettingsHub
+              prefill={wheelSettingsPrefill}
+              onPrefillConsumed={() => setWheelSettingsPrefill(null)}
+            />
+          </AppErrorBoundary>
         );
       case "advisor":
         return wrap("Championship Advisor", <ChampionshipAdvisor />);
@@ -304,9 +293,9 @@ function AppShell() {
 
 
       {showFounderConsole ? (
-
-        <FounderConsole onClose={() => setShowFounderConsole(false)} />
-
+        <Suspense fallback={null}>
+          <FounderConsole onClose={() => setShowFounderConsole(false)} />
+        </Suspense>
       ) : null}
 
       {showSplash ? (

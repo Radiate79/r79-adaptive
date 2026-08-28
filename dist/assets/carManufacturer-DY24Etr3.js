@@ -1,0 +1,1 @@
+const t=[{prefix:"Aston Martin",label:"Aston Martin"},{prefix:"Alfa Romeo",label:"Alfa Romeo"},{prefix:"Mercedes-AMG",label:"Mercedes"},{prefix:"Mercedes",label:"Mercedes"}];function a(e){if(e.manufacturer)return e.manufacturer;const r=e.name??"";for(const n of t)if(r.startsWith(n.prefix))return n.label;return r.split(" ")[0]||"Unknown"}export{a as g};

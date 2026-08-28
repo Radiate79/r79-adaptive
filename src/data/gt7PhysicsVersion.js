@@ -27,7 +27,7 @@ export const UNKNOWN_PHYSICS_GENERATION = "UNKNOWN_PRE_1_71";
 export const ACTIVE_GT7_PHYSICS_LABEL = "1.71";
 
 /** Last R79 validation / architecture stamp for the active physics generation. */
-export const R79_PHYSICS_LAST_VALIDATION = "2026-08-25";
+export const R79_PHYSICS_LAST_VALIDATION = "2026-08-20";
 
 /**
  * @typedef {Object} Gt7PhysicsConfig

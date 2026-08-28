@@ -105,7 +105,7 @@ function normalizeMultiplier(value) {
     return 1;
   }
 
-  return Math.min(10, Math.max(1, numeric));
+  return Math.min(10, Math.max(0, numeric));
 }
 
 /**

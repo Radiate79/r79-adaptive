@@ -2627,7 +2627,7 @@ td:has(> select) {
 }
 
 .r79-wheel-value-card__value-label {
-  color: rgba(150, 175, 220, 0.55);
+  color: rgba(170, 220, 255, 0.9);
   font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -2651,7 +2651,7 @@ td:has(> select) {
 }
 
 .r79-wheel-value-card__why-label {
-  color: rgba(34, 211, 238, 0.8);
+  color: rgba(120, 245, 255, 0.95);
   font-size: 0.58rem;
   font-weight: 650;
   letter-spacing: 0.06em;
@@ -2661,9 +2661,9 @@ td:has(> select) {
 .r79-wheel-reason-text,
 .r79-wheel-podium-field-reason,
 .r79-wheel-field-description {
-  color: rgba(200, 214, 245, 0.78);
+  color: rgba(232, 242, 255, 0.96);
   font-size: 0.78rem;
-  line-height: 1.4;
+  line-height: 1.45;
   margin: 0;
 }
 

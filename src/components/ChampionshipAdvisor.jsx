@@ -7,6 +7,7 @@ import {
   rankCarsByChampionshipConsistency,
   recommendCarsForChampionship,
 } from "../engine/championshipEngine.js";
+import { formatAdvisorDataStatusLine } from "../engine/advisorConfidenceEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import {
   getRecommendableCarsForGame,
@@ -15,6 +16,7 @@ import {
   getTracksForGame,
   isGameDataReady,
 } from "../utils/gameData.js";
+import { filterItemsByNameSearch } from "../utils/listSearch.js";
 import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 import {
   getCalendarRecommendationStatus,
@@ -36,6 +38,7 @@ export default function ChampionshipAdvisor() {
   const [selectedTrackIds, setSelectedTrackIds] = useState([]);
   const [carClass, setCarClass] = useState("Gr.3");
   const [bannedCarNames, setBannedCarNames] = useState([]);
+  const [trackSearchQuery, setTrackSearchQuery] = useState("");
   const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const classCars = useMemo(
     () =>
@@ -47,6 +50,13 @@ export default function ChampionshipAdvisor() {
   const selectableTracks = useMemo(
     () => getSelectableTracksForClass(gameVersion, carClass),
     [gameVersion, carClass],
+  );
+  const filteredSelectableTracks = useMemo(
+    () =>
+      filterItemsByNameSearch(selectableTracks, trackSearchQuery, (track) =>
+        getTrackDisplayName(track),
+      ),
+    [selectableTracks, trackSearchQuery],
   );
   const [lapInput, setLapInput] = useState("");
   const {
@@ -93,8 +103,9 @@ export default function ChampionshipAdvisor() {
       fuelMultiplier,
       tyreMultiplier,
       bannedCarNames,
+      lapCount: effectiveLapCount,
     }),
-    [fuelMultiplier, tyreMultiplier, bannedCarNames],
+    [fuelMultiplier, tyreMultiplier, bannedCarNames, effectiveLapCount],
   );
 
   const allCarsBanned =
@@ -278,6 +289,8 @@ export default function ChampionshipAdvisor() {
         ) : null}
       </R79PageHeader>
 
+      <p className="r79-advisor-data-status">{formatAdvisorDataStatusLine()}</p>
+
       <TrackSurfaceWarning
         warning={calendarRecommendationStatus.warning}
         message={calendarRecommendationStatus.message}
@@ -328,13 +341,26 @@ export default function ChampionshipAdvisor() {
         <p style={styles.trackHint}>
           Select the tracks in your championship calendar.
         </p>
+        <label className="r79-wheel-search r79-wheel-car-search" style={styles.trackSearch}>
+          <span className="r79-wheel-search__label">Search tracks</span>
+          <span className="r79-wheel-search__shell">
+            <input
+              type="search"
+              value={trackSearchQuery}
+              onChange={(event) => setTrackSearchQuery(event.target.value)}
+              placeholder="e.g. Fuji, Spa, Monza"
+              className="r79-wheel-search-input"
+              aria-label="Search championship tracks"
+            />
+          </span>
+        </label>
         {selectableTracks.length === 0 ? (
           <p style={styles.trackEmpty}>
             No tracks available for {carClass} in {game.shortLabel}.
           </p>
         ) : (
           <div className="championship-checkbox-grid">
-            {selectableTracks.map((track) => {
+            {filteredSelectableTracks.map((track) => {
               const selected = selectedTrackIds.includes(track.id);
               return (
                 <label key={track.id} className="championship-checkbox-option">
@@ -519,6 +545,18 @@ export default function ChampionshipAdvisor() {
                     <span style={styles.scoreExplainLabel}>Track Fit:</span>{" "}
                     {car.trackFitScore ?? car.technicalScore ?? car.score}
                   </p>
+                  {car.raceConditionFitScore != null ? (
+                    <p style={styles.scoreExplainLine}>
+                      <span style={styles.scoreExplainLabel}>Race Condition Fit:</span>{" "}
+                      {car.raceConditionFitScore}
+                    </p>
+                  ) : null}
+                  {car.advisorConfidence ? (
+                    <p style={styles.scoreExplainLine}>
+                      <span style={styles.scoreExplainLabel}>Confidence:</span>{" "}
+                      {car.advisorConfidence.label}
+                    </p>
+                  ) : null}
                 </div>
                 <div style={styles.whyBlock}>
                   <p style={styles.whyTitle}>Why this car?</p>
@@ -630,6 +668,10 @@ const styles = {
     fontSize: "0.85rem",
     lineHeight: 1.45,
     margin: "0 0 10px",
+  },
+  trackSearch: {
+    display: "block",
+    marginBottom: "12px",
   },
   trackEmpty: {
     color: "rgba(200, 214, 245, 0.75)",

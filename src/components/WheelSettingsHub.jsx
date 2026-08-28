@@ -23,6 +23,7 @@ import {
   getTrackDisplayName,
   getTracksForGame,
 } from "../utils/gameData.js";
+import { filterItemsByNameSearch } from "../utils/listSearch.js";
 import {
   commitLapCountInput,
   formatLapsSummary,
@@ -254,7 +255,7 @@ function MobileWearMultiplierRow({
               <input
                 type="range"
                 className="r79-mobile-filter-panel__range"
-                min="1"
+                min="0"
                 max="10"
                 step="1"
                 value={fuelMultiplier}
@@ -270,7 +271,7 @@ function MobileWearMultiplierRow({
               <input
                 type="range"
                 className="r79-mobile-filter-panel__range"
-                min="1"
+                min="0"
                 max="10"
                 step="1"
                 value={tyreMultiplier}
@@ -339,6 +340,8 @@ export default function WheelSettingsHub({
   const [lapDraft, setLapDraft] = useState(/** @type {string | null} */ (null));
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [carSearchQuery, setCarSearchQuery] = useState("");
+  const [trackSearchQuery, setTrackSearchQuery] = useState("");
 
   const cars = useMemo(
     () =>
@@ -356,8 +359,17 @@ export default function WheelSettingsHub({
     () => searchWheelSetups(searchQuery, filterGame) ?? [],
     [searchQuery, filterGame],
   );
-  const filteredCars = useMemo(() => cars, [cars]);
-  const filteredTracks = useMemo(() => tracks, [tracks]);
+  const filteredCars = useMemo(
+    () => filterItemsByNameSearch(cars, carSearchQuery),
+    [cars, carSearchQuery],
+  );
+  const filteredTracks = useMemo(
+    () =>
+      filterItemsByNameSearch(tracks, trackSearchQuery, (track) =>
+        getTrackDisplayName(track),
+      ),
+    [tracks, trackSearchQuery],
+  );
 
   useEffect(() => {
     if (!prefill) {
@@ -639,6 +651,23 @@ export default function WheelSettingsHub({
             </div>
           </div>
 
+          <label className="r79-wheel-search r79-wheel-car-search">
+            <span className="r79-wheel-search__label">Search cars</span>
+            <span className="r79-wheel-search__shell">
+              <span className="r79-wheel-search__icon" aria-hidden="true">
+                <R79Icon name="search" accent="cyan" size={18} />
+              </span>
+              <input
+                type="search"
+                value={carSearchQuery}
+                onChange={(event) => setCarSearchQuery(event.target.value)}
+                placeholder="e.g. Ferrari, Porsche, Genesis"
+                className="r79-wheel-search-input"
+                aria-label="Search cars"
+              />
+            </span>
+          </label>
+
           <MobileFilterRow
             objectName={R79_FILTER_OBJECTS.car}
             label="Car"
@@ -658,6 +687,23 @@ export default function WheelSettingsHub({
               ))}
             </select>
           </MobileFilterRow>
+
+          <label className="r79-wheel-search r79-wheel-car-search">
+            <span className="r79-wheel-search__label">Search tracks</span>
+            <span className="r79-wheel-search__shell">
+              <span className="r79-wheel-search__icon" aria-hidden="true">
+                <R79Icon name="search" accent="cyan" size={18} />
+              </span>
+              <input
+                type="search"
+                value={trackSearchQuery}
+                onChange={(event) => setTrackSearchQuery(event.target.value)}
+                placeholder="e.g. Fuji, Spa, Monza"
+                className="r79-wheel-search-input"
+                aria-label="Search tracks"
+              />
+            </span>
+          </label>
 
           <MobileFilterRow
             objectName={R79_FILTER_OBJECTS.track}
@@ -833,6 +879,23 @@ export default function WheelSettingsHub({
           </label>
 
           <label className="r79-wheel-field" style={styles.fieldLabel}>
+            Search cars
+            <span className="r79-wheel-search__shell r79-wheel-search__shell--desktop">
+              <span className="r79-wheel-search__icon" aria-hidden="true">
+                <R79Icon name="search" accent="cyan" size={18} />
+              </span>
+              <input
+                type="search"
+                value={carSearchQuery}
+                onChange={(event) => setCarSearchQuery(event.target.value)}
+                placeholder="e.g. Ferrari, Porsche, Genesis"
+                className="r79-wheel-search-input"
+                aria-label="Search cars"
+              />
+            </span>
+          </label>
+
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
             Car
               <select
                 value={carId}
@@ -847,6 +910,23 @@ export default function WheelSettingsHub({
                   </option>
                 ))}
               </select>
+          </label>
+
+          <label className="r79-wheel-field" style={styles.fieldLabel}>
+            Search tracks
+            <span className="r79-wheel-search__shell r79-wheel-search__shell--desktop">
+              <span className="r79-wheel-search__icon" aria-hidden="true">
+                <R79Icon name="search" accent="cyan" size={18} />
+              </span>
+              <input
+                type="search"
+                value={trackSearchQuery}
+                onChange={(event) => setTrackSearchQuery(event.target.value)}
+                placeholder="e.g. Fuji, Spa, Monza"
+                className="r79-wheel-search-input"
+                aria-label="Search tracks"
+              />
+            </span>
           </label>
 
           <label className="r79-wheel-field" style={styles.fieldLabel}>
@@ -935,7 +1015,7 @@ export default function WheelSettingsHub({
             <div style={styles.rangeField}>
               <input
                 type="range"
-                min="1"
+                min="0"
                 max="10"
                 step="1"
                 value={fuelMultiplier}
@@ -951,7 +1031,7 @@ export default function WheelSettingsHub({
             <div style={styles.rangeField}>
               <input
                 type="range"
-                min="1"
+                min="0"
                 max="10"
                 step="1"
                 value={tyreMultiplier}

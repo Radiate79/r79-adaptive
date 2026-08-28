@@ -34,7 +34,11 @@ export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.cars ??
     GAME_DATA[DEFAULT_GAME_VERSION]?.cars;
 
-  return Array.isArray(cars) ? cars : [];
+  return Array.isArray(cars)
+    ? [...cars].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+      )
+    : [];
 }
 
 /**
@@ -58,7 +62,13 @@ export function getTracksForGame(gameVersion = DEFAULT_GAME_VERSION) {
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.tracks ??
     GAME_DATA[DEFAULT_GAME_VERSION]?.tracks;
 
-  return Array.isArray(tracks) ? tracks : [];
+  return Array.isArray(tracks)
+    ? [...tracks].sort((a, b) =>
+        getTrackDisplayName(a).localeCompare(getTrackDisplayName(b), undefined, {
+          sensitivity: "base",
+        }),
+      )
+    : [];
 }
 
 /**
@@ -72,7 +82,12 @@ export function getSelectableTracksForClass(
   gameVersion = DEFAULT_GAME_VERSION,
   selectedClass,
 ) {
-  return filterTracksForClass(getTracksForGame(gameVersion), selectedClass);
+  return filterTracksForClass(getTracksForGame(gameVersion), selectedClass).sort(
+    (a, b) =>
+      getTrackDisplayName(a).localeCompare(getTrackDisplayName(b), undefined, {
+        sensitivity: "base",
+      }),
+  );
 }
 
 /**

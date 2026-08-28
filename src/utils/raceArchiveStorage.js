@@ -1,4 +1,4 @@
-const STORAGE_KEY = "r79-race-archive-entries";
+import { normalizeStoredRaceMultiplier } from "./raceConditions.js";
 
 /**
  * @typedef {Object} RaceArchiveEntry
@@ -36,8 +36,8 @@ function normalizeEntry(entry) {
     p3: String(entry.p3 ?? "").trim(),
     notes: String(entry.notes ?? "").trim(),
     racePresetId: String(entry.racePresetId ?? "custom").trim() || "custom",
-    fuelMultiplier: Number(entry.fuelMultiplier ?? 1) || 1,
-    tyreMultiplier: Number(entry.tyreMultiplier ?? 1) || 1,
+    fuelMultiplier: normalizeStoredRaceMultiplier(entry.fuelMultiplier, 1),
+    tyreMultiplier: normalizeStoredRaceMultiplier(entry.tyreMultiplier, 1),
   };
 }
 

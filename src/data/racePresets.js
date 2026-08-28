@@ -1,3 +1,5 @@
+import { normalizeRaceMultiplier } from "../utils/raceConditions.js";
+
 export const RACE_CONDITION_PRESET_CUSTOM_ID = "custom";
 
 /** @typedef {Object} RaceConditionPreset
@@ -125,8 +127,8 @@ export function matchRaceConditionPreset(fuelMultiplier, tyreMultiplier) {
  * @returns {string}
  */
 export function formatRaceConditionSummary(settings) {
-  const fuelMultiplier = settings.fuelMultiplier ?? 1;
-  const tyreMultiplier = settings.tyreMultiplier ?? 1;
+  const fuelMultiplier = normalizeRaceMultiplier(settings.fuelMultiplier, 1);
+  const tyreMultiplier = normalizeRaceMultiplier(settings.tyreMultiplier, 1);
   const preset = getRaceConditionPreset(settings.racePresetId);
 
   if (

@@ -823,6 +823,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    competitiveUse: "low",
   },
   {
     id: "ford_gt_lm_spec_ii_test_car",
@@ -989,6 +990,7 @@ export const cars = [
     tyres: 7,
     stability: 8,
     communityConfidence: 45,
+    competitiveUse: "low",
   },
   {
     id: "porsche_911_rsr_991_17",
@@ -1048,6 +1050,7 @@ export const cars = [
     fuel: 6,
     tyres: 6,
     stability: 7,
+    competitiveUse: "low",
   },
   {
     id: "toyota_supra_gt500_97",
@@ -1070,6 +1073,7 @@ export const cars = [
     fuel: 7,
     tyres: 7,
     stability: 8,
+    competitiveUse: "low",
   },
   {
     id: "ferrari_296_gt3_23",
