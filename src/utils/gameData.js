@@ -26,6 +26,57 @@ const GAME_DATA = {
   },
 };
 
+/** @type {Map<string, Map<string, (typeof gt7Cars)[number]>>} */
+const CAR_BY_ID = new Map();
+/** @type {Map<string, Map<string, (typeof gt7Tracks)[number]>>} */
+const TRACK_BY_ID = new Map();
+
+/**
+ * @param {GameVersion | string} gameVersion
+ */
+function getCarIndex(gameVersion) {
+  const key = /** @type {GameVersion} */ (gameVersion) || DEFAULT_GAME_VERSION;
+  if (!CAR_BY_ID.has(key)) {
+    const map = new Map();
+    for (const car of GAME_DATA[key]?.cars ?? []) {
+      map.set(car.id, car);
+    }
+    CAR_BY_ID.set(key, map);
+  }
+  return CAR_BY_ID.get(key);
+}
+
+/**
+ * @param {GameVersion | string} gameVersion
+ */
+function getTrackIndex(gameVersion) {
+  const key = /** @type {GameVersion} */ (gameVersion) || DEFAULT_GAME_VERSION;
+  if (!TRACK_BY_ID.has(key)) {
+    const map = new Map();
+    for (const track of GAME_DATA[key]?.tracks ?? []) {
+      map.set(track.id, track);
+    }
+    TRACK_BY_ID.set(key, map);
+  }
+  return TRACK_BY_ID.get(key);
+}
+
+/**
+ * @param {string} carId
+ * @param {GameVersion | string} [gameVersion]
+ */
+export function getCarById(carId, gameVersion = DEFAULT_GAME_VERSION) {
+  return getCarIndex(gameVersion)?.get(carId) ?? null;
+}
+
+/**
+ * @param {string} trackId
+ * @param {GameVersion | string} [gameVersion]
+ */
+export function getTrackById(trackId, gameVersion = DEFAULT_GAME_VERSION) {
+  return getTrackIndex(gameVersion)?.get(trackId) ?? null;
+}
+
 /**
  * @param {GameVersion | string} [gameVersion]
  */

@@ -69,10 +69,23 @@ function getCarAttribute(car, field, raceSettings = {}) {
   });
 
   if (field === "rotation") {
-    return Number(profile?.rotation ?? DEFAULT_ROTATION[profile?.drivetrain] ?? 7);
+    if (profile?.rotation != null && Number.isFinite(Number(profile.rotation))) {
+      return Number(profile.rotation);
+    }
+    // Modelled fallback — not invented as certain. Caller may treat as modelled.
+    return Number(DEFAULT_ROTATION[profile?.drivetrain] ?? 7);
   }
 
-  return Number(profile?.[field] ?? 0);
+  const raw = profile?.[field];
+  if (raw == null || !Number.isFinite(Number(raw))) {
+    return null;
+  }
+
+  return Number(raw);
+}
+
+function isKnownAttribute(value) {
+  return value != null && Number.isFinite(Number(value));
 }
 
 function computeRotationDemand(track) {
@@ -246,10 +259,18 @@ function getWeightedTrackScore(car, track, raceSettings = {}) {
   let weightedTotal = 0;
   let maxWeightedTotal = 0;
   let weaknessTotal = 0;
+  let unknownCount = 0;
 
   SCORING_FIELDS.forEach((field) => {
     const demand = demands[field] ?? 0;
     const carValue = getCarAttribute(car, field, raceSettings);
+
+    // Unknown dimensions are skipped and remaining weights renormalised.
+    if (!isKnownAttribute(carValue)) {
+      unknownCount += 1;
+      return;
+    }
+
     const paceBoost =
       field === "topSpeed" || field === "rotation"
         ? raceImportance.paceEmphasis
@@ -267,8 +288,12 @@ function getWeightedTrackScore(car, track, raceSettings = {}) {
     maxWeightedTotal > 0 ? (weightedTotal / maxWeightedTotal) * 100 : 0;
   const drivetrainBonus = getDrivetrainTrackBonus(car, track);
   const penalty = Math.min(fitScore * 0.35, weaknessTotal * 2.4);
+  const unknownPenalty = Math.min(8, unknownCount * 1.5);
 
-  return Math.max(0, fitScore + drivetrainBonus - penalty);
+  return {
+    score: Math.max(0, fitScore + drivetrainBonus - penalty - unknownPenalty),
+    unknownCount,
+  };
 }
 
 function computeRaceConditionFitScore(car, track, raceSettings = {}) {
@@ -279,34 +304,53 @@ function computeRaceConditionFitScore(car, track, raceSettings = {}) {
   const profile = getRaceDistanceProfile(raceSettings.lapCount);
 
   let score = 50;
+  let active = 0;
 
-  if (raceImportance.tyreImportance > 0) {
+  if (raceImportance.tyreImportance > 0 && isKnownAttribute(carTyres)) {
     score += ((carTyres - 5) / 5) * raceImportance.tyreImportance * 18;
     score +=
       ((Number(track?.tyres ?? 5) - 5) / 5) *
       raceImportance.tyreImportance *
       6;
+    active += 1;
   }
 
-  if (raceImportance.fuelImportance > 0) {
+  if (raceImportance.fuelImportance > 0 && isKnownAttribute(carFuel)) {
     score += ((carFuel - 5) / 5) * raceImportance.fuelImportance * 16;
+    active += 1;
   }
 
   if (profile.paceEmphasis > 1) {
-    score +=
-      ((getCarAttribute(car, "topSpeed", raceSettings) +
-        getCarAttribute(car, "traction", raceSettings)) /
-        20 -
-        0.5) *
-      (profile.paceEmphasis - 0.85) *
-      22;
+    const topSpeed = getCarAttribute(car, "topSpeed", raceSettings);
+    const traction = getCarAttribute(car, "traction", raceSettings);
+    if (isKnownAttribute(topSpeed) && isKnownAttribute(traction)) {
+      score +=
+        ((topSpeed + traction) / 20 - 0.5) *
+        (profile.paceEmphasis - 0.85) *
+        22;
+      active += 1;
+    }
   }
 
-  if (profile.enduranceEmphasis > 1) {
+  if (
+    profile.enduranceEmphasis > 1 &&
+    isKnownAttribute(carStability) &&
+    isKnownAttribute(carTyres)
+  ) {
     score +=
       ((carStability + carTyres) / 20 - 0.5) *
       (profile.enduranceEmphasis - 0.85) *
       18;
+    active += 1;
+  }
+
+  if (active === 0 && raceImportance.tyreImportance === 0 && raceImportance.fuelImportance === 0) {
+    // Pure pace sprint with wear disabled — use pace attributes only.
+    const topSpeed = getCarAttribute(car, "topSpeed", raceSettings);
+    const traction = getCarAttribute(car, "traction", raceSettings);
+    if (isKnownAttribute(topSpeed) && isKnownAttribute(traction)) {
+      score = 50 + ((topSpeed + traction) / 20 - 0.5) * 40;
+    }
   }
 
   return Number(Math.max(0, Math.min(100, score)).toFixed(2));
@@ -328,6 +372,14 @@ function getDetailedStrengthContributions(
 
   return SCORING_FIELDS.map((field) => {
     const carValue = getCarAttribute(car, field, raceSettings);
+    if (!isKnownAttribute(carValue)) {
+      return {
+        field,
+        contribution: 0,
+        carValue: null,
+        demand: 0,
+      };
+    }
     const contribution =
       championshipTracks.reduce((sum, track) => {
         const demands = getTrackDemandWeights(track, raceSettings);
@@ -353,11 +405,15 @@ function getDetailedStrengthContributions(
 }
 
 export function scoreCarForTrack(car, track, raceSettings = {}) {
-  return Number(getWeightedTrackScore(car, track, raceSettings).toFixed(2));
+  return Number(getWeightedTrackScore(car, track, raceSettings).score.toFixed(2));
 }
 
 export function scoreCarRaceConditionFit(car, track, raceSettings = {}) {
   return computeRaceConditionFitScore(car, track, raceSettings);
+}
+
+export function getTrackFitDiagnostics(car, track, raceSettings = {}) {
+  return getWeightedTrackScore(car, track, raceSettings);
 }
 
 export function scoreCarForChampionship(
@@ -395,7 +451,7 @@ function generateCarReasons(car, championshipTracks, raceSettings = {}) {
 }
 
 function computeRoundTechnicalScore(car, track, raceSettings = {}) {
-  const trackFit = getWeightedTrackScore(car, track, raceSettings);
+  const trackFit = getWeightedTrackScore(car, track, raceSettings).score;
   const raceConditionFit = computeRaceConditionFitScore(car, track, raceSettings);
 
   return Number(
@@ -794,6 +850,12 @@ export function recommendCarsForChampionship(
           historicalScore: historicalScores[index],
           hasCurrent171Profile: car.class === "Gr.3",
           hasTrackEvidence: historicalScores[index] > 0,
+          unknownDimensionCount: championshipTracks.reduce(
+            (sum, track) =>
+              sum +
+              (getTrackFitDiagnostics(car, track, raceSettings).unknownCount ?? 0),
+            0,
+          ),
         });
 
         return {

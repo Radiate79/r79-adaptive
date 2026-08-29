@@ -20,8 +20,9 @@ export function resolveAdvisorConfidence(input) {
   const historical = Number(input.historicalScore ?? 0);
   const has171 = input.hasCurrent171Profile !== false;
   const hasEvidence = Boolean(input.hasTrackEvidence) || historical > 0;
+  const unknownDimensions = Number(input.unknownDimensionCount ?? 0);
 
-  let score = 42;
+  let score = 40;
 
   if (has171) {
     score += 18;
@@ -35,16 +36,22 @@ export function resolveAdvisorConfidence(input) {
     score += 4;
   }
 
-  if (community >= 85) {
+  if (community == null) {
+    score -= 10;
+  } else if (community >= 85) {
     score += 12;
   } else if (community >= 70) {
     score += 6;
   } else if (community < 50) {
-    score -= 8;
+    score -= 6;
   }
 
   if (hasEvidence) {
     score += 8;
+  }
+
+  if (unknownDimensions > 0) {
+    score -= Math.min(12, unknownDimensions * 3);
   }
 
   if (input.car?.competitiveUse === "low") {
@@ -68,7 +75,9 @@ export function resolveAdvisorConfidence(input) {
       ? "Current 1.71 model with strong track fit and validated competitive evidence."
       : level === "MEDIUM"
         ? "Based on current 1.71 data — limited real-world validation for this exact scenario."
-        : "Largely modelled from limited or legacy evidence — treat as exploratory.";
+        : community == null
+          ? "Limited evidence / unknown community data — treat as a modelled estimate."
+          : "Largely modelled from limited or legacy evidence — treat as exploratory.";
 
   return {
     level,

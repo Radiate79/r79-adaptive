@@ -19,6 +19,7 @@ import {
 } from "../utils/trackClassification.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import { useDebouncedValue } from "../hooks/useDebouncedValue.js";
 import {
   R79_BTN_ACTIVE,
   R79_BTN_CHIP,
@@ -34,7 +35,7 @@ function ScoreExplanation({ car }) {
 
   const breakdown = car.scoreBreakdown ?? {
     technicalFit: car.technicalFitScore ?? car.technicalScore,
-    communityConfidence: car.communityConfidence ?? 60,
+    communityConfidence: car.communityConfidence,
     trackFit: car.trackFitScore ?? car.technicalScore,
   };
 
@@ -46,7 +47,7 @@ function ScoreExplanation({ car }) {
       </p>
       <p style={styles.scoreExplainLine}>
         <span style={styles.scoreExplainLabel}>Community Confidence:</span>{" "}
-        {breakdown.communityConfidence}
+        {breakdown.communityConfidence ?? "—"}
       </p>
       <p style={styles.scoreExplainLine}>
         <span style={styles.scoreExplainLabel}>Track Fit:</span>{" "}
@@ -107,18 +108,17 @@ export default function TodaysRaceAdvisor() {
   }, [lapInput]);
   const [unavailableCarIds, setUnavailableCarIds] = useState([]);
 
-  const analysis = useMemo(
-    () =>
-      analyzeTodaysRace({
-        gameVersion,
-        trackId,
-        carClass,
-        bopOn,
-        tyreCompound,
-        ...raceSettings,
-        lapCount: effectiveLapCount,
-        unavailableCarIds,
-      }),
+  const calculationInput = useMemo(
+    () => ({
+      gameVersion,
+      trackId,
+      carClass,
+      bopOn,
+      tyreCompound,
+      ...raceSettings,
+      lapCount: effectiveLapCount,
+      unavailableCarIds,
+    }),
     [
       gameVersion,
       trackId,
@@ -129,6 +129,12 @@ export default function TodaysRaceAdvisor() {
       effectiveLapCount,
       unavailableCarIds,
     ],
+  );
+  const settledInput = useDebouncedValue(calculationInput, 400);
+
+  const analysis = useMemo(
+    () => analyzeTodaysRace(settledInput),
+    [settledInput],
   );
 
   const toggleUnavailable = (carId) => {
@@ -464,7 +470,7 @@ export default function TodaysRaceAdvisor() {
             <RatingBar label="Rotation" value={analysis.topPick.rotationRating} />
             <RatingBar
               label="Community Confidence"
-              value={analysis.topPick.communityConfidence ?? 60}
+              value={analysis.topPick.communityConfidence ?? "—"}
             />
           </div>
           <div style={styles.whyBlock}>
@@ -505,7 +511,7 @@ export default function TodaysRaceAdvisor() {
               Strength: {analysis.alternativeChoice.strengthRating}
             </span>
             <span>
-              Community: {analysis.alternativeChoice.communityConfidence ?? 60}
+              Community: {analysis.alternativeChoice.communityConfidence ?? "—"}
             </span>
           </div>
           <ul style={styles.reasonList}>

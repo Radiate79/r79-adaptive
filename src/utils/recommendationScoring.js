@@ -16,34 +16,40 @@ import { getCarsForGame } from "./gameData.js";
 import { loadALRRecords } from "./alrStorage.js";
 import { loadRaceArchiveEntries } from "./raceArchiveStorage.js";
 
-export const DEFAULT_COMMUNITY_CONFIDENCE = 60;
+export const DEFAULT_COMMUNITY_CONFIDENCE = null;
 
 export const COMMUNITY_CONFIDENCE_REASON =
   "Strong community confidence: proven in competitive GT7 racing.";
 
 export const COMMUNITY_CONFIDENCE_REASON_THRESHOLD = 75;
 
-/** Community reflects real GT7 competitive use alongside track fit. */
-export const COMMUNITY_MAX_MODIFIER = 8;
-export const HISTORICAL_MAX_MODIFIER = 6;
+/**
+ * Community evidence may refine confidence — it must not act as horsepower.
+ * Missing communityConfidence is UNKNOWN (null), not an invented 60.
+ */
+export const COMMUNITY_MAX_MODIFIER = 3;
+export const HISTORICAL_MAX_MODIFIER = 3;
 /** Historical ALR (PRE_1_71) is supporting evidence only — never primary over track fit / current data. */
 export const HISTORICAL_ALR_IS_SUPPORTING_ONLY = true;
-export const COMMUNITY_BASELINE = DEFAULT_COMMUNITY_CONFIDENCE;
-export const TRACK_SUITABILITY_PRIORITY_GAP = 1.25;
-export const COMPETITIVE_USE_HIGH_MODIFIER = 2.5;
+export const COMMUNITY_BASELINE = 60;
+export const TRACK_SUITABILITY_PRIORITY_GAP = 1.5;
+export const COMPETITIVE_USE_HIGH_MODIFIER = 1;
 export const LOW_COMPETITIVE_USE_TRACK_FIT_THRESHOLD = 88;
 export const RACE_ARCHIVE_WIN_POINTS = 12;
 export const RACE_ARCHIVE_PODIUM_POINTS = 4;
 
 /**
- * @param {{ communityConfidence?: number }} car
+ * @param {{ communityConfidence?: number | null }} car
  * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
+ * @returns {number | null} null when no community evidence exists
  */
 export function getCommunityConfidence(car, recommendationContext = {}) {
   const value = Number(car?.communityConfidence);
-  const base = !Number.isFinite(value)
-    ? DEFAULT_COMMUNITY_CONFIDENCE
-    : Math.min(100, Math.max(0, value));
+  if (!Number.isFinite(value)) {
+    return null;
+  }
+
+  const base = Math.min(100, Math.max(0, value));
   const dailyRace = resolveDailyRaceEvidenceBoost(
     car?.id ?? "",
     car?.class ?? recommendationContext.carClass ?? "",
@@ -51,6 +57,17 @@ export function getCommunityConfidence(car, recommendationContext = {}) {
   );
 
   return Math.min(100, base + dailyRace.confidenceBonus);
+}
+
+/**
+ * Display helper — never invents a scoring baseline.
+ * @param {number | null | undefined} communityConfidence
+ */
+export function formatCommunityConfidenceDisplay(communityConfidence) {
+  if (communityConfidence == null || !Number.isFinite(Number(communityConfidence))) {
+    return "—";
+  }
+  return String(communityConfidence);
 }
 
 /**
@@ -153,10 +170,14 @@ export function getCompetitiveUseModifier(car) {
 }
 
 /**
- * @param {{ communityConfidence?: number }} car
+ * @param {{ communityConfidence?: number | null }} car
  */
 export function getCommunityModifier(car) {
   const community = getCommunityConfidence(car);
+  if (community == null) {
+    return 0;
+  }
+
   const normalized = (community - COMMUNITY_BASELINE) / 40;
   const modifier = normalized * COMMUNITY_MAX_MODIFIER;
 
@@ -188,11 +209,12 @@ export function getAlrLapEvidenceModifier(car, recommendationContext = {}) {
     return 0;
   }
 
-  return getAlrLapEvidenceBonus(car.id, trackId, carClass);
+  // Historical lap evidence is supporting only — capped tiny modifier.
+  return Math.min(2, getAlrLapEvidenceBonus(car.id, trackId, carClass));
 }
 
 /**
- * @param {{ communityConfidence?: number, id?: string, class?: string }} car
+ * @param {{ communityConfidence?: number | null, id?: string, class?: string }} car
  * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
  */
 export function getAlrLapEvidenceReason(car, recommendationContext = {}) {
@@ -201,10 +223,11 @@ export function getAlrLapEvidenceReason(car, recommendationContext = {}) {
 }
 
 /**
- * Track suitability is the primary score; community and history are small modifiers.
+ * Track suitability is the primary score.
+ * Evidence modifiers are tiny and must not act as horsepower.
  *
  * @param {number} technicalScore
- * @param {{ communityConfidence?: number, id?: string, class?: string }} car
+ * @param {{ communityConfidence?: number | null, id?: string, class?: string }} car
  * @param {number} [historicalScore]
  * @param {number} [maxHistorical]
  * @param {import("../data/dailyRaceEvidence.js").RecommendationContext} [recommendationContext]
@@ -223,23 +246,23 @@ export function blendRecommendationScore(
     recommendationContext,
   );
 
-  return Number(
-    (
-      adjustedTechnical +
-      getCommunityModifier(car) +
-      getHistoricalModifier(historicalScore, maxHistorical) +
-      getCompetitiveUseModifier(car) +
-      dailyRace.scoreModifier +
-      getAlrLapEvidenceModifier(car, recommendationContext)
-    ).toFixed(2),
-  );
+  // Daily race / ALR lap evidence capped — supporting only.
+  const evidenceSupport =
+    getCommunityModifier(car) +
+    getHistoricalModifier(historicalScore, maxHistorical) +
+    getCompetitiveUseModifier(car) +
+    Math.min(2, dailyRace.scoreModifier) +
+    getAlrLapEvidenceModifier(car, recommendationContext);
+
+  return Number((adjustedTechnical + evidenceSupport).toFixed(2));
 }
 
 /**
  * Track suitability is always the primary ranking signal.
+ * Ties break deterministically by car id (stable, no dataset-order bias).
  *
- * @param {{ technicalScore?: number, overallScore?: number, score?: number }} a
- * @param {{ technicalScore?: number, overallScore?: number, score?: number }} b
+ * @param {{ adjustedTechnicalScore?: number, technicalScore?: number, overallScore?: number, score?: number, id?: string }} a
+ * @param {{ adjustedTechnicalScore?: number, technicalScore?: number, overallScore?: number, score?: number, id?: string }} b
  */
 export function compareRecommendationRanking(a, b) {
   const techA = Number(
@@ -256,8 +279,13 @@ export function compareRecommendationRanking(a, b) {
 
   const overallA = Number(a.overallScore ?? a.score ?? techA);
   const overallB = Number(b.overallScore ?? b.score ?? techB);
+  const overallDiff = overallB - overallA;
 
-  return overallB - overallA;
+  if (Math.abs(overallDiff) > 0.0001) {
+    return overallDiff;
+  }
+
+  return String(a.id ?? "").localeCompare(String(b.id ?? ""));
 }
 
 /**

@@ -27,6 +27,7 @@ import {
 } from "../utils/gameData.js";
 import { TrackSurfaceWarning } from "./TrackSurfaceWarning.jsx";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import { useDebouncedValue } from "../hooks/useDebouncedValue.js";
 import {
   R79_BTN_ACTIVE,
   R79_BTN_CHIP,
@@ -117,19 +118,18 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
   const [driverNotes, setDriverNotes] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
 
-  const analysis = useMemo(
-    () =>
-      analyzeAIRaceEngineer({
-        gameVersion,
-        trackId,
-        ...raceSettings,
-        lapCount: effectiveLapCount,
-        bopOn,
-        tyresAvailable,
-        availableCarIds,
-        driverStyle,
-        driverProfile,
-      }),
+  const engineerInput = useMemo(
+    () => ({
+      gameVersion,
+      trackId,
+      ...raceSettings,
+      lapCount: effectiveLapCount,
+      bopOn,
+      tyresAvailable,
+      availableCarIds,
+      driverStyle,
+      driverProfile,
+    }),
     [
       gameVersion,
       trackId,
@@ -141,6 +141,12 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
       driverStyle,
       driverProfile,
     ],
+  );
+  const settledEngineerInput = useDebouncedValue(engineerInput, 400);
+
+  const analysis = useMemo(
+    () => analyzeAIRaceEngineer(settledEngineerInput),
+    [settledEngineerInput],
   );
 
   const toggleTyre = (compound) => {
@@ -590,7 +596,7 @@ export default function AIRaceEngineer({ onOpenWheelSettings }) {
                 iconName="pulse"
                 iconAccent="violet"
                 label="Community Confidence"
-                value={`${analysis.recommendedCar.communityConfidence ?? 60}/100`}
+                value={`${analysis.recommendedCar.communityConfidence ?? "—"}/100`}
               />
               <OutputRow
                 iconName="chip"

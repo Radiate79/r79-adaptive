@@ -14,6 +14,7 @@ import {
   getCachedRecommendation,
   hasCachedRecommendation,
 } from "./recommendationCache.js";
+import { getAdvisorCacheVersionStamp } from "../data/advisorDataLayer.js";
 import { getTracksForGame } from "../utils/gameData.js";
 
 /**
@@ -47,6 +48,7 @@ import { getTracksForGame } from "../utils/gameData.js";
  */
 function buildCachePayload(input) {
   return {
+    ...getAdvisorCacheVersionStamp(),
     gameVersion: input.gameVersion ?? DEFAULT_GAME_VERSION,
     carClass: input.carClass,
     selectedTrackIds: [...(input.selectedTrackIds ?? [])].sort(),

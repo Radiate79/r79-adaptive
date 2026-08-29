@@ -7,6 +7,7 @@ import { ReportIssueButton } from "./ReportIssue.jsx";
 import RacePresetControls from "./RacePresetControls.jsx";
 import { isGameDataReady } from "../utils/gameData.js";
 import { useRacePresetSettings } from "../hooks/useRacePresetSettings.js";
+import { useDebouncedValue } from "../hooks/useDebouncedValue.js";
 import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 import {
   R79_BTN_ACTIVE,
@@ -85,17 +86,16 @@ export default function TeamCarShortlistAdvisor() {
     return names.length > 0 ? names.join(" + ") : "Your Drivers";
   }, [inputMode, teamName, driver1, driver2]);
 
-  const shortlist = useMemo(
-    () =>
-      recommendTeamCarShortlist({
-        tier,
-        carClass,
-        gameVersion,
-        raceSettings,
-        teamName: inputMode === "team" ? teamName.trim() : undefined,
-        driver1: inputMode === "drivers" ? driver1 : undefined,
-        driver2: inputMode === "drivers" ? driver2 : undefined,
-      }),
+  const shortlistInput = useMemo(
+    () => ({
+      tier,
+      carClass,
+      gameVersion,
+      raceSettings,
+      teamName: inputMode === "team" ? teamName.trim() : undefined,
+      driver1: inputMode === "drivers" ? driver1 : undefined,
+      driver2: inputMode === "drivers" ? driver2 : undefined,
+    }),
     [
       tier,
       carClass,
@@ -106,6 +106,12 @@ export default function TeamCarShortlistAdvisor() {
       driver1,
       driver2,
     ],
+  );
+  const settledShortlistInput = useDebouncedValue(shortlistInput, 400);
+
+  const shortlist = useMemo(
+    () => recommendTeamCarShortlist(settledShortlistInput),
+    [settledShortlistInput],
   );
 
   const primaryPick = shortlist[0] ?? null;
@@ -345,7 +351,7 @@ function ScoreBreakdown({ entry }) {
       </div>
       <div style={styles.scoreItem}>
         <span style={styles.scoreLabel}>Community Confidence</span>
-        <strong style={styles.scoreValue}>{entry.communityConfidence ?? 60}</strong>
+        <strong style={styles.scoreValue}>{entry.communityConfidence ?? "—"}</strong>
       </div>
       <div style={styles.scoreItem}>
         <span style={styles.scoreLabel}>Historical</span>

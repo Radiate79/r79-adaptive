@@ -17,6 +17,7 @@ import {
   getCachedRecommendation,
   hasCachedRecommendation,
 } from "./recommendationCache.js";
+import { getAdvisorCacheVersionStamp, STRATEGY_ENGINE_VERSION } from "../data/advisorDataLayer.js";
 
 /** GT7 compound codes → display labels. */
 export const COMPOUND_LABELS = {
@@ -637,6 +638,8 @@ function resolveConfidence(primaryStops, alternativeStops, combinedStress, evide
  */
 export function analyzePitstopStrategy(input = {}) {
   const cacheKey = buildRecommendationCacheKey("pitstop-strategy", {
+    ...getAdvisorCacheVersionStamp(),
+    strategyEngineVersion: STRATEGY_ENGINE_VERSION,
     gameVersion: input.gameVersion ?? DEFAULT_GAME_VERSION,
     carId: input.carId ?? "",
     trackId: input.trackId ?? "",

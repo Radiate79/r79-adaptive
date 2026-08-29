@@ -662,7 +662,7 @@ export default function ChampionshipAdvisor() {
                   </p>
                   <p style={styles.scoreExplainLine}>
                     <span style={styles.scoreExplainLabel}>Community Confidence:</span>{" "}
-                    {car.communityConfidence ?? 60}
+                    {car.communityConfidence ?? "—"}
                   </p>
                   <p style={styles.scoreExplainLine}>
                     <span style={styles.scoreExplainLabel}>Track Fit:</span>{" "}
