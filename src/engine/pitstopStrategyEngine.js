@@ -12,6 +12,11 @@ import {
   getLapCountModifiers,
   resolveLapCount,
 } from "../utils/raceDistance.js";
+import {
+  buildRecommendationCacheKey,
+  getCachedRecommendation,
+  hasCachedRecommendation,
+} from "./recommendationCache.js";
 
 /** GT7 compound codes → display labels. */
 export const COMPOUND_LABELS = {
@@ -30,6 +35,38 @@ export const COMPOUND_LABELS = {
  * @property {number} [fuelMultiplier]
  * @property {number} [tyreMultiplier]
  * @property {number} [lapCount]
+ * @property {TyreStintInput[]} [stints] Optional user-defined stints (repeated compounds allowed)
+ * @property {import("../data/driverProfile.js").DriverProfile} [driverProfile] Reserved
+ * @property {import("../data/driverProfile.js").DriverCalibration} [driverCalibration] Reserved
+ */
+
+/**
+ * @typedef {Object} TyreStintInput
+ * @property {number} [stintNumber]
+ * @property {string} compound Soft|Medium|Hard|S|M|H|IM|W
+ * @property {number} [startLap]
+ * @property {number} [endLap]
+ * @property {number} [stintLength]
+ */
+
+/**
+ * @typedef {Object} TyreStint
+ * @property {number} stintNumber
+ * @property {string} compound
+ * @property {string} compoundCode
+ * @property {number} startLap
+ * @property {number} endLap
+ * @property {number} stintLength
+ * @property {number} [estimatedTyreLife]
+ */
+
+/**
+ * @typedef {Object} StrategyCandidate
+ * @property {number} stops
+ * @property {TyreStint[]} stints
+ * @property {number[]} pitLaps
+ * @property {number} estimatedRaceTimeIndex
+ * @property {string} label
  */
 
 /**
@@ -41,15 +78,19 @@ export const COMPOUND_LABELS = {
  * @property {number[]} [pitLaps]
  * @property {string} [pitLapsLabel]
  * @property {string} [tyreStrategy]
+ * @property {TyreStint[]} [stints]
  * @property {string} [alternativeStrategy]
  * @property {number} [alternativeStops]
  * @property {number[]} [alternativePitLaps]
  * @property {string} [alternativeTyreStrategy]
+ * @property {TyreStint[]} [alternativeStints]
+ * @property {StrategyCandidate[]} [comparedStrategies]
  * @property {string} [confidence]
  * @property {number} [confidenceScore]
  * @property {string} [pitLaneLoss]
  * @property {import("../data/pitstopStrategyEvidence.js").PitstopProvenStrategy[]} [provenStrategies]
  * @property {string[]} [notes]
+ * @property {string[]} [validationErrors]
  * @property {Object} [breakdown]
  */
 
@@ -73,6 +114,307 @@ function formatCompoundChain(compounds) {
   return compounds
     .map((code) => COMPOUND_LABELS[code] ?? code)
     .join(" → ");
+}
+
+/**
+ * @param {string} compound
+ * @returns {string}
+ */
+export function normalizeCompoundCode(compound) {
+  const raw = String(compound ?? "").trim().toUpperCase();
+  if (raw === "SOFT" || raw === "S") return "S";
+  if (raw === "MEDIUM" || raw === "M") return "M";
+  if (raw === "HARD" || raw === "H") return "H";
+  if (raw === "INTERMEDIATE" || raw === "IM") return "IM";
+  if (raw === "WET" || raw === "W") return "W";
+  return raw || "M";
+}
+
+/**
+ * Relative compound pace index (lower is faster). Modelled estimate.
+ * @param {string} code
+ */
+function compoundPaceIndex(code) {
+  switch (normalizeCompoundCode(code)) {
+    case "S":
+      return 0.985;
+    case "M":
+      return 1;
+    case "H":
+      return 1.018;
+    case "IM":
+      return 1.04;
+    case "W":
+      return 1.06;
+    default:
+      return 1;
+  }
+}
+
+/**
+ * Estimated tyre life in laps for a compound under wear stress.
+ * @param {string} code
+ * @param {number} tyreMultiplier
+ * @param {number} tyreStress
+ * @param {number} totalLaps
+ */
+function estimateTyreLife(code, tyreMultiplier, tyreStress, totalLaps) {
+  if (tyreMultiplier === 0) {
+    return totalLaps;
+  }
+
+  const base =
+    normalizeCompoundCode(code) === "S"
+      ? 8
+      : normalizeCompoundCode(code) === "H"
+        ? 16
+        : 12;
+  const wearFactor = Math.max(0.35, tyreMultiplier / 3) * Math.max(0.6, tyreStress / 4);
+  return Math.max(3, Math.round(base / wearFactor));
+}
+
+/**
+ * Build structured stints from stop count + compound plan.
+ * Repeated compounds are allowed.
+ *
+ * @param {string[]} compounds
+ * @param {number[]} pitLaps
+ * @param {number} totalLaps
+ * @param {number} tyreMultiplier
+ * @param {number} tyreStress
+ * @returns {TyreStint[]}
+ */
+export function buildStintsFromPlan(
+  compounds,
+  pitLaps,
+  totalLaps,
+  tyreMultiplier,
+  tyreStress,
+) {
+  const boundaries = [1, ...pitLaps.map((lap) => lap + 1), totalLaps + 1];
+  const stints = [];
+
+  for (let i = 0; i < compounds.length; i += 1) {
+    const startLap = boundaries[i] ?? 1;
+    const endLap = Math.min(totalLaps, (boundaries[i + 1] ?? totalLaps + 1) - 1);
+    if (endLap < startLap) {
+      continue;
+    }
+    const code = normalizeCompoundCode(compounds[i]);
+    stints.push({
+      stintNumber: i + 1,
+      compound: COMPOUND_LABELS[code] ?? code,
+      compoundCode: code,
+      startLap,
+      endLap,
+      stintLength: endLap - startLap + 1,
+      estimatedTyreLife: estimateTyreLife(
+        code,
+        tyreMultiplier,
+        tyreStress,
+        totalLaps,
+      ),
+    });
+  }
+
+  return stints;
+}
+
+/**
+ * Validate user-defined stints. Repeated compounds are allowed.
+ *
+ * @param {TyreStintInput[]} stints
+ * @param {number} totalLaps
+ * @returns {{ valid: boolean, errors: string[], normalized: TyreStint[] }}
+ */
+export function validateTyreStints(stints, totalLaps) {
+  /** @type {string[]} */
+  const errors = [];
+  if (!Array.isArray(stints) || stints.length === 0) {
+    return { valid: false, errors: ["At least one stint is required."], normalized: [] };
+  }
+
+  const laps = Math.max(1, Number(totalLaps) || 0);
+  /** @type {TyreStint[]} */
+  const normalized = [];
+  let expectedStart = 1;
+
+  stints.forEach((stint, index) => {
+    const code = normalizeCompoundCode(stint.compound);
+    let startLap = Number(stint.startLap);
+    let endLap = Number(stint.endLap);
+    const length = Number(stint.stintLength);
+
+    if (!Number.isFinite(startLap) || startLap < 1) {
+      startLap = expectedStart;
+    }
+    if ((!Number.isFinite(endLap) || endLap < startLap) && Number.isFinite(length) && length > 0) {
+      endLap = startLap + Math.round(length) - 1;
+    }
+    if (!Number.isFinite(endLap)) {
+      endLap = laps;
+    }
+
+    startLap = Math.round(startLap);
+    endLap = Math.round(endLap);
+
+    if (endLap < startLap) {
+      errors.push(`Stint ${index + 1}: end lap must be after start lap.`);
+    }
+    if (startLap !== expectedStart) {
+      errors.push(
+        `Stint ${index + 1}: starts at lap ${startLap}, expected lap ${expectedStart} (no gaps/overlaps).`,
+      );
+    }
+    if (startLap < 1 || endLap > laps) {
+      errors.push(`Stint ${index + 1}: laps must be within 1–${laps}.`);
+    }
+
+    normalized.push({
+      stintNumber: index + 1,
+      compound: COMPOUND_LABELS[code] ?? code,
+      compoundCode: code,
+      startLap,
+      endLap,
+      stintLength: endLap - startLap + 1,
+    });
+    expectedStart = endLap + 1;
+  });
+
+  const covered = normalized.reduce((sum, stint) => sum + stint.stintLength, 0);
+  if (covered !== laps && errors.length === 0) {
+    errors.push(
+      `Stint lengths cover ${covered} laps but race distance is ${laps} laps.`,
+    );
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    normalized,
+  };
+}
+
+/**
+ * Relative estimated race time index — lower is better.
+ * Purely calculated from stop count, compound pace, degradation and pit loss.
+ *
+ * @param {{
+ *   stops: number,
+ *   compounds: string[],
+ *   pitLaps: number[],
+ *   totalLaps: number,
+ *   tyreMultiplier: number,
+ *   fuelMultiplier: number,
+ *   tyreStress: number,
+ *   pitLossSeconds?: number,
+ * }} plan
+ */
+export function estimateStrategyTimeIndex(plan) {
+  const {
+    stops,
+    compounds,
+    totalLaps,
+    tyreMultiplier,
+    fuelMultiplier,
+    tyreStress,
+    pitLossSeconds = 22,
+  } = plan;
+
+  let driving = 0;
+  const stints = buildStintsFromPlan(
+    compounds,
+    plan.pitLaps,
+    totalLaps,
+    tyreMultiplier,
+    tyreStress,
+  );
+
+  stints.forEach((stint) => {
+    const pace = compoundPaceIndex(stint.compoundCode);
+    const wearPenalty =
+      tyreMultiplier === 0
+        ? 0
+        : Math.max(0, stint.stintLength - (stint.estimatedTyreLife ?? stint.stintLength)) *
+          0.35 *
+          tyreMultiplier;
+    driving += stint.stintLength * pace + wearPenalty;
+  });
+
+  const fuelPenalty =
+    fuelMultiplier === 0 ? 0 : (fuelMultiplier / 10) * totalLaps * 0.02;
+  const pitPenalty = stops * (pitLossSeconds / 90);
+
+  return Number((driving + fuelPenalty + pitPenalty).toFixed(3));
+}
+
+/**
+ * Compare 0/1/2 stop candidates where race rules allow.
+ *
+ * @param {{
+ *   totalLaps: number,
+ *   tyreMultiplier: number,
+ *   fuelMultiplier: number,
+ *   tyreStress: number,
+ *   combinedStress: number,
+ * }} context
+ * @returns {StrategyCandidate[]}
+ */
+export function compareStrategyCandidates(context) {
+  const {
+    totalLaps,
+    tyreMultiplier,
+    fuelMultiplier,
+    tyreStress,
+    combinedStress,
+  } = context;
+
+  /** @type {number[]} */
+  const stopOptions = [];
+  if (tyreMultiplier === 0 && fuelMultiplier === 0) {
+    stopOptions.push(0);
+  } else {
+    stopOptions.push(0, 1, 2);
+    if (totalLaps >= 28 && tyreMultiplier >= 6) {
+      stopOptions.push(3);
+    }
+  }
+
+  const uniqueStops = [...new Set(stopOptions)].filter((stops) => {
+    if (stops === 0 && (combinedStress >= 6.5 || (tyreMultiplier >= 5 && totalLaps >= 16))) {
+      return tyreMultiplier === 0;
+    }
+    return true;
+  });
+
+  return uniqueStops
+    .map((stops) => {
+      const pitLaps = calculatePitLaps(stops, totalLaps, tyreStress);
+      const compounds = buildCompoundPlan(stops, tyreStress, tyreMultiplier);
+      const stints = buildStintsFromPlan(
+        compounds,
+        pitLaps,
+        totalLaps,
+        tyreMultiplier,
+        tyreStress,
+      );
+      return {
+        stops,
+        stints,
+        pitLaps,
+        estimatedRaceTimeIndex: estimateStrategyTimeIndex({
+          stops,
+          compounds,
+          pitLaps,
+          totalLaps,
+          tyreMultiplier,
+          fuelMultiplier,
+          tyreStress,
+        }),
+        label: `${formatStopLabel(stops)} · ${formatCompoundChain(compounds)}`,
+      };
+    })
+    .sort((a, b) => a.estimatedRaceTimeIndex - b.estimatedRaceTimeIndex);
 }
 
 function normalizeMultiplier(value) {
@@ -122,11 +464,6 @@ export function calculateRaceWearProfile(car, track, settings = {}) {
   };
 }
 
-/**
- * @param {number} combinedStress
- * @param {number} laps
- * @param {number} tyreMultiplier
- */
 /**
  * @param {number} combinedStress
  * @param {number} laps
@@ -299,6 +636,29 @@ function resolveConfidence(primaryStops, alternativeStops, combinedStress, evide
  * @returns {PitstopStrategyResult}
  */
 export function analyzePitstopStrategy(input = {}) {
+  const cacheKey = buildRecommendationCacheKey("pitstop-strategy", {
+    gameVersion: input.gameVersion ?? DEFAULT_GAME_VERSION,
+    carId: input.carId ?? "",
+    trackId: input.trackId ?? "",
+    fuelMultiplier: input.fuelMultiplier ?? 0,
+    tyreMultiplier: input.tyreMultiplier ?? 0,
+    lapCount: input.lapCount ?? null,
+    stints: input.stints ?? null,
+  });
+  const fromCache = hasCachedRecommendation(cacheKey);
+
+  const result = getCachedRecommendation(cacheKey, () =>
+    computePitstopStrategy(input),
+  );
+
+  return { ...result, fromCache };
+}
+
+/**
+ * @param {PitstopStrategyInput} input
+ * @returns {PitstopStrategyResult}
+ */
+function computePitstopStrategy(input = {}) {
   const gameVersion = input.gameVersion ?? DEFAULT_GAME_VERSION;
   const carId = String(input.carId ?? "").trim();
   const trackId = String(input.trackId ?? "").trim();
@@ -306,7 +666,7 @@ export function analyzePitstopStrategy(input = {}) {
   if (!carId || !trackId) {
     return {
       ready: false,
-      message: "Select a car and track to generate a pitstop strategy.",
+      message: "Select a car and track, then press Calculate Strategy.",
     };
   }
 
@@ -330,6 +690,18 @@ export function analyzePitstopStrategy(input = {}) {
     tyreMultiplier,
   });
 
+  /** @type {string[]} */
+  const validationErrors = [];
+  let userStints = null;
+  if (Array.isArray(input.stints) && input.stints.length > 0) {
+    const validated = validateTyreStints(input.stints, wear.laps);
+    if (!validated.valid) {
+      validationErrors.push(...validated.errors);
+    } else {
+      userStints = validated.normalized;
+    }
+  }
+
   const evidenceContext = buildPitstopStrategyContext({
     trackId,
     carId,
@@ -348,6 +720,14 @@ export function analyzePitstopStrategy(input = {}) {
     carClass: car.class,
   });
 
+  const comparedStrategies = compareStrategyCandidates({
+    totalLaps: wear.laps,
+    tyreMultiplier,
+    fuelMultiplier,
+    tyreStress: wear.tyreStress,
+    combinedStress: wear.combinedStress,
+  });
+
   let recommendedStops = estimateStopCount(
     wear.combinedStress,
     wear.laps,
@@ -357,6 +737,11 @@ export function analyzePitstopStrategy(input = {}) {
 
   if (evidence.stopAdjustment > 0 && evidence.matchedEntryId) {
     recommendedStops = evidence.stopAdjustment;
+  }
+
+  // Prefer mathematically best candidate when close, unless evidence overrides.
+  if (!evidence.matchedEntryId && comparedStrategies.length > 0) {
+    recommendedStops = comparedStrategies[0].stops;
   }
 
   let pitLaps =
@@ -373,15 +758,37 @@ export function analyzePitstopStrategy(input = {}) {
     wear.tyreStress,
     tyreMultiplier,
   );
+
+  const stints =
+    userStints ??
+    buildStintsFromPlan(
+      compounds,
+      pitLaps,
+      wear.laps,
+      tyreMultiplier,
+      wear.tyreStress,
+    );
+
   const tyreStrategy =
     evidence.tyreStrategyOverride ??
-    formatCompoundChain(compounds);
+    formatCompoundChain(stints.map((stint) => stint.compoundCode));
 
-  const alternative = buildAlternativePlan(
-    recommendedStops,
-    wear.laps,
-    wear.tyreStress,
-  );
+  const alternative =
+    comparedStrategies.find((candidate) => candidate.stops !== recommendedStops) ??
+    buildAlternativePlan(recommendedStops, wear.laps, wear.tyreStress);
+
+  const alternativeStints =
+    "stints" in alternative && Array.isArray(alternative.stints)
+      ? alternative.stints
+      : buildStintsFromPlan(
+          alternative.compounds ??
+            buildCompoundPlan(alternative.stops, wear.tyreStress, tyreMultiplier),
+          alternative.pitLaps,
+          wear.laps,
+          tyreMultiplier,
+          wear.tyreStress,
+        );
+
   const confidence = resolveConfidence(
     recommendedStops,
     alternative.stops,
@@ -392,14 +799,30 @@ export function analyzePitstopStrategy(input = {}) {
   /** @type {string[]} */
   const notes = [];
 
+  if (tyreMultiplier === 0 && fuelMultiplier === 0) {
+    notes.push(
+      "Tyre and fuel multipliers are x0 — no degradation- or fuel-driven stops are required.",
+    );
+  } else if (tyreMultiplier === 0) {
+    notes.push("Tyre wear disabled — stop decisions ignore tyre degradation.");
+  } else if (fuelMultiplier === 0) {
+    notes.push("Fuel consumption disabled — no refuelling stops from fuel use.");
+  }
+
   if (wear.tyreStress >= wear.fuelStress + 1.5) {
     notes.push("Tyre wear is the limiting factor — prioritize stint length over fuel saving.");
   } else if (wear.fuelStress >= wear.tyreStress + 1.2) {
     notes.push("Fuel consumption may define pit timing — consider short-shifting and lift-and-coast.");
   }
 
-  if (recommendedStops === 0 && lapCount >= 12) {
+  if (recommendedStops === 0 && lapCount >= 12 && tyreMultiplier > 0) {
     notes.push("No-stop is aggressive at this distance — monitor tyre temperatures from lap six onward.");
+  }
+
+  if (stints.some((stint, index) =>
+    stints.slice(index + 1).some((other) => other.compoundCode === stint.compoundCode),
+  )) {
+    notes.push("Repeated compounds are allowed — same compound may appear in multiple stints.");
   }
 
   if (evidence.matchedEntryId) {
@@ -423,22 +846,32 @@ export function analyzePitstopStrategy(input = {}) {
       : confidence.label;
 
   return {
-    ready: true,
+    ready: validationErrors.length === 0,
+    message:
+      validationErrors.length > 0
+        ? validationErrors[0]
+        : undefined,
     recommendedStrategy: formatStopLabel(recommendedStops),
     recommendedStops,
     pitLaps,
     pitLapsLabel:
       pitLaps.length > 0 ? pitLaps.join(", ") : "No pit stop required",
     tyreStrategy,
+    stints,
     alternativeStrategy: formatStopLabel(alternative.stops),
     alternativeStops: alternative.stops,
     alternativePitLaps: alternative.pitLaps,
-    alternativeTyreStrategy: formatCompoundChain(alternative.compounds),
+    alternativeTyreStrategy: formatCompoundChain(
+      alternativeStints.map((stint) => stint.compoundCode),
+    ),
+    alternativeStints,
+    comparedStrategies,
     confidence: displayConfidence,
     confidenceScore: confidence.score,
     pitLaneLoss,
     provenStrategies: evidence.provenStrategies ?? [],
     notes,
+    validationErrors,
     breakdown: {
       lapCount: wear.laps,
       tyreStress: wear.tyreStress,
@@ -450,6 +883,15 @@ export function analyzePitstopStrategy(input = {}) {
       trackFuel: track.fuel,
       evidenceMatched: evidence.matchedEntryId,
       pitLaneLossStatus: pitLaneEntry?.status ?? "TBC",
+      estimatedRaceTimeIndex: estimateStrategyTimeIndex({
+        stops: recommendedStops,
+        compounds: stints.map((stint) => stint.compoundCode),
+        pitLaps,
+        totalLaps: wear.laps,
+        tyreMultiplier,
+        fuelMultiplier,
+        tyreStress: wear.tyreStress,
+      }),
     },
   };
 }

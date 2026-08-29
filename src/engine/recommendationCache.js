@@ -41,6 +41,14 @@ export function buildRecommendationCacheKey(namespace, keyPayload) {
 }
 
 /**
+ * @param {string} key
+ * @returns {boolean}
+ */
+export function hasCachedRecommendation(key) {
+  return cache.has(key);
+}
+
+/**
  * @template T
  * @param {string} key
  * @param {() => T} compute

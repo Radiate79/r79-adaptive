@@ -1,4 +1,12 @@
 /**
+ * @typedef {Object} DriverCalibration
+ * @property {number} [lapPaceDelta]
+ * @property {number} [tyreDegradationFactor]
+ * @property {number} [fuelUseFactor]
+ * @property {number} [consistencyRating]
+ */
+
+/**
  * Personal Recommendation layer — driver profile foundation.
  * Default placeholders until profile editing and personalised scoring are added.
  */

@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
   analyzeCalendarDNA,
-  analyzeCarBestAndWeakestTracks,
   analyzeDrivetrainSuitability,
-  rankCarsByChampionshipConsistency,
-  recommendCarsForChampionship,
 } from "../engine/championshipEngine.js";
+import { calculateChampionshipRecommendation } from "../engine/calculateChampionshipRecommendation.js";
+import {
+  createCalculationRequestId,
+  runCancellableCalculation,
+} from "../engine/calculationRunner.js";
 import { formatAdvisorDataStatusLine } from "../engine/advisorConfidenceEngine.js";
 import { ReportIssueButton } from "./ReportIssue.jsx";
 import {
@@ -17,6 +19,7 @@ import {
   isGameDataReady,
 } from "../utils/gameData.js";
 import { filterItemsByNameSearch } from "../utils/listSearch.js";
+import { buildRecommendationCacheKey } from "../engine/recommendationCache.js";
 import { CAR_CLASS_OPTIONS } from "../data/carClasses.js";
 import {
   getCalendarRecommendationStatus,
@@ -39,6 +42,7 @@ export default function ChampionshipAdvisor() {
   const [carClass, setCarClass] = useState("Gr.3");
   const [bannedCarNames, setBannedCarNames] = useState([]);
   const [trackSearchQuery, setTrackSearchQuery] = useState("");
+  const [bopOn, setBopOn] = useState(true);
   const allTracks = useMemo(() => getTracksForGame(gameVersion), [gameVersion]);
   const classCars = useMemo(
     () =>
@@ -83,6 +87,44 @@ export default function ChampionshipAdvisor() {
     [allTracks, selectedTrackIds],
   );
 
+  const [recommendationsWithTrackAnalysis, setRecommendationsWithTrackAnalysis] =
+    useState([]);
+  const [consistencyRankings, setConsistencyRankings] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState(null);
+  const [confirmedInputKey, setConfirmedInputKey] = useState(null);
+  const requestIdRef = useRef(0);
+  const abortRef = useRef(/** @type {AbortController | null} */ (null));
+
+  const draftInputKey = useMemo(
+    () =>
+      buildRecommendationCacheKey("advisor-draft", {
+        gameVersion,
+        carClass,
+        selectedTrackIds: [...selectedTrackIds].sort(),
+        fuelMultiplier,
+        tyreMultiplier,
+        lapCount: effectiveLapCount ?? null,
+        bopOn,
+        bannedCarNames: [...bannedCarNames].sort(),
+      }),
+    [
+      gameVersion,
+      carClass,
+      selectedTrackIds,
+      fuelMultiplier,
+      tyreMultiplier,
+      effectiveLapCount,
+      bopOn,
+      bannedCarNames,
+    ],
+  );
+
+  const inputsChanged =
+    confirmedInputKey != null &&
+    confirmedInputKey !== draftInputKey &&
+    !isGenerating;
+
   useEffect(() => {
     setSelectedTrackIds((current) =>
       current.filter((id) =>
@@ -98,15 +140,11 @@ export default function ChampionshipAdvisor() {
     );
   }, [classCars]);
 
-  const raceSettings = useMemo(
-    () => ({
-      fuelMultiplier,
-      tyreMultiplier,
-      bannedCarNames,
-      lapCount: effectiveLapCount,
-    }),
-    [fuelMultiplier, tyreMultiplier, bannedCarNames, effectiveLapCount],
-  );
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const allCarsBanned =
     classCars.length > 0 &&
@@ -125,6 +163,7 @@ export default function ChampionshipAdvisor() {
       return [
         `Fuel Multiplier x${fuelMultiplier}`,
         `Tyre Multiplier x${tyreMultiplier}`,
+        bopOn ? "BOP On" : "BOP Off",
       ];
     }
 
@@ -167,57 +206,21 @@ export default function ChampionshipAdvisor() {
     }
     labels.push(`Fuel Multiplier x${fuelMultiplier}`);
     labels.push(`Tyre Multiplier x${tyreMultiplier}`);
+    labels.push(bopOn ? "BOP On" : "BOP Off");
 
     return Array.from(new Set(labels));
-  }, [selectedTracks, fuelMultiplier, tyreMultiplier, effectiveLapCount]);
+  }, [
+    selectedTracks,
+    fuelMultiplier,
+    tyreMultiplier,
+    effectiveLapCount,
+    bopOn,
+  ]);
 
   const drivetrainRankings = useMemo(
     () => analyzeDrivetrainSuitability(selectedTracks),
     [selectedTracks],
   );
-
-  const recommendations = useMemo(() => {
-    if (selectedTrackIds.length === 0) {
-      return [];
-    }
-
-    return recommendCarsForChampionship(
-      selectedTrackIds,
-      carClass,
-      raceSettings,
-      gameVersion,
-    )
-      .sort((a, b) => Number(b.score) - Number(a.score))
-      .slice(0, 5);
-  }, [selectedTrackIds, carClass, raceSettings, gameVersion]);
-
-  const recommendationsWithTrackAnalysis = useMemo(() => {
-    if (recommendations.length === 0 || selectedTracks.length === 0) {
-      return [];
-    }
-
-    return recommendations.map((car) => ({
-      ...car,
-      trackAnalysis: analyzeCarBestAndWeakestTracks(
-        car,
-        selectedTracks,
-        raceSettings,
-      ),
-    }));
-  }, [recommendations, selectedTracks, raceSettings]);
-
-  const consistencyRankings = useMemo(() => {
-    if (selectedTrackIds.length === 0) {
-      return [];
-    }
-
-    return rankCarsByChampionshipConsistency(
-      selectedTrackIds,
-      carClass,
-      raceSettings,
-      gameVersion,
-    ).slice(0, 5);
-  }, [selectedTrackIds, carClass, raceSettings, gameVersion]);
 
   const calendarAnalysis = useMemo(() => {
     const metricConfig = [
@@ -268,11 +271,82 @@ export default function ChampionshipAdvisor() {
   };
 
   const resetAdvisor = () => {
+    abortRef.current?.abort();
+    requestIdRef.current = createCalculationRequestId();
     setSelectedTrackIds([]);
     setBannedCarNames([]);
     setCarClass("Gr.3");
     setLapInput("");
+    setBopOn(true);
     resetToPreset("custom");
+    setRecommendationsWithTrackAnalysis([]);
+    setConsistencyRankings([]);
+    setConfirmedInputKey(null);
+    setGenerationError(null);
+    setIsGenerating(false);
+  };
+
+  const generateRecommendations = async () => {
+    if (isGenerating) {
+      return;
+    }
+
+    if (selectedTrackIds.length === 0) {
+      setGenerationError("Select one or more tracks before generating recommendations.");
+      return;
+    }
+
+    if (allCarsBanned) {
+      setGenerationError("No eligible cars available. Remove at least one banned car.");
+      return;
+    }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const requestId = createCalculationRequestId();
+    requestIdRef.current = requestId;
+
+    const inputSnapshot = {
+      selectedTrackIds: [...selectedTrackIds],
+      carClass,
+      fuelMultiplier,
+      tyreMultiplier,
+      lapCount: effectiveLapCount,
+      bopOn,
+      bannedCarNames: [...bannedCarNames],
+      gameVersion,
+    };
+    const snapshotKey = draftInputKey;
+
+    setIsGenerating(true);
+    setGenerationError(null);
+
+    const outcome = await runCancellableCalculation({
+      requestId,
+      isCurrent: (id) => id === requestIdRef.current,
+      signal: controller.signal,
+      compute: () => calculateChampionshipRecommendation(inputSnapshot),
+    });
+
+    if (!outcome.ok) {
+      if (outcome.reason === "cancelled") {
+        return;
+      }
+      setIsGenerating(false);
+      setGenerationError(
+        "Recommendation calculation failed. Check your inputs and try again.",
+      );
+      return;
+    }
+
+    setRecommendationsWithTrackAnalysis(outcome.value.rankings);
+    setConsistencyRankings(outcome.value.consistencyRankings);
+    setConfirmedInputKey(snapshotKey);
+    setIsGenerating(false);
+    if (outcome.value.warnings?.length && outcome.value.rankings.length === 0) {
+      setGenerationError(outcome.value.warnings[0]);
+    }
   };
 
   return (
@@ -331,10 +405,43 @@ export default function ChampionshipAdvisor() {
           onTyreMultiplierChange={setTyreMultiplier}
           style={styles.settingsRow}
         />
+        <div style={styles.bopRow}>
+          <span style={styles.bopLabel}>BOP</span>
+          <div className="r79-wheel-chip-row">
+            <button
+              type="button"
+              className={bopOn ? "r79-wheel-chip r79-wheel-chip--active" : "r79-wheel-chip"}
+              onClick={() => setBopOn(true)}
+            >
+              On
+            </button>
+            <button
+              type="button"
+              className={!bopOn ? "r79-wheel-chip r79-wheel-chip--active" : "r79-wheel-chip"}
+              onClick={() => setBopOn(false)}
+            >
+              Off
+            </button>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={generateRecommendations}
+          className="r79-btn-primary"
+          disabled={isGenerating || selectedTrackIds.length === 0}
+        >
+          {isGenerating ? "Generating…" : "Generate Recommendations"}
+        </button>
         <button type="button" onClick={resetAdvisor} className="r79-btn-secondary">
           Reset Advisor
         </button>
       </div>
+
+      {inputsChanged ? (
+        <p className="r79-notice r79-notice--wide" style={styles.inputsChangedNotice}>
+          Inputs changed since the last result. Press Generate Recommendations to update.
+        </p>
+      ) : null}
 
       <div className="r79-card" style={styles.trackPanel}>
         <h3 style={styles.trackTitle}>Championship Tracks</h3>
@@ -479,26 +586,42 @@ export default function ChampionshipAdvisor() {
             How are these recommendations chosen?
           </summary>
           <p>
-            R79 analyses every eligible car against your selected championship
-            conditions, including selected tracks, BOP, fuel wear, tyre wear and
-            lap count. It combines technical car characteristics with community
-            confidence, championship experience and race suitability to calculate
-            an Overall Score. The five highest scoring cars are recommended as
-            the Top 5.
+            R79 evaluates every eligible car independently against your confirmed
+            championship inputs — selected tracks, BOP mode, fuel wear, tyre wear
+            and lap count. Press Generate Recommendations after adjusting inputs.
+            Track suitability is primary; community confidence and historical
+            evidence adjust confidence, not raw performance.
           </p>
         </details>
+        {isGenerating ? (
+          <p style={styles.emptyState}>Calculating recommendations…</p>
+        ) : null}
+        {generationError && !isGenerating ? (
+          <div style={styles.errorBlock}>
+            <p style={styles.emptyState}>{generationError}</p>
+            <button
+              type="button"
+              className="r79-btn-secondary"
+              onClick={generateRecommendations}
+            >
+              Retry
+            </button>
+          </div>
+        ) : null}
         {allCarsBanned && selectedTrackIds.length > 0 ? (
           <p style={styles.emptyState}>
             No eligible cars available. Remove at least one banned car.
           </p>
-        ) : recommendationsWithTrackAnalysis.length === 0 ? (
+        ) : !isGenerating &&
+          !generationError &&
+          recommendationsWithTrackAnalysis.length === 0 ? (
           <p style={styles.emptyState}>
             {selectableTracks.length === 0
               ? `No ${game?.shortLabel ?? "GT7"} tracks available yet.`
               : calendarRecommendationStatus.message ??
-                "Select one or more tracks to generate recommendations."}
+                "Select tracks, adjust race conditions, then press Generate Recommendations."}
           </p>
-        ) : (
+        ) : !isGenerating && recommendationsWithTrackAnalysis.length > 0 ? (
           <ol style={styles.resultsList}>
             {recommendationsWithTrackAnalysis.map((car) => (
               <li key={car.id} style={styles.resultItem}>
@@ -571,7 +694,7 @@ export default function ChampionshipAdvisor() {
               </li>
             ))}
           </ol>
-        )}
+        ) : null}
       </div>
 
       <div style={styles.consistencyPanel}>
@@ -583,9 +706,11 @@ export default function ChampionshipAdvisor() {
           <p style={styles.emptyState}>
             No eligible cars available. Remove at least one banned car.
           </p>
+        ) : isGenerating ? (
+          <p style={styles.emptyState}>Calculating consistency…</p>
         ) : consistencyRankings.length === 0 ? (
           <p style={styles.emptyState}>
-            Select one or more tracks to rank championship consistency.
+            Generate recommendations to see championship consistency rankings.
           </p>
         ) : (
           <ol style={styles.consistencyList}>
@@ -629,6 +754,25 @@ const styles = {
     display: "grid",
     gap: "10px",
     marginBottom: "14px",
+  },
+  bopRow: {
+    display: "grid",
+    gap: "6px",
+  },
+  bopLabel: {
+    color: "rgba(200, 214, 245, 0.9)",
+    fontSize: "0.78rem",
+    fontWeight: 700,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+  },
+  inputsChangedNotice: {
+    marginBottom: "12px",
+  },
+  errorBlock: {
+    display: "grid",
+    gap: "10px",
+    justifyItems: "start",
   },
   settingsRow: {
     display: "grid",

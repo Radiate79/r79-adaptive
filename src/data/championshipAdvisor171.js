@@ -137,10 +137,17 @@ function clampScore(value) {
 
 /**
  * Resolve championship scoring attributes for the active GT7 1.71 advisor model.
+ * When bopOn is false, return base car attributes without BoP deltas.
+ *
  * @param {{ id?: string, class?: string, topSpeed?: number, traction?: number, fuel?: number, tyres?: number, stability?: number, rotation?: number, drivetrain?: string, [key: string]: unknown }} car
+ * @param {{ bopOn?: boolean }} [options]
  */
-export function resolveChampionshipCarAttributes(car) {
+export function resolveChampionshipCarAttributes(car, options = {}) {
   if (!car || car.class !== "Gr.3") {
+    return car;
+  }
+
+  if (options.bopOn === false) {
     return car;
   }
 

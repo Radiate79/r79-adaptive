@@ -63,8 +63,10 @@ function getScoreWeights(raceSettings = {}) {
   };
 }
 
-function getCarAttribute(car, field) {
-  const profile = resolveChampionshipCarAttributes(car);
+function getCarAttribute(car, field, raceSettings = {}) {
+  const profile = resolveChampionshipCarAttributes(car, {
+    bopOn: raceSettings.bopOn !== false,
+  });
 
   if (field === "rotation") {
     return Number(profile?.rotation ?? DEFAULT_ROTATION[profile?.drivetrain] ?? 7);
@@ -247,7 +249,7 @@ function getWeightedTrackScore(car, track, raceSettings = {}) {
 
   SCORING_FIELDS.forEach((field) => {
     const demand = demands[field] ?? 0;
-    const carValue = getCarAttribute(car, field);
+    const carValue = getCarAttribute(car, field, raceSettings);
     const paceBoost =
       field === "topSpeed" || field === "rotation"
         ? raceImportance.paceEmphasis
@@ -271,9 +273,9 @@ function getWeightedTrackScore(car, track, raceSettings = {}) {
 
 function computeRaceConditionFitScore(car, track, raceSettings = {}) {
   const raceImportance = getRaceConditionImportance(raceSettings);
-  const carFuel = getCarAttribute(car, "fuel");
-  const carTyres = getCarAttribute(car, "tyres");
-  const carStability = getCarAttribute(car, "stability");
+  const carFuel = getCarAttribute(car, "fuel", raceSettings);
+  const carTyres = getCarAttribute(car, "tyres", raceSettings);
+  const carStability = getCarAttribute(car, "stability", raceSettings);
   const profile = getRaceDistanceProfile(raceSettings.lapCount);
 
   let score = 50;
@@ -292,7 +294,8 @@ function computeRaceConditionFitScore(car, track, raceSettings = {}) {
 
   if (profile.paceEmphasis > 1) {
     score +=
-      ((getCarAttribute(car, "topSpeed") + getCarAttribute(car, "traction")) /
+      ((getCarAttribute(car, "topSpeed", raceSettings) +
+        getCarAttribute(car, "traction", raceSettings)) /
         20 -
         0.5) *
       (profile.paceEmphasis - 0.85) *
@@ -318,13 +321,13 @@ function getDetailedStrengthContributions(
     return SCORING_FIELDS.map((field) => ({
       field,
       contribution: 0,
-      carValue: getCarAttribute(car, field),
+      carValue: getCarAttribute(car, field, raceSettings),
       demand: 0,
     }));
   }
 
   return SCORING_FIELDS.map((field) => {
-    const carValue = getCarAttribute(car, field);
+    const carValue = getCarAttribute(car, field, raceSettings);
     const contribution =
       championshipTracks.reduce((sum, track) => {
         const demands = getTrackDemandWeights(track, raceSettings);

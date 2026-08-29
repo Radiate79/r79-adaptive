@@ -1,28 +1,36 @@
 /**
- * Championship Advisor regression scenarios for GT7 1.71 scoring.
+ * Championship Advisor + Pitstop strategy intelligence regression checks.
  * Run: node scripts/verify-championship-advisor.mjs
  */
-import { recommendCarsForChampionship } from "../src/engine/championshipEngine.js";
-import { analyzePitstopStrategy } from "../src/engine/pitstopStrategyEngine.js";
+import { calculateChampionshipRecommendation } from "../src/engine/calculateChampionshipRecommendation.js";
+import {
+  analyzePitstopStrategy,
+  validateTyreStints,
+} from "../src/engine/pitstopStrategyEngine.js";
 import { getTracksForGame } from "../src/utils/gameData.js";
+import { clearRecommendationCache } from "../src/engine/recommendationCache.js";
+
+function recommend(trackIds, raceSettings) {
+  return calculateChampionshipRecommendation({
+    selectedTrackIds: trackIds,
+    carClass: "Gr.3",
+    gameVersion: "gt7",
+    bopOn: true,
+    ...raceSettings,
+  }).rankings;
+}
 
 const SCENARIOS = [
   {
-    name: "Fuji regression — Gr.3 / 7 laps / x4 tyres / x1 fuel",
+    name: "Fuji regression — Gr.3 / 7 laps / x4 tyres / x1 fuel / BOP On",
     trackIds: ["fuji"],
-    carClass: "Gr.3",
     raceSettings: { lapCount: 7, tyreMultiplier: 4, fuelMultiplier: 1 },
     checks: [
       (results) => {
-        const peugeot = results.find((car) =>
-          car.id.includes("peugeot_vision"),
-        );
         const top5Ids = results.slice(0, 5).map((car) => car.id);
         return {
           pass: !top5Ids.includes("peugeot_vision_gran_turismo_gr3"),
-          detail: peugeot
-            ? `Peugeot VGT rank ${results.indexOf(peugeot) + 1}, score ${peugeot.score}`
-            : "Peugeot VGT not in results (filtered or outside top)",
+          detail: `Peugeot VGT in top 5: ${top5Ids.includes("peugeot_vision_gran_turismo_gr3")}`,
         };
       },
       (results) => ({
@@ -34,7 +42,6 @@ const SCENARIOS = [
   {
     name: "Short sprint — Tyres x0 / Fuel x0",
     trackIds: ["monza"],
-    carClass: "Gr.3",
     raceSettings: { lapCount: 5, tyreMultiplier: 0, fuelMultiplier: 0 },
     checks: [
       (results) => ({
@@ -46,7 +53,6 @@ const SCENARIOS = [
   {
     name: "Long race — high tyre wear",
     trackIds: ["spa"],
-    carClass: "Gr.3",
     raceSettings: { lapCount: 30, tyreMultiplier: 8, fuelMultiplier: 3 },
     checks: [
       (results) => ({
@@ -58,26 +64,20 @@ const SCENARIOS = [
   {
     name: "Technical circuit — Laguna Seca",
     trackIds: ["laguna_seca"],
-    carClass: "Gr.3",
     raceSettings: { lapCount: 10, tyreMultiplier: 2, fuelMultiplier: 1 },
     checks: [],
   },
   {
     name: "Traction circuit — Sardegna Road",
     trackIds: ["sardegna_road_track"],
-    carClass: "Gr.3",
     raceSettings: { lapCount: 12, tyreMultiplier: 3, fuelMultiplier: 2 },
     checks: [],
   },
 ];
 
 function runScenario(scenario) {
-  const results = recommendCarsForChampionship(
-    scenario.trackIds,
-    scenario.carClass,
-    scenario.raceSettings,
-    "gt7",
-  ).slice(0, 10);
+  clearRecommendationCache();
+  const results = recommend(scenario.trackIds, scenario.raceSettings).slice(0, 10);
 
   console.log(`\n=== ${scenario.name} ===`);
   results.slice(0, 5).forEach((car, index) => {
@@ -100,6 +100,7 @@ function runScenario(scenario) {
 }
 
 function compareTrackDiversity() {
+  clearRecommendationCache();
   const tracks = [
     "fuji",
     "monza",
@@ -110,12 +111,11 @@ function compareTrackDiversity() {
     "sardegna_road_track",
   ];
   const winners = tracks.map((trackId) => {
-    const results = recommendCarsForChampionship(
-      [trackId],
-      "Gr.3",
-      { lapCount: 10, tyreMultiplier: 3, fuelMultiplier: 2 },
-      "gt7",
-    );
+    const results = recommend([trackId], {
+      lapCount: 10,
+      tyreMultiplier: 3,
+      fuelMultiplier: 2,
+    });
     return { trackId, winner: results[0]?.id, score: results[0]?.score };
   });
 
@@ -132,36 +132,147 @@ function compareTrackDiversity() {
   return pass;
 }
 
-function verifyPitstopZeroMultipliers() {
+function verifyCacheReuse() {
+  clearRecommendationCache();
+  const input = {
+    selectedTrackIds: ["fuji"],
+    carClass: "Gr.3",
+    lapCount: 7,
+    tyreMultiplier: 4,
+    fuelMultiplier: 1,
+    bopOn: true,
+    gameVersion: "gt7",
+  };
+  const first = calculateChampionshipRecommendation(input);
+  const second = calculateChampionshipRecommendation(input);
+  const pass = first.fromCache === false && second.fromCache === true;
+  console.log("\n=== Cache reuse ===");
+  console.log(
+    `[${pass ? "PASS" : "FAIL"}] first.fromCache=${first.fromCache} second.fromCache=${second.fromCache}`,
+  );
+  return pass;
+}
+
+function verifyBopSeparation() {
+  clearRecommendationCache();
+  const withBop = calculateChampionshipRecommendation({
+    selectedTrackIds: ["fuji"],
+    carClass: "Gr.3",
+    lapCount: 7,
+    tyreMultiplier: 4,
+    fuelMultiplier: 1,
+    bopOn: true,
+    gameVersion: "gt7",
+  });
+  const withoutBop = calculateChampionshipRecommendation({
+    selectedTrackIds: ["fuji"],
+    carClass: "Gr.3",
+    lapCount: 7,
+    tyreMultiplier: 4,
+    fuelMultiplier: 1,
+    bopOn: false,
+    gameVersion: "gt7",
+  });
+
+  const scoresDiffer =
+    JSON.stringify(withBop.scores) !== JSON.stringify(withoutBop.scores);
+  console.log("\n=== BOP On vs Off separation ===");
+  console.log(
+    `[${scoresDiffer ? "PASS" : "FAIL"}] BOP modes produce different score sets: ${scoresDiffer}`,
+  );
+  return scoresDiffer;
+}
+
+function verifyPitstopScenarios() {
   const tracks = getTracksForGame("gt7");
   const trackId = tracks.find((track) => track.id === "fuji")?.id ?? "fuji";
-  const tyreZero = analyzePitstopStrategy({
-    carId: "porsche_911_gt3_r_22",
+  const carId = "porsche_911_gt3_r_22";
+
+  console.log("\n=== Pitstop / strategy regression ===");
+
+  const a = analyzePitstopStrategy({
+    carId,
     trackId,
     lapCount: 10,
     tyreMultiplier: 0,
-    fuelMultiplier: 1,
-  });
-  const fuelZero = analyzePitstopStrategy({
-    carId: "porsche_911_gt3_r_22",
-    trackId,
-    lapCount: 10,
-    tyreMultiplier: 3,
     fuelMultiplier: 0,
   });
-
-  const tyrePass = tyreZero.recommendedStops === 0;
-  const fuelPass = fuelZero.recommendedStops === 0 || fuelZero.combinedStress === 0;
-
-  console.log("\n=== Pitstop x0 validation ===");
+  const aPass = a.ready && a.recommendedStops === 0;
   console.log(
-    `[${tyrePass ? "PASS" : "FAIL"}] Tyres x0 → ${tyreZero.recommendedStops} stops`,
-  );
-  console.log(
-    `[${fuelPass ? "PASS" : "FAIL"}] Fuel x0 → ${fuelZero.recommendedStops} stops`,
+    `[${aPass ? "PASS" : "FAIL"}] A 10 laps Tyres x0 Fuel x0 → ${a.recommendedStops} stops`,
   );
 
-  return tyrePass && fuelPass;
+  const b = analyzePitstopStrategy({
+    carId,
+    trackId,
+    lapCount: 20,
+    tyreMultiplier: 8,
+    fuelMultiplier: 1,
+  });
+  const bPass = b.ready && b.recommendedStops >= 1;
+  console.log(
+    `[${bPass ? "PASS" : "FAIL"}] B 20 laps high tyre / low fuel → ${b.recommendedStops} stops`,
+  );
+
+  const c = analyzePitstopStrategy({
+    carId,
+    trackId,
+    lapCount: 20,
+    tyreMultiplier: 1,
+    fuelMultiplier: 8,
+  });
+  const cPass = c.ready;
+  console.log(
+    `[${cPass ? "PASS" : "FAIL"}] C 20 laps low tyre / high fuel → ${c.recommendedStops} stops`,
+  );
+
+  const softMediumSoft = validateTyreStints(
+    [
+      { compound: "S", startLap: 1, endLap: 7 },
+      { compound: "M", startLap: 8, endLap: 18 },
+      { compound: "S", startLap: 19, endLap: 25 },
+    ],
+    25,
+  );
+  const dPass = softMediumSoft.valid;
+  console.log(
+    `[${dPass ? "PASS" : "FAIL"}] D Soft→Medium→Soft validation (${softMediumSoft.errors.join("; ") || "ok"})`,
+  );
+
+  const mediumMedium = validateTyreStints(
+    [
+      { compound: "M", startLap: 1, endLap: 12 },
+      { compound: "M", startLap: 13, endLap: 25 },
+    ],
+    25,
+  );
+  const ePass = mediumMedium.valid;
+  console.log(
+    `[${ePass ? "PASS" : "FAIL"}] E Medium→Medium validation (${mediumMedium.errors.join("; ") || "ok"})`,
+  );
+
+  const userStintStrategy = analyzePitstopStrategy({
+    carId,
+    trackId,
+    lapCount: 25,
+    tyreMultiplier: 3,
+    fuelMultiplier: 2,
+    stints: [
+      { compound: "S", startLap: 1, endLap: 7 },
+      { compound: "M", startLap: 8, endLap: 18 },
+      { compound: "S", startLap: 19, endLap: 25 },
+    ],
+  });
+  const userPass =
+    userStintStrategy.ready &&
+    userStintStrategy.stints?.length === 3 &&
+    userStintStrategy.stints[0].compoundCode === "S" &&
+    userStintStrategy.stints[2].compoundCode === "S";
+  console.log(
+    `[${userPass ? "PASS" : "FAIL"}] User Soft→Medium→Soft stints applied`,
+  );
+
+  return aPass && bPass && cPass && dPass && ePass && userPass;
 }
 
 let allPassed = true;
@@ -175,14 +286,19 @@ for (const scenario of SCENARIOS) {
 if (!compareTrackDiversity()) {
   allPassed = false;
 }
-
-if (!verifyPitstopZeroMultipliers()) {
+if (!verifyCacheReuse()) {
+  allPassed = false;
+}
+if (!verifyBopSeparation()) {
+  allPassed = false;
+}
+if (!verifyPitstopScenarios()) {
   allPassed = false;
 }
 
 if (!allPassed) {
-  console.error("\nChampionship advisor regression checks failed.");
+  console.error("\nIntelligence regression checks failed.");
   process.exit(1);
 }
 
-console.log("\nAll championship advisor regression checks passed.");
+console.log("\nAll intelligence regression checks passed.");
