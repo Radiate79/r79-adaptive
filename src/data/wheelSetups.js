@@ -762,9 +762,10 @@ const T598_CLASS_STARTERS = {
  * @param {string} carId
  * @param {"Gr.1" | "Gr.2" | "Gr.3" | "Gr.4"} carClass
  * @param {string} [trackId]
+ * @param {string} [wheelBase]
  * @returns {WheelSetupRecord}
  */
-function createT598ClassStarter(carId, carClass, trackId) {
+export function buildCarClassStarter(carId, carClass, trackId, wheelBase = "thrustmaster_t598") {
   const template = T598_CLASS_STARTERS[carClass] ?? T598_BASE_VALUES;
   const resolvedTrack = trackId ?? DEFAULT_TRACK_BY_CLASS[carClass] ?? "spa";
 
@@ -773,7 +774,7 @@ function createT598ClassStarter(carId, carClass, trackId) {
     label: STARTER_SETUP_LABEL,
     isStarter: true,
     gameVersion: "gt7",
-    wheelBase: "thrustmaster_t598",
+    wheelBase,
     carId,
     trackId: resolvedTrack,
     tyreCompound: "M",
@@ -799,7 +800,7 @@ const AUTO_T598_STARTERS = gt7Cars
       ["Gr.1", "Gr.2", "Gr.3", "Gr.4"].includes(car.class) &&
       !T598_COVERED_CAR_IDS.has(car.id),
   )
-  .map((car) => createT598ClassStarter(car.id, car.class));
+  .map((car) => buildCarClassStarter(car.id, car.class));
 
 /** @type {WheelSetupRecord[]} */
 export const STARTER_WHEEL_SETUPS = [

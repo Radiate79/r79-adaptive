@@ -7,11 +7,9 @@ import {
   TYRE_COMPOUND_OPTIONS,
 } from "../data/wheelSetupsMeta.js";
 import {
-  buildWheelSetupPresentation,
-  findWheelSetup,
+  calculateWheelSettings,
   searchWheelSetups,
 } from "../engine/wheelSettingsEngine.js";
-import { isPodiumInputComplete } from "../engine/podiumEngine.js";
 import { useGameVersion } from "../context/GameVersionContext.jsx";
 import {
   CAR_CLASS_OPTIONS,
@@ -434,21 +432,19 @@ export default function WheelSettingsHub({
     lapCount,
   ]);
 
-  const lookup = useMemo(
-    () =>
-      findWheelSetup({
-        gameVersion: filterGame,
-        wheelBase,
-        carId,
-        trackId,
-        tyreCompound,
-        bopOn,
-      }),
-    [filterGame, wheelBase, carId, trackId, tyreCompound, bopOn],
-  );
+  const canShowSetup = Boolean(carId && trackId && wheelBase);
 
-  const podiumInput = useMemo(
-    () => ({
+  const wheelSettingsResult = useMemo(() => {
+    if (!canShowSetup) {
+      return {
+        lookup: { setup: null, matchType: "none", message: null },
+        rows: [],
+        podium: null,
+        confidence: null,
+      };
+    }
+
+    return calculateWheelSettings({
       gameVersion: filterGame,
       wheelBase,
       carId,
@@ -458,36 +454,23 @@ export default function WheelSettingsHub({
       fuelMultiplier,
       tyreMultiplier,
       lapCount,
-    }),
-    [
-      filterGame,
-      wheelBase,
-      carId,
-      trackId,
-      tyreCompound,
-      bopOn,
-      fuelMultiplier,
-      tyreMultiplier,
-      lapCount,
-    ],
-  );
+    });
+  }, [
+    canShowSetup,
+    filterGame,
+    wheelBase,
+    carId,
+    trackId,
+    tyreCompound,
+    bopOn,
+    fuelMultiplier,
+    tyreMultiplier,
+    lapCount,
+  ]);
 
-  const podiumReady = isPodiumInputComplete(podiumInput);
-
-  const canShowSetup = Boolean(carId && trackId && wheelBase);
-
-  const presentation = useMemo(() => {
-    if (!lookup.setup || !canShowSetup) {
-      return { rows: [], podium: null };
-    }
-
-    return buildWheelSetupPresentation(
-      lookup.setup,
-      podiumReady ? podiumInput : { wheelBase },
-    );
-  }, [lookup.setup, canShowSetup, podiumReady, podiumInput, wheelBase]);
-
-  const setupRows = presentation.rows;
+  const lookup = wheelSettingsResult.lookup ?? { setup: null, matchType: "none" };
+  const presentation = wheelSettingsResult;
+  const setupRows = wheelSettingsResult.rows;
   const selectedCar = cars.find((car) => car.id === carId) ?? null;
   const selectedTrack = tracks.find((track) => track.id === trackId) ?? null;
   const wheelLabel =

@@ -107,6 +107,10 @@ function createValidatedT598Profile(carId, carClass, trackId) {
     tyreCompound: "M",
     bopOn: true,
     values: getValidatedT598ValuesForClass(carClass),
+    physicsGeneration: "GT7_1_71_PHYSICS",
+    dataStatus: "TESTING",
+    validationStatus: "testing",
+    validatedAfterUpdate: false,
   };
 }
 
