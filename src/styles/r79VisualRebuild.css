@@ -1647,3 +1647,208 @@ body,
     max-width: 92px;
   }
 }
+
+/* ========== MOBILE RESPONSIVE LAYOUT (real phone widths) ========== */
+@media (max-width: 768px) {
+  .r79-app-nav-shell {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
+  }
+
+  .r79-mobile-chrome {
+    gap: 8px !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Wheel Settings hero — preserve side-by-side, fit viewport */
+  .r79-wheel-hero-nav {
+    box-sizing: border-box !important;
+    display: grid !important;
+    gap: 4px !important;
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%) !important;
+    max-width: 100% !important;
+    min-height: clamp(168px, 50vw, 214px) !important;
+    min-width: 0 !important;
+    padding: 8px 46px 10px 0 !important;
+    width: 100% !important;
+  }
+
+  .r79-wheel-hero-nav__visual {
+    align-self: end !important;
+    height: auto !important;
+    justify-self: center !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    transform: translateY(-38px) !important;
+    width: 100% !important;
+  }
+
+  .r79-wheel-hero-nav__visual .r79-hero-wheel {
+    max-height: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .r79-wheel-hero-nav__copy {
+    align-self: center !important;
+    justify-self: stretch !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding-bottom: 34px !important;
+    padding-right: 4px !important;
+    width: auto !important;
+  }
+
+  .r79-wheel-hero-nav__title {
+    max-width: 100% !important;
+    width: auto !important;
+  }
+
+  .r79-wheel-hero-nav__title-wheel,
+  .r79-wheel-hero-nav__title-settings {
+    max-width: 100% !important;
+    width: auto !important;
+  }
+
+  .r79-wheel-hero-nav__title-wheel {
+    color: #ffffff !important;
+    filter:
+      drop-shadow(0 0 8px rgba(255, 255, 255, 0.45))
+      drop-shadow(0 0 14px rgba(34, 211, 238, 0.55)) !important;
+  }
+
+  .r79-wheel-hero-nav__title-settings {
+    background: linear-gradient(
+      100deg,
+      #ffffff 0%,
+      #e0fdff 16%,
+      #7dd3fc 42%,
+      #c4b5fd 75%,
+      #f0abfc 100%
+    ) !important;
+    filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.55)) !important;
+  }
+
+  .r79-wheel-hero-nav__subtitle {
+    max-width: 100% !important;
+  }
+
+  .r79-wheel-hero-nav__chevron {
+    bottom: 12px !important;
+    right: 8px !important;
+  }
+
+  /* Feature cards — horizontal scroll rail inside viewport */
+  .r79-mobile-feature-scroll {
+    box-sizing: border-box !important;
+    display: flex !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain !important;
+    padding: 8px 16px 14px 2px !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+  }
+
+  .r79-mobile-feature-card {
+    flex: 0 0 clamp(112px, 34vw, 132px) !important;
+    height: clamp(160px, 48vw, 188px) !important;
+    max-width: 100% !important;
+    scroll-snap-align: start !important;
+    width: clamp(112px, 34vw, 132px) !important;
+  }
+
+  .r79-mobile-feature-card__icon {
+    height: clamp(100px, 30vw, 118px) !important;
+    max-width: 100% !important;
+  }
+
+  .r79-mobile-feature-card__icon .r79-object {
+    height: clamp(100px, 30vw, 118px) !important;
+    max-width: 100% !important;
+    width: clamp(100px, 30vw, 118px) !important;
+  }
+
+  /* Header — prevent wordmark overflow */
+  .r79-brand-bar--app {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .r79-brand-bar__identity {
+    flex: 1 1 auto !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .r79-brand-bar__copy {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Bottom nav — stay inside viewport */
+  .r79-mobile-bottom-nav {
+    box-sizing: border-box !important;
+    left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    max-width: calc(100% - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)) !important;
+    right: max(10px, env(safe-area-inset-right, 0px)) !important;
+    width: auto !important;
+  }
+
+  .r79-mobile-bottom-nav__item {
+    min-width: 0 !important;
+  }
+
+  .r79-mobile-bottom-nav__label {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .r79-app-main {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .r79-wheel-hero-nav {
+    grid-template-columns: minmax(0, 38%) minmax(0, 62%) !important;
+    min-height: 168px !important;
+    padding-right: 42px !important;
+  }
+
+  .r79-wheel-hero-nav__visual {
+    transform: translateY(-34px) !important;
+  }
+
+  .r79-wheel-hero-nav__title {
+    font-size: 1.08rem !important;
+  }
+
+  .r79-mobile-feature-card {
+    flex: 0 0 112px !important;
+    height: 160px !important;
+    width: 112px !important;
+  }
+
+  .r79-mobile-feature-card__icon,
+  .r79-mobile-feature-card__icon .r79-object {
+    height: 100px !important;
+    width: 100px !important;
+  }
+}
