@@ -209,7 +209,7 @@ function MobileWearMultiplierRow({
     >
       <button
         type="button"
-        className="r79-mobile-filter-row r79-mobile-filter-row--toggle"
+        className="r79-mobile-filter-row r79-mobile-filter-row--toggle r79-mobile-filter-row--conditions"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
       >

@@ -149,12 +149,16 @@ body::before {
 }
 
 .r79-wheel-value-text {
-  background: linear-gradient(100deg, #fff 0%, #67e8f9 35%, #a78bfa 70%, #f0abfc 100%) !important;
+  background: linear-gradient(100deg, #ffffff 0%, #e0fdff 16%, #7dd3fc 40%, #c4b5fd 72%, #f5d0fe 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
   color: transparent !important;
+  display: inline-block !important;
   font-size: 1.85rem !important;
   font-weight: 850 !important;
+  max-width: 100% !important;
+  width: fit-content !important;
 }
 
 .r79-wheel-value-card {
@@ -1419,15 +1423,18 @@ body,
   background: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
-  color: #f8fbff !important;
-  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35)) !important;
+  color: #ffffff !important;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 255, 255, 0.35))
+    drop-shadow(0 0 14px rgba(34, 211, 238, 0.45)) !important;
 }
 
 .r79-wheel-hero-nav__title-settings {
-  background: linear-gradient(100deg, #22d3ee 0%, #38bdf8 28%, #a78bfa 68%, #e879f9 100%) !important;
+  background: linear-gradient(100deg, #ffffff 0%, #e0fdff 18%, #67e8f9 42%, #a5b4fc 72%, #f0abfc 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   color: transparent !important;
+  filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.45)) !important;
 }
 
 .r79-wheel-hero-nav__copy {
@@ -1520,7 +1527,7 @@ body,
   max-width: 86% !important;
   min-width: 0 !important;
   overflow: hidden;
-  transform: translateY(-20px);
+  transform: translateY(-28px);
   width: 86% !important;
 }
 
@@ -1601,4 +1608,42 @@ body,
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   margin: -6px 0 14px;
+}
+
+/* ========== MOBILE VISUAL CORRECTIONS (live phone layout) ========== */
+@media (max-width: 768px) {
+  /* Race Conditions row — reserve label width so value never overlaps */
+  .r79-page--wheel-settings .r79-mobile-filter-row--conditions {
+    column-gap: 6px !important;
+    grid-template-columns: 68px minmax(92px, 100px) minmax(0, 1fr) 22px !important;
+  }
+
+  .r79-page--wheel-settings .r79-mobile-filter-row--conditions .r79-mobile-filter-row__label {
+    align-self: center;
+    grid-column: 2;
+    line-height: 1.15;
+    max-width: 100px;
+    min-width: 0;
+  }
+
+  .r79-page--wheel-settings .r79-mobile-filter-row--conditions .r79-mobile-filter-row__value {
+    grid-column: 3;
+    justify-self: stretch;
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 359px) {
+  .r79-page--wheel-settings .r79-mobile-filter-row--conditions {
+    column-gap: 4px !important;
+    grid-template-columns: 58px minmax(84px, 92px) minmax(0, 1fr) 18px !important;
+  }
+
+  .r79-page--wheel-settings .r79-mobile-filter-row--conditions .r79-mobile-filter-row__label {
+    max-width: 92px;
+  }
 }
