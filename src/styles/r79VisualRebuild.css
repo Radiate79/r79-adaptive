@@ -1671,12 +1671,13 @@ body,
   .r79-wheel-hero-nav {
     box-sizing: border-box !important;
     display: grid !important;
-    gap: 4px !important;
+    gap: 2px !important;
     grid-template-columns: minmax(0, 40%) minmax(0, 60%) !important;
+    justify-items: start !important;
     max-width: 100% !important;
     min-height: clamp(168px, 50vw, 214px) !important;
     min-width: 0 !important;
-    padding: 8px 46px 10px 0 !important;
+    padding: 8px 46px 10px 4px !important;
     width: 100% !important;
   }
 
@@ -1686,7 +1687,7 @@ body,
     justify-self: center !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    transform: translateY(-38px) !important;
+    transform: translate(8px, -24px) !important;
     width: 100% !important;
   }
 
@@ -1697,12 +1698,14 @@ body,
 
   .r79-wheel-hero-nav__copy {
     align-self: center !important;
-    justify-self: stretch !important;
+    justify-self: start !important;
     max-width: 100% !important;
     min-width: 0 !important;
     overflow: hidden !important;
     padding-bottom: 34px !important;
+    padding-left: 0 !important;
     padding-right: 4px !important;
+    transform: translateX(24px) !important;
     width: auto !important;
   }
 
@@ -1829,11 +1832,15 @@ body,
   .r79-wheel-hero-nav {
     grid-template-columns: minmax(0, 38%) minmax(0, 62%) !important;
     min-height: 168px !important;
-    padding-right: 42px !important;
+    padding: 6px 42px 8px 2px !important;
   }
 
   .r79-wheel-hero-nav__visual {
-    transform: translateY(-34px) !important;
+    transform: translate(6px, -20px) !important;
+  }
+
+  .r79-wheel-hero-nav__copy {
+    transform: translateX(18px) !important;
   }
 
   .r79-wheel-hero-nav__title {
