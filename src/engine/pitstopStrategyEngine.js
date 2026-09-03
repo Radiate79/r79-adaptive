@@ -154,9 +154,18 @@ function compoundPaceIndex(code) {
 
 /**
  * Estimated tyre life in laps for a compound under wear stress.
+ *
+ * Calibrated against real-world GT7 ALR race evidence:
+ *   Ferrari 296 GT3 / Laguna Seca / 29 laps / tyreMultiplier x5 / tyreStress ≈ 5
+ *   → Soft ≈ 10-11 laps, Medium ≈ 19-20 laps (observed by experienced drivers)
+ *
+ * Base values represent estimated laps at tyreMultiplier x1 and neutral stress (5).
+ * The wear divisor uses a square-root scaling on the multiplier so that higher
+ * multipliers erode life more gently than a direct ratio — matching observed data.
+ *
  * @param {string} code
  * @param {number} tyreMultiplier
- * @param {number} tyreStress
+ * @param {number} tyreStress   0–10 scale from calculateRaceWearProfile
  * @param {number} totalLaps
  */
 function estimateTyreLife(code, tyreMultiplier, tyreStress, totalLaps) {
@@ -164,14 +173,27 @@ function estimateTyreLife(code, tyreMultiplier, tyreStress, totalLaps) {
     return totalLaps;
   }
 
+  // Base laps at x1 / neutral stress (stress=5).
+  // Calibrated against ALR evidence:
+  //   Ferrari 296 GT3 / Laguna Seca / x5 wear / stress≈5 → S≈10-11L, M≈19-20L
+  // At x5/stress=5: divisor = sqrt(5) × 1.0 ≈ 2.236
+  //   S: 24 / 2.236 ≈ 10.7 ✓   M: 44 / 2.236 ≈ 19.7 ✓   H: 72 / 2.236 ≈ 32 (realistic)
   const base =
     normalizeCompoundCode(code) === "S"
-      ? 8
+      ? 24
       : normalizeCompoundCode(code) === "H"
-        ? 16
-        : 12;
-  const wearFactor = Math.max(0.35, tyreMultiplier / 3) * Math.max(0.6, tyreStress / 4);
-  return Math.max(3, Math.round(base / wearFactor));
+        ? 72
+        : 44;
+
+  // Stress factor: neutral stress is 5 (mid-range).  Below 5 → longer life, above → shorter.
+  const stressFactor = Math.max(0.5, tyreStress / 5);
+
+  // Multiplier scaling: sqrt gives a gentler curve than linear.
+  // At x1: sqrt(1/1)=1.  At x5: sqrt(5/1)≈2.24.  At x10: sqrt(10)≈3.16.
+  const multFactor = Math.sqrt(Math.max(1, tyreMultiplier));
+
+  const life = base / (stressFactor * multFactor);
+  return Math.max(3, Math.round(life));
 }
 
 /**
