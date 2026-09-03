@@ -350,7 +350,184 @@ export function estimateStrategyTimeIndex(plan) {
 }
 
 /**
- * Compare 0/1/2 stop candidates where race rules allow.
+ * Return all viable compound permutations for a given stop count.
+ * Repeated compounds are supported — e.g. M/M, S/S.
+ *
+ * @param {number} stops
+ * @param {number} tyreMultiplier
+ * @returns {string[][]}
+ */
+function buildCompoundPermutations(stops, tyreMultiplier) {
+  const stintCount = stops + 1;
+
+  // When wear is disabled there is no degradation pressure — only one compound needed.
+  if (tyreMultiplier === 0) {
+    return [["M"], ["S"], ["H"]].slice(0, 1);
+  }
+
+  const dryCompounds = ["S", "M", "H"];
+
+  if (stintCount === 1) {
+    return dryCompounds.map((c) => [c]);
+  }
+
+  if (stintCount === 2) {
+    /** @type {string[][]} */
+    const pairs = [];
+    for (const c1 of dryCompounds) {
+      for (const c2 of dryCompounds) {
+        pairs.push([c1, c2]);
+      }
+    }
+    return pairs;
+  }
+
+  if (stintCount === 3) {
+    /** @type {string[][]} */
+    const triples = [];
+    for (const c1 of dryCompounds) {
+      for (const c2 of dryCompounds) {
+        for (const c3 of dryCompounds) {
+          triples.push([c1, c2, c3]);
+        }
+      }
+    }
+    return triples;
+  }
+
+  // 3-stop (4 stints): limit to combinations that are physically sensible
+  /** @type {string[][]} */
+  const quads = [];
+  for (const c1 of dryCompounds) {
+    for (const c2 of dryCompounds) {
+      quads.push([c1, c2, "M", "H"]);
+      quads.push([c1, "M", c2, "H"]);
+    }
+  }
+  return quads;
+}
+
+/**
+ * Find the optimal pit lap(s) for a fixed compound sequence by minimising
+ * estimated race time across a sensible range of split points.
+ *
+ * @param {string[]} compounds
+ * @param {number} stops
+ * @param {number} totalLaps
+ * @param {number} tyreMultiplier
+ * @param {number} fuelMultiplier
+ * @param {number} tyreStress
+ * @returns {{ pitLaps: number[], timeIndex: number }}
+ */
+function optimisePitLaps(compounds, stops, totalLaps, tyreMultiplier, fuelMultiplier, tyreStress) {
+  if (stops === 0) {
+    const timeIndex = estimateStrategyTimeIndex({
+      stops: 0,
+      compounds,
+      pitLaps: [],
+      totalLaps,
+      tyreMultiplier,
+      fuelMultiplier,
+      tyreStress,
+    });
+    return { pitLaps: [], timeIndex };
+  }
+
+  // For a 1-stop, scan pit lap from 30% to 70% of race distance.
+  if (stops === 1) {
+    const lo = Math.max(1, Math.round(totalLaps * 0.3));
+    const hi = Math.min(totalLaps - 1, Math.round(totalLaps * 0.7));
+    let best = Infinity;
+    let bestLap = Math.round(totalLaps * 0.5);
+    for (let lap = lo; lap <= hi; lap += 1) {
+      const t = estimateStrategyTimeIndex({
+        stops: 1,
+        compounds,
+        pitLaps: [lap],
+        totalLaps,
+        tyreMultiplier,
+        fuelMultiplier,
+        tyreStress,
+      });
+      if (t < best) {
+        best = t;
+        bestLap = lap;
+      }
+    }
+    return { pitLaps: [bestLap], timeIndex: best };
+  }
+
+  // For 2-stop, scan first pit from 25%–50% and second from 55%–80% in coarser steps.
+  if (stops === 2) {
+    const lo1 = Math.max(1, Math.round(totalLaps * 0.25));
+    const hi1 = Math.round(totalLaps * 0.5);
+    const lo2 = Math.round(totalLaps * 0.55);
+    const hi2 = Math.min(totalLaps - 1, Math.round(totalLaps * 0.8));
+    let best = Infinity;
+    let bestLaps = [Math.round(totalLaps * 0.33), Math.round(totalLaps * 0.66)];
+    for (let lap1 = lo1; lap1 <= hi1; lap1 += 2) {
+      for (let lap2 = Math.max(lap1 + 3, lo2); lap2 <= hi2; lap2 += 2) {
+        const t = estimateStrategyTimeIndex({
+          stops: 2,
+          compounds,
+          pitLaps: [lap1, lap2],
+          totalLaps,
+          tyreMultiplier,
+          fuelMultiplier,
+          tyreStress,
+        });
+        if (t < best) {
+          best = t;
+          bestLaps = [lap1, lap2];
+        }
+      }
+    }
+    return { pitLaps: bestLaps, timeIndex: best };
+  }
+
+  // Fallback for 3+ stops
+  const pitLaps = calculatePitLaps(stops, totalLaps, tyreStress);
+  const timeIndex = estimateStrategyTimeIndex({
+    stops,
+    compounds,
+    pitLaps,
+    totalLaps,
+    tyreMultiplier,
+    fuelMultiplier,
+    tyreStress,
+  });
+  return { pitLaps, timeIndex };
+}
+
+/**
+ * Whether a compound sequence is feasible given tyre life and race distance.
+ * Tyre life is a constraint not a ranking criterion.
+ *
+ * @param {string[]} compounds
+ * @param {number[]} pitLaps
+ * @param {number} totalLaps
+ * @param {number} tyreMultiplier
+ * @param {number} tyreStress
+ */
+function isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress) {
+  if (tyreMultiplier === 0) {
+    return true; // no degradation constraint
+  }
+
+  const stints = buildStintsFromPlan(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress);
+  for (const stint of stints) {
+    const life = stint.estimatedTyreLife ?? totalLaps;
+    // Allow up to 40% over estimated life — model is approximate
+    if (stint.stintLength > life * 1.4) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Compare all viable compound combinations across feasible stop counts.
+ * Tyre life is a feasibility constraint. Total estimated race time determines ranking.
  *
  * @param {{
  *   totalLaps: number,
@@ -381,41 +558,59 @@ export function compareStrategyCandidates(context) {
     }
   }
 
-  const uniqueStops = [...new Set(stopOptions)].filter((stops) => {
+  const viableStops = [...new Set(stopOptions)].filter((stops) => {
     if (stops === 0 && (combinedStress >= 6.5 || (tyreMultiplier >= 5 && totalLaps >= 16))) {
       return tyreMultiplier === 0;
     }
     return true;
   });
 
-  return uniqueStops
-    .map((stops) => {
-      const pitLaps = calculatePitLaps(stops, totalLaps, tyreStress);
-      const compounds = buildCompoundPlan(stops, tyreStress, tyreMultiplier);
-      const stints = buildStintsFromPlan(
+  /** @type {StrategyCandidate[]} */
+  const candidates = [];
+
+  for (const stops of viableStops) {
+    const permutations = buildCompoundPermutations(stops, tyreMultiplier);
+
+    // Best time tracker so each unique compound sequence gets its own candidate
+    /** @type {Map<string, StrategyCandidate>} */
+    const bestPerSequence = new Map();
+
+    for (const compounds of permutations) {
+      const { pitLaps, timeIndex } = optimisePitLaps(
         compounds,
-        pitLaps,
+        stops,
         totalLaps,
         tyreMultiplier,
+        fuelMultiplier,
         tyreStress,
       );
-      return {
-        stops,
-        stints,
-        pitLaps,
-        estimatedRaceTimeIndex: estimateStrategyTimeIndex({
+
+      // Skip infeasible sequences (tyre life constraint)
+      if (!isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress)) {
+        continue;
+      }
+
+      const sequenceKey = compounds.join("/");
+      const existing = bestPerSequence.get(sequenceKey);
+      if (!existing || timeIndex < existing.estimatedRaceTimeIndex) {
+        const stints = buildStintsFromPlan(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress);
+        bestPerSequence.set(sequenceKey, {
           stops,
-          compounds,
+          stints,
           pitLaps,
-          totalLaps,
-          tyreMultiplier,
-          fuelMultiplier,
-          tyreStress,
-        }),
-        label: `${formatStopLabel(stops)} · ${formatCompoundChain(compounds)}`,
-      };
-    })
-    .sort((a, b) => a.estimatedRaceTimeIndex - b.estimatedRaceTimeIndex);
+          estimatedRaceTimeIndex: timeIndex,
+          label: `${formatStopLabel(stops)} · ${formatCompoundChain(compounds)}`,
+        });
+      }
+    }
+
+    candidates.push(...bestPerSequence.values());
+  }
+
+  // Sort by estimated race time — fastest first. Tyre life has already been used as feasibility gate.
+  candidates.sort((a, b) => a.estimatedRaceTimeIndex - b.estimatedRaceTimeIndex);
+
+  return candidates;
 }
 
 function normalizeMultiplier(value) {
@@ -747,37 +942,45 @@ function computePitstopStrategy(input = {}) {
     recommendedStops = comparedStrategies[0].stops;
   }
 
+  // Use the best-ranked candidate matching the recommended stop count.
+  const bestCandidate = comparedStrategies.find((c) => c.stops === recommendedStops);
+
   let pitLaps =
     evidence.pitLapAdjustments.length > 0 && evidence.matchedEntryId
       ? evidence.pitLapAdjustments.map((lap) => clampLap(lap, wear.laps))
-      : calculatePitLaps(recommendedStops, wear.laps, wear.tyreStress);
+      : (bestCandidate?.pitLaps ?? calculatePitLaps(recommendedStops, wear.laps, wear.tyreStress));
 
   if (pitLaps.length !== recommendedStops && recommendedStops > 0) {
     pitLaps = calculatePitLaps(recommendedStops, wear.laps, wear.tyreStress);
   }
 
-  const compounds = buildCompoundPlan(
-    recommendedStops,
-    wear.tyreStress,
-    tyreMultiplier,
-  );
+  const compounds =
+    bestCandidate
+      ? bestCandidate.stints.map((s) => s.compoundCode)
+      : buildCompoundPlan(recommendedStops, wear.tyreStress, tyreMultiplier);
 
   const stints =
     userStints ??
-    buildStintsFromPlan(
+    (bestCandidate?.stints ?? buildStintsFromPlan(
       compounds,
       pitLaps,
       wear.laps,
       tyreMultiplier,
       wear.tyreStress,
-    );
+    ));
 
   const tyreStrategy =
     evidence.tyreStrategyOverride ??
     formatCompoundChain(stints.map((stint) => stint.compoundCode));
 
+  // Alternative: best candidate with different compound sequence or stop count.
   const alternative =
-    comparedStrategies.find((candidate) => candidate.stops !== recommendedStops) ??
+    comparedStrategies.find(
+      (candidate) =>
+        candidate !== bestCandidate &&
+        (candidate.stops !== recommendedStops ||
+          candidate.label !== (bestCandidate?.label ?? "")),
+    ) ??
     buildAlternativePlan(recommendedStops, wear.laps, wear.tyreStress);
 
   const alternativeStints =
