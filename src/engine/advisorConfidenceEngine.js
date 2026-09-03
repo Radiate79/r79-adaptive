@@ -22,10 +22,24 @@ export function resolveAdvisorConfidence(input) {
   const hasEvidence = Boolean(input.hasTrackEvidence) || historical > 0;
   const unknownDimensions = Number(input.unknownDimensionCount ?? 0);
 
+  // Gr.3 v2 profile data confidence
+  const gr3DataConfidence = input.car?._gr3DataConfidence ?? null;
+
   let score = 40;
 
   if (has171) {
     score += 18;
+  }
+
+  // Gr.3 profile quality adjustment
+  if (gr3DataConfidence === "current") {
+    score += 8;
+  } else if (gr3DataConfidence === "modelled") {
+    score += 2;
+  } else if (gr3DataConfidence === "historical") {
+    score -= 6;
+  } else if (gr3DataConfidence === "low") {
+    score -= 12;
   }
 
   if (trackFit >= 82) {

@@ -105,15 +105,19 @@ const SINGLE_LAYOUT_TRACKS = [
     trackFamily: "WeatherTech Raceway Laguna Seca",
     layoutName: "Full Circuit",
     displayName: "Laguna Seca",
+    // Laguna Seca: technical mid-speed circuit demanding braking stability,
+    // rotation through Corkscrew, corner exit traction, and medium-speed cornering.
+    // Not a pure traction circuit — traction=7 reflects this accurately.
+    // Stability=7 reflects the importance of braking control at T1 and Corkscrew.
     drivingStyle: "technical",
     topSpeed: 6,
-    traction: 8,
-    fuel: 7,
-    tyres: 5,
-    stability: 6,
+    traction: 7,
+    fuel: 6,
+    tyres: 6,
+    stability: 7,
     kerbs: 5,
     overtaking: 5,
-    notes: ["Set up cleanly for Corkscrew", "Rear traction on corner exits"],
+    notes: ["Set up cleanly for Corkscrew", "Rear traction on corner exits", "Rotation and braking stability critical"],
   }),
   t({
     id: "mount_panorama",

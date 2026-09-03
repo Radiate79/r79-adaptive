@@ -13,9 +13,9 @@ import { CHAMPIONSHIP_ADVISOR_VERSION } from "./championshipAdvisor171.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
-export const ADVISOR_ENGINE_VERSION = "2.0.0";
+export const ADVISOR_ENGINE_VERSION = "2.1.0";
 export const STRATEGY_ENGINE_VERSION = "2.0.0";
-export const ADVISOR_DATA_LAYER_VERSION = "2.0.0";
+export const ADVISOR_DATA_LAYER_VERSION = "2.1.0"; // Gr.3 profiles v2 — 2026-09-03
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,

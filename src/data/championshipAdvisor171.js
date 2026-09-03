@@ -6,7 +6,8 @@ export const CHAMPIONSHIP_ADVISOR_VERSION = {
   GT7_VERSION: ACTIVE_GT7_GAME_VERSION,
   BOP_VERSION: "1.71",
   PHYSICS_GENERATION: ACTIVE_PHYSICS_GENERATION,
-  UPDATED: "2026-08-20",
+  UPDATED: "2026-09-03",
+  GR3_PROFILES_VERSION: "2",
 };
 
 const SCORE_FIELDS = [
@@ -26,9 +27,10 @@ const SCORE_FIELDS = [
  */
 export const GR3_171_ATTRIBUTE_DELTAS = {
   ferrari_296_gt3_23: {
+    // BOP 1.71: Ferrari 296 gets traction/rotation/stability advantage.
+    // Tyre penalty removed — profile already reflects real-world manageable wear.
     traction: 0.5,
     rotation: 0.5,
-    tyres: -0.5,
     stability: 0.5,
   },
   porsche_911_gt3_r_22: {
@@ -38,10 +40,12 @@ export const GR3_171_ATTRIBUTE_DELTAS = {
     rotation: 0.5,
   },
   genesis_x_gr3: {
-    topSpeed: 0.5,
-    traction: -0.5,
+    // ALR 2026 evidence: Genesis X competitive at Laguna Seca x5.
+    // Revised BOP: gains slight rotation/traction advantage from suspension geometry.
+    // Previous traction/tyres penalties removed — not supported by current evidence.
+    traction: 0.5,
+    rotation: 0.5,
     fuel: 0.5,
-    tyres: -0.5,
   },
   mercedes_amg_gt3_20: {
     stability: 0.5,
@@ -66,7 +70,8 @@ export const GR3_171_ATTRIBUTE_DELTAS = {
     traction: 0.5,
     topSpeed: -0.5,
   },
-  lexus_rc_f_gt3: {
+  // Corrected ID to match cars.js entry (was lexus_rc_f_gt3 — mismatch fixed)
+  lexus_rcf_gt3: {
     stability: 0.5,
     tyres: 0.5,
     traction: 0.5,
@@ -124,6 +129,27 @@ export const GR3_171_ATTRIBUTE_DELTAS = {
     topSpeed: -1,
     traction: -0.5,
     tyres: -0.5,
+  },
+  // Cars with meaningful 1.71 BOP adjustments not previously covered
+  subaru_wrx_gr3: {
+    // 4WD advantage applied in BOP — good traction/tyres baseline already reflected in profile
+    traction: 0.5,
+    tyres: 0.5,
+  },
+  porsche_911_rsr_991_17: {
+    // RSR is strong at braking/rotation (RR layout), small positive on traction
+    traction: 0.5,
+    rotation: 0.5,
+  },
+  bmw_m6_gt3_endurance_model_16: {
+    // Endurance-oriented BOP: slightly better tyres and fuel
+    tyres: 0.5,
+    fuel: 0.5,
+  },
+  mercedes_amg_gt3_16: {
+    // Older spec — slight adjustment vs '20 AMG
+    topSpeed: -0.5,
+    traction: -0.5,
   },
 };
 
@@ -212,18 +238,19 @@ export function getTrackRacingProfile(track) {
  * @returns {Partial<Record<(typeof SCORE_FIELDS)[number], number>>}
  */
 export function getTrackProfileDemandBoosts(profile) {
+  // Reduced multipliers to prevent multiplicative stacking from dominating scores.
   switch (profile) {
     case "power":
-      return { topSpeed: 1.35, traction: 0.88, stability: 1.05 };
+      return { topSpeed: 1.18, traction: 0.92, stability: 1.04 };
     case "technical":
-      return { traction: 1.35, rotation: 1.25, topSpeed: 0.85 };
+      return { traction: 1.15, rotation: 1.12, topSpeed: 0.90 };
     case "highSpeedCorner":
-      return { stability: 1.25, topSpeed: 1.15, traction: 1.1 };
+      return { stability: 1.12, topSpeed: 1.10, traction: 1.05 };
     case "tractionHeavy":
-      return { traction: 1.3, rotation: 1.15, stability: 1.05 };
+      return { traction: 1.15, rotation: 1.08, stability: 1.04 };
     case "tyreSensitive":
-      return { tyres: 1.4, traction: 1.1, stability: 1.05 };
+      return { tyres: 1.18, traction: 1.05, stability: 1.04 };
     default:
-      return { topSpeed: 1.05, traction: 1.05, stability: 1.05 };
+      return { topSpeed: 1.03, traction: 1.03, stability: 1.03 };
   }
 }

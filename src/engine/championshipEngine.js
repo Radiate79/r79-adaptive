@@ -52,12 +52,20 @@ function normalizeMultiplier(value) {
   return Math.min(10, Math.max(0, numeric));
 }
 
+/**
+ * Attribute scoring weights by race settings.
+ * Tyre and fuel weights use sqrt scaling so x5 does not overwhelm pace attributes.
+ * x0 → exactly 0. x1 → 1. x5 → ~2.2. x10 → ~3.2.
+ * This preserves meaningful scaling while preventing any single attribute dominating.
+ */
 function getScoreWeights(raceSettings = {}) {
+  const tyreMult = normalizeMultiplier(raceSettings.tyreMultiplier);
+  const fuelMult = normalizeMultiplier(raceSettings.fuelMultiplier);
   return {
     topSpeed: 1,
     traction: 1,
-    fuel: normalizeMultiplier(raceSettings.fuelMultiplier),
-    tyres: normalizeMultiplier(raceSettings.tyreMultiplier),
+    fuel: fuelMult === 0 ? 0 : Math.sqrt(fuelMult),
+    tyres: tyreMult === 0 ? 0 : Math.sqrt(tyreMult),
     stability: 1,
     rotation: 1,
   };
@@ -104,19 +112,20 @@ function getAttributeDemandWeight(
   emphasisBoost = 1,
 ) {
   const normalized = trackValue / 10;
-  const emphasis = 0.5 + normalized * 1.75;
+  // Reduced tier boost to prevent single attributes overwhelming the score.
+  // High values (≥8) get 1.3 boost (was 1.6), medium gets 1.1 (was 1.15).
   const tierBoost =
     trackValue >= 8
-      ? 1.6
+      ? 1.3
       : trackValue >= 6.5
-        ? 1.15
+        ? 1.1
         : trackValue <= 4.5
-          ? 0.7
+          ? 0.75
           : 1;
+  // Use linear (not squared) emphasis to reduce extreme spread
+  const emphasis = 0.6 + normalized * 1.4;
 
-  return (
-    normalized * normalized * emphasis * tierBoost * raceWeight * emphasisBoost
-  );
+  return normalized * emphasis * tierBoost * raceWeight * emphasisBoost;
 }
 
 export function getTrackDemandWeights(track, raceSettings = {}) {
@@ -127,11 +136,12 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
   const rotationValue = attrs.rotation;
   const profileBoosts = getTrackProfileDemandBoosts(getTrackRacingProfile(track));
   const drivingStyle = track?.drivingStyle ?? "balanced";
+  // Reduced style boost multipliers to prevent extreme attribute domination.
   const styleBoosts =
     drivingStyle === "high_speed"
-      ? { topSpeed: 1.45, traction: 0.92, rotation: 0.88 }
+      ? { topSpeed: 1.25, traction: 0.94, rotation: 0.90 }
       : drivingStyle === "technical"
-        ? { traction: 1.4, rotation: 1.35, topSpeed: 0.82 }
+        ? { traction: 1.20, rotation: 1.18, topSpeed: 0.88 }
         : { topSpeed: 1.05, traction: 1.05, rotation: 1.05 };
 
   const applySurface = (field, weight) =>
@@ -146,7 +156,7 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
       getAttributeDemandWeight(
         attrs.topSpeed,
         raceWeights.topSpeed,
-        attrs.topSpeed >= 8 ? 1.4 : 1,
+        attrs.topSpeed >= 8 ? 1.2 : 1,
       ),
     ),
     traction: applySurface(
@@ -154,7 +164,7 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
       getAttributeDemandWeight(
         attrs.traction,
         raceWeights.traction,
-        attrs.traction >= 8 ? 1.5 : 1,
+        attrs.traction >= 8 ? 1.25 : 1,
       ),
     ),
     fuel: applySurface(
@@ -162,7 +172,7 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
       getAttributeDemandWeight(
         attrs.fuel,
         raceWeights.fuel,
-        attrs.fuel >= 8 ? 1.7 : 1,
+        attrs.fuel >= 8 ? 1.3 : 1,
       ),
     ),
     tyres: applySurface(
@@ -178,7 +188,7 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
       getAttributeDemandWeight(
         attrs.stability,
         raceWeights.stability,
-        attrs.stability >= 7 || kerbDifficulty >= 3 ? 1.35 : 1,
+        attrs.stability >= 7 || kerbDifficulty >= 3 ? 1.15 : 1,
       ),
     ),
     rotation: applySurface(
@@ -186,7 +196,7 @@ export function getTrackDemandWeights(track, raceSettings = {}) {
       getAttributeDemandWeight(
         rotationValue,
         raceWeights.rotation,
-        attrs.traction >= 7.5 && attrs.topSpeed <= 8 ? 1.45 : 0.9,
+        attrs.traction >= 7.5 && attrs.topSpeed <= 8 ? 1.20 : 0.92,
       ),
     ),
   };

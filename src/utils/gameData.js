@@ -7,10 +7,44 @@ import { getTrackDisplayName } from "../data/gt7/trackMetadata.js";
 import {
   getSelectableTracksForClass as filterTracksForClass,
 } from "./trackClassification.js";
-import { cars as gt7Cars } from "../data/gt7/cars.js";
+import { cars as gt7CarsRaw } from "../data/gt7/cars.js";
 import { tracks as gt7Tracks } from "../data/gt7/tracks.js";
 import { cars as gt8Cars } from "../data/gt8/cars.js";
 import { tracks as gt8Tracks } from "../data/gt8/tracks.js";
+import { GR3_CAR_PROFILES } from "../data/gr3CarProfiles.js";
+
+/**
+ * Merge authoritative Gr.3 v2 profiles into the raw car list.
+ * Profile attributes override base car attributes for Gr.3 cars only.
+ * Non-Gr.3 cars are unaffected.
+ */
+const GR3_PROFILE_MAP = new Map(GR3_CAR_PROFILES.map((p) => [p.carId, p]));
+
+const gt7Cars = gt7CarsRaw.map((car) => {
+  if (car.class !== "Gr.3") return car;
+  const profile = GR3_PROFILE_MAP.get(car.id);
+  if (!profile) return car;
+
+  return {
+    ...car,
+    // Core scoring attributes — use profile values
+    topSpeed: profile.topSpeed,
+    traction: profile.traction,
+    fuel: profile.fuel,
+    tyres: profile.tyres,
+    stability: profile.stability,
+    rotation: profile.rotation,
+    // Metadata
+    communityConfidence: profile.communityConfidence ?? car.communityConfidence ?? null,
+    competitiveUse: profile.competitiveUse ?? car.competitiveUse ?? null,
+    strengths: profile.strengths?.length ? profile.strengths : (car.strengths ?? []),
+    weaknesses: profile.weaknesses?.length ? profile.weaknesses : (car.weaknesses ?? []),
+    // Extended fields for diagnostic use
+    _gr3DataConfidence: profile.dataConfidence,
+    _gr3Provenance: profile.provenance,
+    _gr3EngineVersion: "2",
+  };
+});
 
 /** @typedef {import("../data/gameVersions.js").GameVersion} GameVersion */
 
