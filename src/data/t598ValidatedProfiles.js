@@ -95,10 +95,12 @@ function createValidatedT598Profile(carId, carClass, trackId) {
   const resolvedTrack = trackId ?? DEFAULT_TRACK_BY_CLASS[carClass] ?? "spa";
 
   return {
-    id: `validated_t598_${carId}`,
-    label: "Validated profile",
-    isStarter: false,
-    isValidated: true,
+    id: `class_anchor_t598_${carId}`,
+    label: `${carClass} class calibration anchor`,
+    isStarter: true,
+    // Class-cloned templates are NOT per-car validated lab results.
+    isValidated: false,
+    isClassAnchor: true,
     lastUpdated: INTELLIGENCE_UPDATE_DATE,
     gameVersion: "gt7",
     wheelBase: "thrustmaster_t598",

@@ -39,12 +39,19 @@ import {
 import {
   ACTIVE_T598_FIRMWARE,
   SETUP_ANCHOR_WEIGHTS,
+  WHEEL_CAR_PROFILE_VERSION,
+  WHEEL_DEVICE_PROFILE_VERSION,
   WHEEL_SETTINGS_ENGINE_VERSION,
   WHEEL_SETTINGS_PLATFORM_BASELINE,
+  WHEEL_TRACK_PROFILE_VERSION,
 } from "../data/wheelSettingsConfig.js";
 import { resolveCarDynamicsProfile } from "./carDynamicsProfile.js";
 import { resolveTrackDynamicsProfile } from "./trackDynamicsProfile.js";
+import { calculateDesiredSteeringBehaviour } from "./wheelDesiredBehaviour.js";
+import { applyWholeSetupBalance } from "./wheelSetupBalance.js";
+import { translateDesiredBehaviourToDevice } from "./wheelDeviceTranslation.js";
 import { calculateT598WheelSettings } from "./wheelT598Calculator.js";
+import { estimateT598CombinedResistance } from "./wheelSetupBalance.js";
 
 /**
  * @typedef {Object} WheelSetupFilters
@@ -429,6 +436,9 @@ export function calculateWheelSettings(input) {
     wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
     gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
     physicsGeneration: WHEEL_SETTINGS_PLATFORM_BASELINE.physicsGeneration,
+    carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
+    trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
+    deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
     t598Firmware: ACTIVE_T598_FIRMWARE,
     gameVersion: input.gameVersion,
     wheelBase: input.wheelBase,
@@ -461,6 +471,15 @@ function calculateWheelSettingsUncached(input) {
     bopOn: input.bopOn,
   });
 
+  // Class-cloned anchors must not claim "validated" match tiers.
+  if (lookup.setup?.isClassAnchor) {
+    lookup.matchType = "classStarter";
+    if (lookup.message == null) {
+      lookup.message =
+        "Using class calibration anchor — setup calculated from this car's own dynamics.";
+    }
+  }
+
   const selectedCarId = carId || lookup.setup?.carId || "";
   const carProfile = resolveCarDynamicsProfile({
     carId: selectedCarId,
@@ -475,9 +494,26 @@ function calculateWheelSettingsUncached(input) {
 
   const templateFamily = getTemplateFamilyForWheelBase(wheelBase);
   const anchorValues = lookup.setup?.values ?? {};
-  const anchorWeight = SETUP_ANCHOR_WEIGHTS[lookup.matchType] ?? 0;
+  let anchorWeight = SETUP_ANCHOR_WEIGHTS[lookup.matchType] ?? 0;
+  if (lookup.setup?.isClassAnchor) {
+    anchorWeight = Math.min(anchorWeight, SETUP_ANCHOR_WEIGHTS.classStarter ?? 0.06);
+  }
 
-  let modelValues = { ...anchorValues };
+  // ── Stage A: desired behaviour ──────────────────────────────────────────
+  const stageA = calculateDesiredSteeringBehaviour({
+    carProfile,
+    trackProfile,
+    tyreCompound: input.tyreCompound,
+    lapCount: input.lapCount,
+    tyreMultiplier: input.tyreMultiplier,
+    fuelMultiplier: input.fuelMultiplier,
+  });
+
+  // ── Whole-setup balance ─────────────────────────────────────────────────
+  const balanced = applyWholeSetupBalance(stageA.desired);
+
+  // ── Stage B: device translation (ALL supported bases) ───────────────────
+  let modelValues;
   /** @type {ReturnType<typeof calculateT598WheelSettings> | null} */
   let calculationBreakdown = null;
 
@@ -493,6 +529,27 @@ function calculateWheelSettingsUncached(input) {
       wheelBaseId: wheelBase,
     });
     modelValues = calculationBreakdown.values;
+  } else {
+    const translated = translateDesiredBehaviourToDevice(
+      templateFamily,
+      balanced.desired,
+      {
+        wheelBaseId: wheelBase,
+        anchorValues,
+        anchorWeight,
+      },
+    );
+    modelValues = translated.values;
+    calculationBreakdown = {
+      values: translated.values,
+      continuous: translated.continuous,
+      signals: stageA.signals,
+      raceContext: stageA.race,
+      desiredBehaviour: balanced.desired,
+      balanceCorrections: balanced.corrections,
+      balanceDiagnostics: balanced.diagnostics,
+      fieldReasons: {},
+    };
   }
 
   const setupForDisplay = {
@@ -544,10 +601,31 @@ function calculateWheelSettingsUncached(input) {
     };
   }
 
+  const finalValues = podium?.adjustedValues ?? modelValues;
+
+  // Post-podium resistance sanity for T598 — if podium re-stacked resistance, soften friction.
+  if (templateFamily === "t598") {
+    const resistance = estimateT598CombinedResistance(finalValues);
+    if (resistance > 0.72 && finalValues.friction && finalValues.friction !== "Off") {
+      const softened = { ...finalValues };
+      if (String(softened.friction) === "High") softened.friction = "Mid";
+      else if (String(softened.friction) === "Mid") softened.friction = "Low";
+      else if (String(softened.friction) === "Low") softened.friction = "Off";
+      fieldReasons.friction =
+        (fieldReasons.friction ? `${fieldReasons.friction} ` : "") +
+        "Friction lowered after whole-setup balance: combined resistance exceeded the target envelope.";
+      if (podium?.adjustedValues) {
+        podium.adjustedValues = softened;
+      } else {
+        Object.assign(finalValues, softened);
+      }
+    }
+  }
+
   const rows = formatWheelSetupValues(setupForDisplay, {
     templateWheelBaseId: wheelBase,
     carId: selectedCarId,
-    valueOverrides: podium?.adjustedValues,
+    valueOverrides: podium?.adjustedValues ?? finalValues,
     fieldReasons,
     podiumContext: podium
       ? {
@@ -582,6 +660,9 @@ function calculateWheelSettingsUncached(input) {
     confidence,
     settings: podium?.adjustedValues ?? modelValues,
     reasons: fieldReasons,
+    desiredBehaviour: calculationBreakdown?.desiredBehaviour ?? balanced.desired,
+    balanceCorrections:
+      calculationBreakdown?.balanceCorrections ?? balanced.corrections,
     provenance: {
       carProfile: carProfile.provenance,
       carCompleteness: carProfile.completeness,
@@ -591,12 +672,27 @@ function calculateWheelSettingsUncached(input) {
       engineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
       gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
       t598Firmware: ACTIVE_T598_FIRMWARE,
+      carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
+      trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
+      deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
     },
     calculationBreakdown,
+    diagnostics: {
+      desiredBehaviour: calculationBreakdown?.desiredBehaviour ?? balanced.desired,
+      balance: calculationBreakdown?.balanceDiagnostics ?? balanced.diagnostics,
+      corrections: calculationBreakdown?.balanceCorrections ?? balanced.corrections,
+      combinedResistance:
+        templateFamily === "t598"
+          ? estimateT598CombinedResistance(podium?.adjustedValues ?? modelValues)
+          : null,
+    },
     cacheKey: buildRecommendationCacheKey("wheelSettings", {
       wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
       gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
       physicsGeneration: WHEEL_SETTINGS_PLATFORM_BASELINE.physicsGeneration,
+      carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
+      trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
+      deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
       t598Firmware: ACTIVE_T598_FIRMWARE,
       gameVersion: input.gameVersion,
       wheelBase: input.wheelBase,

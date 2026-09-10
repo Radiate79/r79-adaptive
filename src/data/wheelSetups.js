@@ -808,8 +808,8 @@ export const STARTER_WHEEL_SETUPS = [
   ...AUTO_T598_STARTERS,
 ];
 
-/** Validated profiles take priority over starter entries in lookup. */
+/** Real / starter setups first. Class calibration anchors are soft references only. */
 export const WHEEL_SETUP_POOL = [
-  ...T598_VALIDATED_PROFILES,
   ...STARTER_WHEEL_SETUPS,
+  ...T598_VALIDATED_PROFILES,
 ];

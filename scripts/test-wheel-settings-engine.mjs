@@ -174,17 +174,21 @@ if (uniqueTrackSetups.size < 2) {
   ok("Same car / different track recalculates");
 }
 
-/** Tyre compound test */
+/** Tyre compound test — continuous targets must respond; hardware may quantise identically. */
 const tyreCompounds = ["H", "M", "S"];
 const tyreSnapshots = tyreCompounds.map((tyreCompound) =>
   calculateWheelSettings({ ...BASE_INPUT, carId: "ferrari_296_gt3_23", tyreCompound }),
 );
-if (
-  JSON.stringify(rowMap(tyreSnapshots[0])) === JSON.stringify(rowMap(tyreSnapshots[2]))
-) {
+const tyreForces = tyreSnapshots.map((r) => r.desiredBehaviour?.steeringForceTarget);
+if (tyreForces[0] === tyreForces[2]) {
   fail("Tyre compound did not reach calculation");
 } else {
-  ok("Tyre compound affects relevant settings");
+  ok("Tyre compound affects continuous steering-force target");
+}
+if (tyreSnapshots[0].cacheKey === tyreSnapshots[2].cacheKey) {
+  fail("Tyre compound missing from cache key");
+} else {
+  ok("Tyre compound included in cache key");
 }
 
 /** Short vs long race */

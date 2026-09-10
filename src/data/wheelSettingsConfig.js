@@ -5,7 +5,12 @@ import {
 } from "./gt7PhysicsVersion.js";
 
 /** Authoritative Wheel Settings engine generation — bump when calculation logic changes. */
-export const WHEEL_SETTINGS_ENGINE_VERSION = "2";
+export const WHEEL_SETTINGS_ENGINE_VERSION = "3";
+
+/** Car / track / device profile data stamps — invalidate cache when these change. */
+export const WHEEL_CAR_PROFILE_VERSION = "3";
+export const WHEEL_TRACK_PROFILE_VERSION = "3";
+export const WHEEL_DEVICE_PROFILE_VERSION = "3";
 
 /** Active T598 firmware baseline for R79 wheel recommendations. */
 export const ACTIVE_T598_FIRMWARE = "3.08";
@@ -52,20 +57,21 @@ export const TYRE_COMPOUND_GRIP_INDEX = {
  * @type {Record<string, number>}
  */
 export const SETUP_ANCHOR_WEIGHTS = {
-  validated: 0.88,
-  exact: 0.85,
-  validatedSimilar: 0.72,
-  similar: 0.68,
-  validatedCarTrack: 0.62,
-  carTrack: 0.58,
-  validatedCarOnly: 0.48,
-  carOnly: 0.44,
-  validatedClass: 0.22,
-  classStarter: 0.18,
-  validatedWheelOnly: 0.12,
-  wheelOnly: 0.1,
-  validatedWheelFamily: 0.08,
-  wheelFamily: 0.06,
+  validated: 0.35,
+  exact: 0.55,
+  validatedSimilar: 0.28,
+  similar: 0.4,
+  validatedCarTrack: 0.3,
+  carTrack: 0.35,
+  // Class-cloned "validated" profiles must NOT dominate — treat as soft anchors
+  validatedCarOnly: 0.12,
+  carOnly: 0.18,
+  validatedClass: 0.08,
+  classStarter: 0.06,
+  validatedWheelOnly: 0.04,
+  wheelOnly: 0.04,
+  validatedWheelFamily: 0.03,
+  wheelFamily: 0.03,
   none: 0,
 };
 

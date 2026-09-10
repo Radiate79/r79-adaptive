@@ -455,11 +455,23 @@ function adjustT598Field(fieldKey, baseValue, weights, context) {
   const interaction = context?.interaction;
   const objective = context?.objective ?? "race";
 
-  // Bounded car×track nudges on top of race-priority deltas.
+  // Bounded car×track nudges — do NOT stack the same delta onto
+  // damper + inertia + friction (causes excessive combined resistance).
   if (interaction) {
-    if (fieldKey === "damper" || fieldKey === "inertia" || fieldKey === "friction") {
-      delta += interaction.catchabilityNeed * 0.45 + interaction.kerbLoad * 0.25;
-      delta -= interaction.rotationNeed * 0.2;
+    if (fieldKey === "damper") {
+      // Damper is the primary catchability / kerb channel
+      delta += interaction.catchabilityNeed * 0.35 + interaction.kerbLoad * 0.22;
+      delta -= interaction.rotationNeed * 0.18;
+    }
+    if (fieldKey === "inertia") {
+      // Inertia only for high-speed mass feel — orthogonal to damper
+      delta += interaction.highSpeedNeed * 0.28;
+      delta -= interaction.rotationNeed * 0.22;
+    }
+    if (fieldKey === "friction") {
+      // Friction stays low unless kerb catchability is extreme AND damper is not enough
+      delta += interaction.kerbLoad * 0.1;
+      delta -= interaction.rotationNeed * 0.15;
     }
     if (fieldKey === "speed" || fieldKey === "damperGain") {
       delta += interaction.detailNeed * 0.25 - interaction.fatigueRisk * 0.3;
@@ -472,25 +484,22 @@ function adjustT598Field(fieldKey, baseValue, weights, context) {
   switch (fieldKey) {
     case "damper":
       delta +=
-        weights.stability * 2 +
-        weights.tyrePreservation * 1.4 +
-        weights.consistency * 0.8 +
-        weights.fuelEfficiency * 0.5 -
-        weights.maximumPace * 1.8;
+        weights.stability * 1.4 +
+        weights.tyrePreservation * 0.9 +
+        weights.consistency * 0.5 -
+        weights.maximumPace * 1.5;
+      // Fuel efficiency must NOT invent damper — excluded intentionally.
       break;
     case "inertia":
       delta +=
-        weights.stability * 1.5 +
-        weights.tyrePreservation * 0.9 +
-        weights.fuelEfficiency * 0.8 +
-        weights.consistency * 0.5 -
-        weights.maximumPace * 1.2;
+        weights.stability * 0.9 +
+        weights.consistency * 0.35 -
+        weights.maximumPace * 1.0;
       break;
     case "friction":
       delta +=
-        weights.stability * 0.9 +
-        weights.consistency * 0.8 +
-        weights.fuelEfficiency * 0.4 -
+        weights.stability * 0.45 +
+        weights.consistency * 0.35 -
         weights.maximumPace * 0.55;
       break;
     case "speed":

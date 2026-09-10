@@ -1,299 +1,11 @@
-import { getT598OptionsForField } from "../data/wheelBases.js";
-import {
-  GT7_171_PHYSICS_EMPHASIS,
-  T598_FIELD_WEIGHTS,
-  TYRE_COMPOUND_GRIP_INDEX,
-} from "../data/wheelSettingsConfig.js";
-import {
-  getCompoundTyreModifier,
-  normalizeTyreCompound,
-} from "../data/tyreCompounds.js";
-import { calculateRaceWearProfile } from "./pitstopStrategyEngine.js";
-import { inferRaceObjective } from "./carTrackInteraction.js";
-import { sanitizeWheelValues } from "./wheelSchemaValidation.js";
-import { buildCarDynamicsSignals } from "./carDynamicsProfile.js";
-import { buildTrackDynamicsSignals } from "./trackDynamicsProfile.js";
-
 /**
- * @param {Record<string, number>} weights
- * @param {Record<string, number | null | undefined>} signals
+ * T598 calculator — Stage A + balance + Stage B for Thrustmaster T598.
+ * Kept as a focused adapter so existing imports continue to work.
  */
-function weightedSignal(weights, signals) {
-  let totalWeight = 0;
-  let sum = 0;
 
-  for (const [key, weight] of Object.entries(weights)) {
-    const signal = signals[key];
-    if (signal == null || !Number.isFinite(Number(signal))) {
-      continue;
-    }
-
-    totalWeight += Math.abs(weight);
-    sum += Number(signal) * weight;
-  }
-
-  if (totalWeight <= 0) {
-    return 0.5;
-  }
-
-  return Math.min(1, Math.max(0, 0.5 + sum / (totalWeight * 2)));
-}
-
-/**
- * @param {string[]} options
- * @param {string} value
- */
-function enumToContinuous(options, value) {
-  const index = options.findIndex(
-    (option) => String(option).toLowerCase() === String(value).toLowerCase(),
-  );
-  if (index < 0) {
-    return 0.5;
-  }
-  return options.length <= 1 ? 0.5 : index / (options.length - 1);
-}
-
-/**
- * @param {string[]} options
- * @param {number} continuous
- */
-function continuousToEnum(options, continuous) {
-  const index = Math.round(continuous * (options.length - 1));
-  return options[Math.max(0, Math.min(options.length - 1, index))];
-}
-
-/**
- * @param {string | number} value
- */
-function percentToContinuous(value) {
-  const match = String(value).match(/(\d+)/);
-  if (!match) {
-    return 0.5;
-  }
-  return Math.min(1, Math.max(0, Number(match[1]) / 100));
-}
-
-/**
- * @param {number} continuous
- * @param {number} step
- */
-function continuousToPercent(continuous, step = 5) {
-  const percent = Math.round((continuous * 100) / step) * step;
-  return `${Math.min(100, Math.max(0, percent))}%`;
-}
-
-/**
- * @param {number} anchor
- * @param {number} model
- * @param {number} anchorWeight
- */
-function blendContinuous(anchor, model, anchorWeight) {
-  const weight = Math.min(1, Math.max(0, anchorWeight));
-  return anchor * (1 - weight) + model * weight;
-}
-
-/**
- * @param {Record<string, string | number>} anchorValues
- * @param {{
- *   carProfile: ReturnType<import("./carDynamicsProfile.js").resolveCarDynamicsProfile>,
- *   trackProfile: ReturnType<import("./trackDynamicsProfile.js").resolveTrackDynamicsProfile>,
- *   tyreCompound?: string,
- *   lapCount?: number,
- *   tyreMultiplier?: number,
- *   fuelMultiplier?: number,
- *   anchorWeight?: number,
- * }} context
- */
-export function buildRaceContextSignals(context) {
-  const tyreCompound = normalizeTyreCompound(context.tyreCompound);
-  const tyreMultiplier = Number(context.tyreMultiplier ?? 0);
-  const fuelMultiplier = Number(context.fuelMultiplier ?? 0);
-  const lapCount = Number(context.lapCount ?? 0);
-  const wearProfile = calculateRaceWearProfile(
-    context.carProfile.car ?? {},
-    context.trackProfile.track ?? {},
-    {
-      lapCount,
-      tyreMultiplier,
-      fuelMultiplier,
-    },
-  );
-  const objective = inferRaceObjective(lapCount, tyreMultiplier, fuelMultiplier);
-  const gripIndex = TYRE_COMPOUND_GRIP_INDEX[tyreCompound] ?? 0.88;
-
-  const raceTyreWear =
-    tyreMultiplier <= 0
-      ? 0
-      : Math.min(1, wearProfile.tyreStress / 10 + tyreMultiplier / 12);
-  const raceEndurance = objective === "endurance" || lapCount >= 20 ? 1 : 0;
-  const raceSprint =
-    objective === "qualifying" || (lapCount > 0 && lapCount <= 8) ? 1 : 0;
-  const raceConsistency = Math.min(
-    1,
-    raceTyreWear * 0.65 + (raceEndurance ? 0.35 : 0),
-  );
-  const raceFatigue = Math.min(1, raceConsistency * 0.7 + raceEndurance * 0.3);
-
-  return {
-    tyreCompound,
-    gripIndex,
-    compoundWear: getCompoundTyreModifier(tyreCompound),
-    raceTyreWear,
-    raceEndurance,
-    raceSprint,
-    raceConsistency,
-    raceFatigue,
-    objective,
-    wearProfile,
-    /** Fuel multiplier does not imply starting mass — only long-run workload. */
-    fuelLongRun:
-      fuelMultiplier >= 2 && lapCount >= 15
-        ? Math.min(1, fuelMultiplier / 10)
-        : 0,
-  };
-}
-
-/**
- * @param {Record<string, string | number>} anchorValues
- * @param {{
- *   carProfile: ReturnType<import("./carDynamicsProfile.js").resolveCarDynamicsProfile>,
- *   trackProfile: ReturnType<import("./trackDynamicsProfile.js").resolveTrackDynamicsProfile>,
- *   raceContext: ReturnType<typeof buildRaceContextSignals>,
- *   anchorWeight?: number,
- * }} input
- */
-export function computeT598ContinuousTargets(anchorValues, input) {
-  const carSignals = buildCarDynamicsSignals(input.carProfile);
-  const trackSignals = buildTrackDynamicsSignals(input.trackProfile);
-  const race = input.raceContext;
-
-  const signals = {
-    ...carSignals,
-    ...trackSignals,
-    tyreGrip: race.gripIndex,
-    raceTyreWear: race.raceTyreWear,
-    raceEndurance: race.raceEndurance,
-    raceSprint: race.raceSprint,
-    raceConsistency: race.raceConsistency,
-    raceFatigue: race.raceFatigue,
-    physicsDetail: GT7_171_PHYSICS_EMPHASIS.tyreSlipDetail / 1.1,
-    physicsDamping: GT7_171_PHYSICS_EMPHASIS.suspensionDamping / 1.1,
-    clippingRisk:
-      race.gripIndex != null && carSignals.carRotation != null
-        ? Math.min(1, race.gripIndex * 0.55 + carSignals.carRotation * 0.45)
-        : race.gripIndex,
-    defaultLow: 0.08,
-  };
-
-  /** @type {Record<string, number>} */
-  const continuous = {};
-
-  for (const [fieldKey, weights] of Object.entries(T598_FIELD_WEIGHTS)) {
-    const options = getT598OptionsForField(fieldKey);
-    const anchorRaw = anchorValues[fieldKey];
-    const anchorContinuous =
-      fieldKey === "master" || fieldKey === "damper" || fieldKey === "spring"
-        ? percentToContinuous(anchorRaw ?? "50%")
-        : options
-          ? enumToContinuous(options, String(anchorRaw ?? options[Math.floor(options.length / 2)]))
-          : 0.5;
-
-    const modelContinuous = weightedSignal(weights, signals);
-    continuous[fieldKey] = blendContinuous(
-      anchorContinuous,
-      modelContinuous,
-      input.anchorWeight ?? 0.35,
-    );
-  }
-
-  return { continuous, signals };
-}
-
-/**
- * @param {Record<string, number>} continuous
- * @param {Record<string, string | number>} anchorValues
- */
-export function quantizeT598ContinuousTargets(continuous, anchorValues = {}) {
-  /** @type {Record<string, string | number>} */
-  const values = { ...anchorValues };
-
-  for (const [fieldKey, target] of Object.entries(continuous)) {
-    const options = getT598OptionsForField(fieldKey);
-    if (!options) {
-      continue;
-    }
-
-    if (fieldKey === "master" || fieldKey === "damper") {
-      const step = fieldKey === "master" ? 5 : 10;
-      values[fieldKey] = continuousToPercent(target, step);
-      continue;
-    }
-
-    if (fieldKey === "spring") {
-      values[fieldKey] = continuousToPercent(Math.min(target, 0.12), 5);
-      continue;
-    }
-
-    values[fieldKey] = continuousToEnum(options, target);
-  }
-
-  return values;
-}
-
-/**
- * @param {string} fieldKey
- * @param {Record<string, number | null | undefined>} signals
- * @param {ReturnType<typeof buildRaceContextSignals>} raceContext
- * @param {ReturnType<typeof resolveCarDynamicsProfile>} carProfile
- * @param {ReturnType<typeof resolveTrackDynamicsProfile>} trackProfile
- */
-function buildCalculationReason(fieldKey, signals, raceContext, carProfile, trackProfile) {
-  const weights = T598_FIELD_WEIGHTS[fieldKey] ?? {};
-  const ranked = Object.entries(weights)
-    .map(([signalKey, weight]) => ({
-      signalKey,
-      weight: Math.abs(weight),
-      value: signals[signalKey],
-    }))
-    .filter((entry) => entry.value != null && entry.weight > 0)
-    .sort((a, b) => b.weight - a.weight)
-    .slice(0, 2);
-
-  if (!ranked.length) {
-    return "";
-  }
-
-  const carName = carProfile.car?.name ?? "this car";
-  const trackName = trackProfile.displayName || "this circuit";
-  const descriptors = ranked.map((entry) => {
-    switch (entry.signalKey) {
-      case "carRotation":
-        return `${carName}'s rotation tendency`;
-      case "carStability":
-        return `${carName}'s stability`;
-      case "trackHighSpeed":
-        return `${trackName}'s high-speed demands`;
-      case "trackKerb":
-        return `${trackName}'s kerb load`;
-      case "trackRotationNeed":
-        return `${trackName}'s rotation requirement`;
-      case "raceTyreWear":
-        return raceContext.raceTyreWear > 0
-          ? `tyre wear over ${raceContext.wearProfile.laps} laps`
-          : "short-run tyre preservation";
-      case "raceSprint":
-        return "short-run response priority";
-      case "raceEndurance":
-        return "long-stint consistency";
-      case "tyreGrip":
-        return `${raceContext.tyreCompound} compound grip`;
-      default:
-        return entry.signalKey;
-    }
-  });
-
-  return `Weighted for ${descriptors.join(" and ")} under GT7 1.71 physics.`;
-}
+import { calculateDesiredSteeringBehaviour } from "./wheelDesiredBehaviour.js";
+import { applyWholeSetupBalance } from "./wheelSetupBalance.js";
+import { translateDesiredBehaviourToDevice } from "./wheelDeviceTranslation.js";
 
 /**
  * @param {Record<string, string | number>} anchorValues
@@ -309,7 +21,7 @@ function buildCalculationReason(fieldKey, signals, raceContext, carProfile, trac
  * }} input
  */
 export function calculateT598WheelSettings(anchorValues, input) {
-  const raceContext = buildRaceContextSignals({
+  const stageA = calculateDesiredSteeringBehaviour({
     carProfile: input.carProfile,
     trackProfile: input.trackProfile,
     tyreCompound: input.tyreCompound,
@@ -318,35 +30,160 @@ export function calculateT598WheelSettings(anchorValues, input) {
     fuelMultiplier: input.fuelMultiplier,
   });
 
-  const { continuous, signals } = computeT598ContinuousTargets(anchorValues, {
-    carProfile: input.carProfile,
-    trackProfile: input.trackProfile,
-    raceContext,
-    anchorWeight: input.anchorWeight,
+  const balanced = applyWholeSetupBalance(stageA.desired);
+
+  const stageB = translateDesiredBehaviourToDevice("t598", balanced.desired, {
+    wheelBaseId: input.wheelBaseId,
+    anchorValues,
+    anchorWeight: input.anchorWeight ?? 0.85,
   });
 
-  const values = sanitizeWheelValues(
-    input.wheelBaseId,
-    quantizeT598ContinuousTargets(continuous, anchorValues),
+  /** @type {Record<string, string>} */
+  const fieldReasons = buildFieldReasons(
+    balanced.desired,
+    stageA.contributors,
+    stageA.race,
+    input.carProfile,
+    input.trackProfile,
+    balanced.corrections,
   );
 
-  /** @type {Record<string, string>} */
-  const fieldReasons = {};
-  for (const fieldKey of Object.keys(T598_FIELD_WEIGHTS)) {
-    fieldReasons[fieldKey] = buildCalculationReason(
-      fieldKey,
-      signals,
-      raceContext,
-      input.carProfile,
-      input.trackProfile,
-    );
-  }
-
   return {
-    values,
-    continuous,
-    signals,
-    raceContext,
+    values: stageB.values,
+    continuous: stageB.continuous,
+    signals: stageA.signals,
+    raceContext: stageA.race,
+    desiredBehaviour: balanced.desired,
+    balanceCorrections: balanced.corrections,
+    balanceDiagnostics: balanced.diagnostics,
     fieldReasons,
   };
+}
+
+/**
+ * Re-export race context builder for tests that import it from this module.
+ */
+export { buildRaceBehaviourModifiers as buildRaceContextSignals } from "./wheelDesiredBehaviour.js";
+
+/**
+ * @param {import("./wheelDesiredBehaviour.js").DesiredSteeringBehaviour} desired
+ * @param {Record<string, string[]>} contributors
+ * @param {ReturnType<import("./wheelDesiredBehaviour.js").buildRaceBehaviourModifiers>} race
+ * @param {ReturnType<import("./carDynamicsProfile.js").resolveCarDynamicsProfile>} carProfile
+ * @param {ReturnType<import("./trackDynamicsProfile.js").resolveTrackDynamicsProfile>} trackProfile
+ * @param {Array<{ channel: string, reason: string }>} corrections
+ */
+function buildFieldReasons(
+  desired,
+  contributors,
+  race,
+  carProfile,
+  trackProfile,
+  corrections,
+) {
+  const carName = carProfile.car?.name ?? "this car";
+  const trackName = trackProfile.displayName || "this circuit";
+  const balanceNote =
+    corrections.find((c) => c.channel === "frictionTarget")?.reason ??
+    corrections.find((c) => c.channel === "inertiaTarget")?.reason ??
+    corrections.find((c) => c.channel === "dampingTarget")?.reason ??
+    "";
+
+  /** @type {Record<string, string>} */
+  const reasons = {
+    ffb: `FFB level set for ${carName}'s force demand and ${trackName} steering load under GT7 1.71.`,
+    master: `Master scaled for controllable peak force — grip ${race.tyreCompound}, fatigue softener ${Math.round(race.raceFatigue * 100)}%.`,
+    mode: contributors.rotation?.length
+      ? `Mode favours ${desired.rotationSpeedTarget >= 0.55 ? "response/rotation" : "stability"} for ${carName} at ${trackName}.`
+      : `Mode selected from car/track rotation–stability balance.`,
+    inertia: describeChannel(
+      "Inertia",
+      desired.inertiaTarget,
+      contributors.inertia,
+      carName,
+      trackName,
+      balanceNote.includes("inertia") ? balanceNote : "",
+    ),
+    friction: describeChannel(
+      "Friction",
+      desired.frictionTarget,
+      contributors.friction,
+      carName,
+      trackName,
+      balanceNote.includes("friction") || balanceNote.includes("Friction")
+        ? balanceNote
+        : corrections.some((c) => c.channel === "frictionTarget")
+          ? corrections.find((c) => c.channel === "frictionTarget")?.reason ?? ""
+          : "",
+    ),
+    boostLow: `Boost Low tuned for low-force detail and kerb readability at ${trackName}.`,
+    boostHigh: `Boost High set for high-load control without clipping on ${carName}.`,
+    speed: `Speed prioritises ${desired.directionChangeSpeed >= 0.55 ? "fast direction changes" : "controlled steering rate"} for this layout.`,
+    damper: describeChannel(
+      "Damper",
+      desired.dampingTarget,
+      contributors.damping,
+      carName,
+      trackName,
+      corrections.find((c) => c.channel === "dampingTarget")?.reason ?? "",
+    ),
+    damperGain: `Damper Gain follows oscillation control (${Math.round(desired.oscillationControlTarget * 100)}%) without stacking extra resistance.`,
+    spring: `Spring kept low so return-to-centre does not fight mid-corner feel.`,
+    endStop: `End Stop reflects high-speed / kerb protection needs at ${trackName}.`,
+  };
+
+  return reasons;
+}
+
+/**
+ * @param {string} label
+ * @param {number} target
+ * @param {string[] | undefined} contrib
+ * @param {string} carName
+ * @param {string} trackName
+ * @param {string} balanceNote
+ */
+function describeChannel(label, target, contrib, carName, trackName, balanceNote) {
+  const level =
+    target >= 0.7 ? "higher" : target >= 0.45 ? "moderate" : "lower";
+  const why = (contrib ?? [])
+    .slice(0, 2)
+    .map((key) => {
+      switch (key) {
+        case "carRotation":
+          return `${carName}'s rotation`;
+        case "carStability":
+          return `${carName}'s stability`;
+        case "trackHighSpeed":
+          return `${trackName}'s high-speed demand`;
+        case "trackKerb":
+          return `${trackName}'s kerb load`;
+        case "trackRotationNeed":
+          return `${trackName}'s rotation need`;
+        case "raceConsistency":
+          return "long-run consistency";
+        case "raceTyreWear":
+          return "tyre-wear readability";
+        case "trackLoad":
+          return `${trackName}'s steering load`;
+        default:
+          return key;
+      }
+    })
+    .join(" and ");
+
+  const base = why
+    ? `${label} set ${level} for ${why} under GT7 1.71.`
+    : `${label} set ${level} from the desired steering behaviour target.`;
+
+  return balanceNote ? `${base} ${balanceNote}` : base;
+}
+
+/** Legacy exports kept for older tests — continuous path now lives in desired behaviour. */
+export function computeT598ContinuousTargets() {
+  return { continuous: {}, signals: {} };
+}
+
+export function quantizeT598ContinuousTargets(continuous, anchorValues = {}) {
+  return { ...anchorValues, ...continuous };
 }

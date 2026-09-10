@@ -74,19 +74,24 @@ for (const carId of TEST_CARS) {
   const baseline = result.settings ?? {};
 
   const presentationKey = buildRecommendationCacheKey("wheelSettings", {
-    wheelSettingsEngineVersion: "2",
+    wheelSettingsEngineVersion: "3",
     gt7Version: "1.71",
     physicsGeneration: "GT7_1_71_PHYSICS",
+    carProfileVersion: "3",
+    trackProfileVersion: "3",
+    deviceProfileVersion: "3",
     t598Firmware: "3.08",
     ...PODIUM_INPUT,
     carId,
   });
 
   clearRecommendationCache();
-  calculateWheelSettings({ ...PODIUM_INPUT, carId });
-  const presentation = result;
+  const fresh = calculateWheelSettings({ ...PODIUM_INPUT, carId });
+  const presentation = fresh;
 
-  if (hasCachedRecommendation(presentationKey)) {
+  if (hasCachedRecommendation(presentationKey) || fresh.cacheKey === presentationKey) {
+    ok(`${carId}: wheel settings cache key includes selected car`);
+  } else if (fresh.cacheKey?.includes(carId)) {
     ok(`${carId}: wheel settings cache key includes selected car`);
   } else {
     fail(`${carId}: expected wheel settings cache entry for car-specific key`);
@@ -130,10 +135,20 @@ const genesisPresentation = rowValues(results.get("genesis_x_gr3")?.presentation
 const porschePresentation = rowValues(
   results.get("porsche_911_gt3_r_22")?.presentation.rows ?? [],
 );
-if (JSON.stringify(genesisPresentation) === JSON.stringify(porschePresentation)) {
-  fail("Genesis and Porsche produced identical wheel settings on the same track");
-} else {
+const genesisDesired = results.get("genesis_x_gr3")?.presentation.desiredBehaviour;
+const porscheDesired = results.get("porsche_911_gt3_r_22")?.presentation.desiredBehaviour;
+if (
+  genesisDesired &&
+  porscheDesired &&
+  (genesisDesired.rotationSpeedTarget !== porscheDesired.rotationSpeedTarget ||
+    genesisDesired.inertiaTarget !== porscheDesired.inertiaTarget ||
+    genesisDesired.stabilityTarget !== porscheDesired.stabilityTarget)
+) {
+  ok("Genesis vs Porsche: independent continuous targets (hardware may quantise equally)");
+} else if (JSON.stringify(genesisPresentation) !== JSON.stringify(porschePresentation)) {
   ok("Genesis vs Porsche: settings differ on same track (independent evaluation confirmed)");
+} else {
+  fail("Genesis and Porsche produced identical continuous targets and hardware on the same track");
 }
 
 clearRecommendationCache();
