@@ -33,6 +33,11 @@ import {
   getRecommendationHistoricalScore,
   passesCompetitiveUseGate,
 } from "../utils/recommendationScoring.js";
+import {
+  hasGr3MeasurableData,
+  resolveGr3BopCategory,
+  scoreGr3CarForRace,
+} from "./gr3MeasurableScoring.js";
 
 const SCORE_FIELDS = ["topSpeed", "traction", "fuel", "tyres", "stability"];
 const SCORING_FIELDS = [...SCORE_FIELDS, "rotation"];
@@ -263,6 +268,30 @@ function getTrackAttributeTargets(track) {
 }
 
 function getWeightedTrackScore(car, track, raceSettings = {}) {
+  if (car?.class === "Gr.3" && car?.id) {
+    const bopCategory = resolveGr3BopCategory(track, {
+      bopCategory: raceSettings.gr3BopCategory,
+    });
+
+    if (hasGr3MeasurableData(car.id, bopCategory)) {
+      const measurable = scoreGr3CarForRace(car.id, track, {
+        bopCategory,
+        confidenceScale: 1,
+        fuelMultiplier: raceSettings.fuelMultiplier,
+        tyreMultiplier: raceSettings.tyreMultiplier,
+        lapCount: raceSettings.lapCount,
+      });
+
+      if (measurable.confidence === "full" && Number.isFinite(measurable.score)) {
+        return {
+          score: measurable.score,
+          unknownCount: 0,
+          scoringSource: "gt_engine_measurable",
+        };
+      }
+    }
+  }
+
   const demands = getTrackDemandWeights(track, raceSettings);
   const targets = getTrackAttributeTargets(track);
   const raceImportance = getRaceConditionImportance(raceSettings);
@@ -300,16 +329,40 @@ function getWeightedTrackScore(car, track, raceSettings = {}) {
   const penalty = Math.min(fitScore * 0.35, weaknessTotal * 2.4);
   const unknownPenalty = Math.min(8, unknownCount * 1.5);
 
+  const legacyScore = Math.max(
+    0,
+    fitScore + drivetrainBonus - penalty - unknownPenalty,
+  );
+
+  if (car?.class === "Gr.3" && car?.id) {
+    const bopCategory = resolveGr3BopCategory(track, {
+      bopCategory: raceSettings.gr3BopCategory,
+    });
+
+    if (!hasGr3MeasurableData(car.id, bopCategory)) {
+      return {
+        // Incomplete measurable coverage must not outrank full GT ENG!NE profiles.
+        score: Math.min(legacyScore * 0.68, 48),
+        unknownCount: unknownCount + 2,
+        scoringSource: "legacy_reduced_confidence",
+      };
+    }
+  }
+
   return {
-    score: Math.max(0, fitScore + drivetrainBonus - penalty - unknownPenalty),
+    score: legacyScore,
     unknownCount,
+    scoringSource: "legacy_attributes",
   };
 }
 
 function computeRaceConditionFitScore(car, track, raceSettings = {}) {
   const raceImportance = getRaceConditionImportance(raceSettings);
-  const carFuel = getCarAttribute(car, "fuel", raceSettings);
-  const carTyres = getCarAttribute(car, "tyres", raceSettings);
+  // Gr.3: tyre/fuel economy are not measured in GT ENG!NE tables.
+  // Unknown > fake precision — do not use subjective profile invents.
+  const isGr3 = car?.class === "Gr.3";
+  const carFuel = isGr3 ? null : getCarAttribute(car, "fuel", raceSettings);
+  const carTyres = isGr3 ? null : getCarAttribute(car, "tyres", raceSettings);
   const carStability = getCarAttribute(car, "stability", raceSettings);
   const profile = getRaceDistanceProfile(raceSettings.lapCount);
 
@@ -361,6 +414,20 @@ function computeRaceConditionFitScore(car, track, raceSettings = {}) {
     if (isKnownAttribute(topSpeed) && isKnownAttribute(traction)) {
       score = 50 + ((topSpeed + traction) / 20 - 0.5) * 40;
     }
+  }
+
+  // Gr.3 with active tyre/fuel and unknown consumption: stay near neutral.
+  // Track-fit race modifiers for Gr.3 live in scoreGr3CarForRace instead.
+  if (
+    isGr3 &&
+    (raceImportance.tyreImportance > 0 || raceImportance.fuelImportance > 0) &&
+    !isKnownAttribute(carTyres) &&
+    !isKnownAttribute(carFuel)
+  ) {
+    const stabilityBias = isKnownAttribute(carStability)
+      ? ((carStability - 5) / 5) * 6
+      : 0;
+    score = 50 + stabilityBias;
   }
 
   return Number(Math.max(0, Math.min(100, score)).toFixed(2));

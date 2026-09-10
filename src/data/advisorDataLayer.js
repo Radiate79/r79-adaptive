@@ -10,12 +10,16 @@ import {
   R79_PHYSICS_LAST_VALIDATION,
 } from "./gt7PhysicsVersion.js";
 import { CHAMPIONSHIP_ADVISOR_VERSION } from "./championshipAdvisor171.js";
+import {
+  GR3_DATA_VERSION,
+  GR3_PICKER_ENGINE_VERSION,
+} from "./gr3Measurable171.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
-export const ADVISOR_ENGINE_VERSION = "2.1.0";
+export const ADVISOR_ENGINE_VERSION = "3.0.0";
 export const STRATEGY_ENGINE_VERSION = "2.0.0";
-export const ADVISOR_DATA_LAYER_VERSION = "2.1.0"; // Gr.3 profiles v2 — 2026-09-03
+export const ADVISOR_DATA_LAYER_VERSION = "3.0.0"; // Gr.3 measurable GT ENG!NE picker — 2026-09-10
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,
@@ -66,6 +70,8 @@ export function getAdvisorCacheVersionStamp() {
     advisorEngineVersion: ADVISOR_ENGINE_VERSION,
     strategyEngineVersion: STRATEGY_ENGINE_VERSION,
     dataLayerVersion: ADVISOR_DATA_LAYER_VERSION,
+    gr3PickerEngineVersion: GR3_PICKER_ENGINE_VERSION,
+    gr3DataVersion: GR3_DATA_VERSION,
     gt7Version: R79_ACTIVE_GT7_BASELINE.gt7Version,
     bopVersion: R79_ACTIVE_GT7_BASELINE.bopVersion,
     updatedAt: R79_ACTIVE_GT7_BASELINE.updatedAt,
