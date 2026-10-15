@@ -4,6 +4,9 @@ import "./styles/r79Global.css";
 import "./styles/r79FutureSystem.css";
 import "./styles/r79VisualRebuild.css";
 import App from "./App.jsx";
+import { loadALRRaceCalibration } from "./engine/alrBenchmarkService.js";
+
+loadALRRaceCalibration();
 
 const STARTUP_FALLBACK =
   "R79 loaded but one module failed. Please report this issue.";

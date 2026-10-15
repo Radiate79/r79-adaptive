@@ -1,0 +1,3786 @@
+{
+  "schemaVersion": "1.0",
+  "datasetId": "r79-alr-calibration-aggregates-2026-10-15",
+  "sourceDatasetId": "r79-alr-race-benchmarks-2026-10-15",
+  "purpose": "Production-safe ALR benchmark calibration",
+  "restrictions": {
+    "carRanking": false,
+    "trackSpecificCalibrationUntilMapped": false,
+    "strategyInferenceFromTotals": false,
+    "rawDriverNamesShippedToClient": false
+  },
+  "events": [
+    {
+      "eventId": "ALR-BENCH-A",
+      "trackId": null,
+      "trackName": null,
+      "metrics": {
+        "qualifying": {
+          "available": true,
+          "overall": {
+            "count": 149,
+            "fastestSeconds": 80.014,
+            "medianSeconds": 82.098,
+            "p25Seconds": 81.508,
+            "p75Seconds": 82.916,
+            "slowestSeconds": 87.796
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 80.014,
+              "medianSeconds": 81.189,
+              "p25Seconds": 80.673,
+              "p75Seconds": 81.4,
+              "slowestSeconds": 82.177,
+              "medianGapTierLeaderSeconds": 1.175,
+              "medianGapTierLeaderPct": 1.4472
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 80.628,
+              "medianSeconds": 81.358,
+              "p25Seconds": 81.181,
+              "p75Seconds": 81.602,
+              "slowestSeconds": 82.177,
+              "medianGapTierLeaderSeconds": 0.73,
+              "medianGapTierLeaderPct": 0.8973
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 81.02,
+              "medianSeconds": 81.734,
+              "p25Seconds": 81.3,
+              "p75Seconds": 81.958,
+              "slowestSeconds": 82.141,
+              "medianGapTierLeaderSeconds": 0.714,
+              "medianGapTierLeaderPct": 0.8742
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 80.674,
+              "medianSeconds": 81.633,
+              "p25Seconds": 81.092,
+              "p75Seconds": 82.136,
+              "slowestSeconds": 82.757,
+              "medianGapTierLeaderSeconds": 0.959,
+              "medianGapTierLeaderPct": 1.1748
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 81.402,
+              "medianSeconds": 81.848,
+              "p25Seconds": 81.678,
+              "p75Seconds": 81.921,
+              "slowestSeconds": 84.089,
+              "medianGapTierLeaderSeconds": 0.446,
+              "medianGapTierLeaderPct": 0.5449
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 81.228,
+              "medianSeconds": 82.218,
+              "p25Seconds": 81.795,
+              "p75Seconds": 82.426,
+              "slowestSeconds": 84.151,
+              "medianGapTierLeaderSeconds": 0.99,
+              "medianGapTierLeaderPct": 1.2041
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 81.85,
+              "medianSeconds": 82.532,
+              "p25Seconds": 82.097,
+              "p75Seconds": 82.736,
+              "slowestSeconds": 83.804,
+              "medianGapTierLeaderSeconds": 0.682,
+              "medianGapTierLeaderPct": 0.8263
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 82.251,
+              "medianSeconds": 82.975,
+              "p25Seconds": 82.774,
+              "p75Seconds": 83.656,
+              "slowestSeconds": 84.965,
+              "medianGapTierLeaderSeconds": 0.724,
+              "medianGapTierLeaderPct": 0.8725
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 81.892,
+              "medianSeconds": 83.385,
+              "p25Seconds": 82.785,
+              "p75Seconds": 83.842,
+              "slowestSeconds": 84.721,
+              "medianGapTierLeaderSeconds": 1.494,
+              "medianGapTierLeaderPct": 1.791
+            },
+            "10": {
+              "count": 13,
+              "fastestSeconds": 82.96,
+              "medianSeconds": 83.299,
+              "p25Seconds": 83.054,
+              "p75Seconds": 85.637,
+              "slowestSeconds": 87.796,
+              "medianGapTierLeaderSeconds": 0.339,
+              "medianGapTierLeaderPct": 0.407
+            }
+          }
+        },
+        "sprintFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 150,
+            "fastestSeconds": 80.344,
+            "medianSeconds": 82.303,
+            "p25Seconds": 81.655,
+            "p75Seconds": 83.162,
+            "slowestSeconds": 88.684
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 80.344,
+              "medianSeconds": 81.422,
+              "p25Seconds": 80.964,
+              "p75Seconds": 81.639,
+              "slowestSeconds": 82.367,
+              "medianGapTierLeaderSeconds": 1.078,
+              "medianGapTierLeaderPct": 1.324
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 80.726,
+              "medianSeconds": 81.655,
+              "p25Seconds": 81.285,
+              "p75Seconds": 81.864,
+              "slowestSeconds": 82.55,
+              "medianGapTierLeaderSeconds": 0.929,
+              "medianGapTierLeaderPct": 1.1377
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 81.213,
+              "medianSeconds": 81.864,
+              "p25Seconds": 81.598,
+              "p75Seconds": 82.139,
+              "slowestSeconds": 82.636,
+              "medianGapTierLeaderSeconds": 0.651,
+              "medianGapTierLeaderPct": 0.7952
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 80.841,
+              "medianSeconds": 81.628,
+              "p25Seconds": 81.513,
+              "p75Seconds": 81.932,
+              "slowestSeconds": 82.553,
+              "medianGapTierLeaderSeconds": 0.787,
+              "medianGapTierLeaderPct": 0.9641
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 81.553,
+              "medianSeconds": 82.156,
+              "p25Seconds": 81.955,
+              "p75Seconds": 82.334,
+              "slowestSeconds": 84.706,
+              "medianGapTierLeaderSeconds": 0.603,
+              "medianGapTierLeaderPct": 0.7333
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 81.469,
+              "medianSeconds": 82.313,
+              "p25Seconds": 81.73,
+              "p75Seconds": 82.481,
+              "slowestSeconds": 83.572,
+              "medianGapTierLeaderSeconds": 0.844,
+              "medianGapTierLeaderPct": 1.0254
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 82.217,
+              "medianSeconds": 82.805,
+              "p25Seconds": 82.339,
+              "p75Seconds": 83.191,
+              "slowestSeconds": 85.481,
+              "medianGapTierLeaderSeconds": 0.588,
+              "medianGapTierLeaderPct": 0.7101
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 82.592,
+              "medianSeconds": 83.091,
+              "p25Seconds": 82.868,
+              "p75Seconds": 83.626,
+              "slowestSeconds": 84.958,
+              "medianGapTierLeaderSeconds": 0.5,
+              "medianGapTierLeaderPct": 0.6011
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 82.213,
+              "medianSeconds": 83.307,
+              "p25Seconds": 82.929,
+              "p75Seconds": 83.617,
+              "slowestSeconds": 84.145,
+              "medianGapTierLeaderSeconds": 1.094,
+              "medianGapTierLeaderPct": 1.313
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 82.93,
+              "medianSeconds": 84.275,
+              "p25Seconds": 83.512,
+              "p75Seconds": 84.883,
+              "slowestSeconds": 88.684,
+              "medianGapTierLeaderSeconds": 1.345,
+              "medianGapTierLeaderPct": 1.596
+            }
+          }
+        },
+        "sprintTotal": {
+          "available": true,
+          "overall": {
+            "count": 146,
+            "fastestSeconds": 980.477,
+            "medianSeconds": 1014.901,
+            "p25Seconds": 1000.76,
+            "p75Seconds": 1036.87,
+            "slowestSeconds": 1092.17
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 980.477,
+              "medianSeconds": 994.398,
+              "p25Seconds": 986.215,
+              "p75Seconds": 999.096,
+              "slowestSeconds": 1024.5,
+              "medianGapTierLeaderSeconds": 13.921,
+              "medianGapTierLeaderPct": 1.3999
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 982.789,
+              "medianSeconds": 1000.572,
+              "p25Seconds": 991.082,
+              "p75Seconds": 1004.377,
+              "slowestSeconds": 1038.04,
+              "medianGapTierLeaderSeconds": 17.783,
+              "medianGapTierLeaderPct": 1.7773
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 990.274,
+              "medianSeconds": 1006.018,
+              "p25Seconds": 1000.056,
+              "p75Seconds": 1020.664,
+              "slowestSeconds": 1053.629,
+              "medianGapTierLeaderSeconds": 15.744,
+              "medianGapTierLeaderPct": 1.565
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 984.275,
+              "medianSeconds": 1005.888,
+              "p25Seconds": 995.6,
+              "p75Seconds": 1025.539,
+              "slowestSeconds": 1048.389,
+              "medianGapTierLeaderSeconds": 21.613,
+              "medianGapTierLeaderPct": 2.1486
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 991.855,
+              "medianSeconds": 1016.608,
+              "p25Seconds": 1005.389,
+              "p75Seconds": 1027.257,
+              "slowestSeconds": 1063.285,
+              "medianGapTierLeaderSeconds": 24.752,
+              "medianGapTierLeaderPct": 2.4348
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 992.458,
+              "medianSeconds": 1011.747,
+              "p25Seconds": 996.464,
+              "p75Seconds": 1026.941,
+              "slowestSeconds": 1056.739,
+              "medianGapTierLeaderSeconds": 19.289,
+              "medianGapTierLeaderPct": 1.9065
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 1003.134,
+              "medianSeconds": 1029.424,
+              "p25Seconds": 1017.788,
+              "p75Seconds": 1043.457,
+              "slowestSeconds": 1084.914,
+              "medianGapTierLeaderSeconds": 26.29,
+              "medianGapTierLeaderPct": 2.5539
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 1003.943,
+              "medianSeconds": 1027.544,
+              "p25Seconds": 1015.382,
+              "p75Seconds": 1045.313,
+              "slowestSeconds": 1072.916,
+              "medianGapTierLeaderSeconds": 23.601,
+              "medianGapTierLeaderPct": 2.2968
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 1002.292,
+              "medianSeconds": 1031.527,
+              "p25Seconds": 1019.115,
+              "p75Seconds": 1040.282,
+              "slowestSeconds": 1071.985,
+              "medianGapTierLeaderSeconds": 29.235,
+              "medianGapTierLeaderPct": 2.8341
+            },
+            "10": {
+              "count": 14,
+              "fastestSeconds": 1015.238,
+              "medianSeconds": 1054.811,
+              "p25Seconds": 1037.25,
+              "p75Seconds": 1075.938,
+              "slowestSeconds": 1092.17,
+              "medianGapTierLeaderSeconds": 39.573,
+              "medianGapTierLeaderPct": 3.7488
+            }
+          }
+        },
+        "featureFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 141,
+            "fastestSeconds": 80.659,
+            "medianSeconds": 82.7,
+            "p25Seconds": 81.935,
+            "p75Seconds": 83.689,
+            "slowestSeconds": 87.927
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 80.659,
+              "medianSeconds": 82.143,
+              "p25Seconds": 81.303,
+              "p75Seconds": 82.941,
+              "slowestSeconds": 83.515,
+              "medianGapTierLeaderSeconds": 1.484,
+              "medianGapTierLeaderPct": 1.8066
+            },
+            "2": {
+              "count": 12,
+              "fastestSeconds": 80.893,
+              "medianSeconds": 81.783,
+              "p25Seconds": 81.305,
+              "p75Seconds": 82.312,
+              "slowestSeconds": 83.577,
+              "medianGapTierLeaderSeconds": 0.89,
+              "medianGapTierLeaderPct": 1.0881
+            },
+            "3": {
+              "count": 14,
+              "fastestSeconds": 80.841,
+              "medianSeconds": 81.75,
+              "p25Seconds": 81.48,
+              "p75Seconds": 82.292,
+              "slowestSeconds": 82.49,
+              "medianGapTierLeaderSeconds": 0.908,
+              "medianGapTierLeaderPct": 1.1113
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 80.948,
+              "medianSeconds": 82.141,
+              "p25Seconds": 81.831,
+              "p75Seconds": 82.534,
+              "slowestSeconds": 83.173,
+              "medianGapTierLeaderSeconds": 1.193,
+              "medianGapTierLeaderPct": 1.4524
+            },
+            "5": {
+              "count": 11,
+              "fastestSeconds": 81.311,
+              "medianSeconds": 82.377,
+              "p25Seconds": 82.111,
+              "p75Seconds": 83.006,
+              "slowestSeconds": 85.608,
+              "medianGapTierLeaderSeconds": 1.066,
+              "medianGapTierLeaderPct": 1.2941
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 81.61,
+              "medianSeconds": 82.172,
+              "p25Seconds": 81.811,
+              "p75Seconds": 82.779,
+              "slowestSeconds": 84.1,
+              "medianGapTierLeaderSeconds": 0.562,
+              "medianGapTierLeaderPct": 0.6839
+            },
+            "7": {
+              "count": 13,
+              "fastestSeconds": 82.201,
+              "medianSeconds": 83.249,
+              "p25Seconds": 82.571,
+              "p75Seconds": 83.61,
+              "slowestSeconds": 84.421,
+              "medianGapTierLeaderSeconds": 1.048,
+              "medianGapTierLeaderPct": 1.2589
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 82.889,
+              "medianSeconds": 84.129,
+              "p25Seconds": 83.59,
+              "p75Seconds": 84.715,
+              "slowestSeconds": 85.791,
+              "medianGapTierLeaderSeconds": 1.24,
+              "medianGapTierLeaderPct": 1.4733
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 82.307,
+              "medianSeconds": 83.217,
+              "p25Seconds": 82.771,
+              "p75Seconds": 83.671,
+              "slowestSeconds": 84.932,
+              "medianGapTierLeaderSeconds": 0.91,
+              "medianGapTierLeaderPct": 1.0935
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 82.978,
+              "medianSeconds": 84.715,
+              "p25Seconds": 84.319,
+              "p75Seconds": 85.558,
+              "slowestSeconds": 87.927,
+              "medianGapTierLeaderSeconds": 1.737,
+              "medianGapTierLeaderPct": 2.0504
+            }
+          }
+        },
+        "featureTotal": {
+          "available": true,
+          "overall": {
+            "count": 121,
+            "fastestSeconds": 2450.05,
+            "medianSeconds": 2507.913,
+            "p25Seconds": 2487.524,
+            "p75Seconds": 2546.946,
+            "slowestSeconds": 2633.172
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 2450.05,
+              "medianSeconds": 2485.371,
+              "p25Seconds": 2474.319,
+              "p75Seconds": 2500.576,
+              "slowestSeconds": 2513.744,
+              "medianGapTierLeaderSeconds": 35.321,
+              "medianGapTierLeaderPct": 1.4212
+            },
+            "2": {
+              "count": 10,
+              "fastestSeconds": 2459.92,
+              "medianSeconds": 2470.286,
+              "p25Seconds": 2462.948,
+              "p75Seconds": 2479.471,
+              "slowestSeconds": 2507.82,
+              "medianGapTierLeaderSeconds": 10.366,
+              "medianGapTierLeaderPct": 0.4191
+            },
+            "3": {
+              "count": 13,
+              "fastestSeconds": 2472.739,
+              "medianSeconds": 2495.018,
+              "p25Seconds": 2483.133,
+              "p75Seconds": 2498.679,
+              "slowestSeconds": 2558.037,
+              "medianGapTierLeaderSeconds": 22.279,
+              "medianGapTierLeaderPct": 0.8929
+            },
+            "4": {
+              "count": 14,
+              "fastestSeconds": 2480.376,
+              "medianSeconds": 2500.68,
+              "p25Seconds": 2487.598,
+              "p75Seconds": 2515.991,
+              "slowestSeconds": 2523.852,
+              "medianGapTierLeaderSeconds": 20.305,
+              "medianGapTierLeaderPct": 0.8119
+            },
+            "5": {
+              "count": 10,
+              "fastestSeconds": 2474.385,
+              "medianSeconds": 2505.559,
+              "p25Seconds": 2498.258,
+              "p75Seconds": 2519.784,
+              "slowestSeconds": 2529.809,
+              "medianGapTierLeaderSeconds": 31.174,
+              "medianGapTierLeaderPct": 1.244
+            },
+            "6": {
+              "count": 12,
+              "fastestSeconds": 2482.888,
+              "medianSeconds": 2500.378,
+              "p25Seconds": 2495.572,
+              "p75Seconds": 2522.777,
+              "slowestSeconds": 2552.088,
+              "medianGapTierLeaderSeconds": 17.491,
+              "medianGapTierLeaderPct": 0.6995
+            },
+            "7": {
+              "count": 12,
+              "fastestSeconds": 2503.373,
+              "medianSeconds": 2538.248,
+              "p25Seconds": 2516.081,
+              "p75Seconds": 2544.959,
+              "slowestSeconds": 2550.193,
+              "medianGapTierLeaderSeconds": 34.875,
+              "medianGapTierLeaderPct": 1.374
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 2507.913,
+              "medianSeconds": 2551.046,
+              "p25Seconds": 2538.664,
+              "p75Seconds": 2563.666,
+              "slowestSeconds": 2571.934,
+              "medianGapTierLeaderSeconds": 43.133,
+              "medianGapTierLeaderPct": 1.6907
+            },
+            "9": {
+              "count": 13,
+              "fastestSeconds": 2516.054,
+              "medianSeconds": 2573.956,
+              "p25Seconds": 2546.946,
+              "p75Seconds": 2581.927,
+              "slowestSeconds": 2593.363,
+              "medianGapTierLeaderSeconds": 57.902,
+              "medianGapTierLeaderPct": 2.2495
+            },
+            "10": {
+              "count": 10,
+              "fastestSeconds": 2541.174,
+              "medianSeconds": 2598.364,
+              "p25Seconds": 2575.774,
+              "p75Seconds": 2605.011,
+              "slowestSeconds": 2633.172,
+              "medianGapTierLeaderSeconds": 57.191,
+              "medianGapTierLeaderPct": 2.201
+            }
+          }
+        }
+      },
+      "transitions": {
+        "qualifyingToSprintFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.2417,
+              "p25Pct": 0.0548,
+              "p75Pct": 0.3507
+            },
+            "2": {
+              "count": 15,
+              "medianPct": 0.2945,
+              "p25Pct": 0.0964,
+              "p75Pct": 0.5066
+            },
+            "3": {
+              "count": 16,
+              "medianPct": 0.2106,
+              "p25Pct": 0.043,
+              "p75Pct": 0.4659
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.207,
+              "p25Pct": -0.1231,
+              "p75Pct": 0.3578
+            },
+            "5": {
+              "count": 12,
+              "medianPct": 0.4419,
+              "p25Pct": 0.2397,
+              "p75Pct": 0.5661
+            },
+            "6": {
+              "count": 15,
+              "medianPct": 0.103,
+              "p25Pct": -0.3931,
+              "p75Pct": 0.3856
+            },
+            "7": {
+              "count": 14,
+              "medianPct": 0.237,
+              "p25Pct": 0.1145,
+              "p75Pct": 0.3619
+            },
+            "8": {
+              "count": 16,
+              "medianPct": 0.2658,
+              "p25Pct": -0.2454,
+              "p75Pct": 0.6024
+            },
+            "9": {
+              "count": 16,
+              "medianPct": 0.0196,
+              "p25Pct": -0.3805,
+              "p75Pct": 0.3619
+            },
+            "10": {
+              "count": 13,
+              "medianPct": 0.265,
+              "p25Pct": -0.6729,
+              "p75Pct": 0.6316
+            }
+          }
+        },
+        "qualifyingToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 1.0213,
+              "p25Pct": 0.7039,
+              "p75Pct": 1.4792
+            },
+            "2": {
+              "count": 12,
+              "medianPct": 0.4301,
+              "p25Pct": 0.1547,
+              "p75Pct": 0.907
+            },
+            "3": {
+              "count": 14,
+              "medianPct": 0.2872,
+              "p25Pct": -0.2761,
+              "p75Pct": 0.6911
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.5496,
+              "p25Pct": 0.1604,
+              "p75Pct": 1.0085
+            },
+            "5": {
+              "count": 11,
+              "medianPct": 0.8397,
+              "p25Pct": 0.4988,
+              "p75Pct": 1.324
+            },
+            "6": {
+              "count": 15,
+              "medianPct": 0.1538,
+              "p25Pct": -0.1234,
+              "p75Pct": 0.5598
+            },
+            "7": {
+              "count": 12,
+              "medianPct": 0.7113,
+              "p25Pct": 0.0637,
+              "p75Pct": 1.0941
+            },
+            "8": {
+              "count": 16,
+              "medianPct": 1.0077,
+              "p25Pct": 0.5507,
+              "p75Pct": 2.1978
+            },
+            "9": {
+              "count": 15,
+              "medianPct": 0.0263,
+              "p25Pct": -0.5943,
+              "p75Pct": 0.536
+            },
+            "10": {
+              "count": 13,
+              "medianPct": 0.4409,
+              "p25Pct": -0.0915,
+              "p75Pct": 1.1969
+            }
+          }
+        },
+        "sprintToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.942,
+              "p25Pct": 0.4733,
+              "p75Pct": 1.3772
+            },
+            "2": {
+              "count": 12,
+              "medianPct": 0.2005,
+              "p25Pct": -0.1602,
+              "p75Pct": 0.7013
+            },
+            "3": {
+              "count": 14,
+              "medianPct": 0.0922,
+              "p25Pct": -0.2987,
+              "p75Pct": 0.2743
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.4875,
+              "p25Pct": 0.0515,
+              "p75Pct": 0.8897
+            },
+            "5": {
+              "count": 11,
+              "medianPct": 0.3887,
+              "p25Pct": 0.0571,
+              "p75Pct": 1.0787
+            },
+            "6": {
+              "count": 15,
+              "medianPct": 0.2622,
+              "p25Pct": -0.0218,
+              "p75Pct": 0.421
+            },
+            "7": {
+              "count": 12,
+              "medianPct": 0.1305,
+              "p25Pct": -0.0647,
+              "p75Pct": 0.7705
+            },
+            "8": {
+              "count": 16,
+              "medianPct": 0.9325,
+              "p25Pct": 0.3916,
+              "p75Pct": 1.7961
+            },
+            "9": {
+              "count": 15,
+              "medianPct": 0.1929,
+              "p25Pct": -0.5193,
+              "p75Pct": 0.6069
+            },
+            "10": {
+              "count": 15,
+              "medianPct": 0.7362,
+              "p25Pct": 0.2715,
+              "p75Pct": 1.0645
+            }
+          }
+        }
+      },
+      "focusDriver": {
+        "id": "Radiate79",
+        "results": {
+          "qualifying": {
+            "rank": 108,
+            "tier": 8,
+            "tierRank": 7,
+            "time": "01:22.845",
+            "timeSeconds": 82.845,
+            "gapOverallLeaderSeconds": 2.831,
+            "gapTierLeaderSeconds": 0.594
+          },
+          "sprintFastestLap": {
+            "rank": 107,
+            "tier": 8,
+            "tierRank": 8,
+            "time": "01:23.050",
+            "timeSeconds": 83.05,
+            "gapOverallLeaderSeconds": 2.706,
+            "gapTierLeaderSeconds": 0.458
+          },
+          "sprintTotal": {
+            "rank": 79,
+            "tier": 8,
+            "tierRank": 5,
+            "time": "16:58.442",
+            "timeSeconds": 1018.442,
+            "gapOverallLeaderSeconds": 37.965,
+            "gapTierLeaderSeconds": 14.499
+          },
+          "featureFastestLap": {
+            "rank": 108,
+            "tier": 8,
+            "tierRank": 6,
+            "time": "01:23.710",
+            "timeSeconds": 83.71,
+            "gapOverallLeaderSeconds": 3.051,
+            "gapTierLeaderSeconds": 0.821
+          },
+          "featureTotal": {
+            "rank": 94,
+            "tier": 8,
+            "tierRank": 6,
+            "time": "42:28.624",
+            "timeSeconds": 2548.624,
+            "gapOverallLeaderSeconds": 98.574,
+            "gapTierLeaderSeconds": 40.711
+          }
+        }
+      }
+    },
+    {
+      "eventId": "ALR-BENCH-B",
+      "trackId": null,
+      "trackName": null,
+      "metrics": {
+        "qualifying": {
+          "available": true,
+          "overall": {
+            "count": 148,
+            "fastestSeconds": 92.882,
+            "medianSeconds": 94.499,
+            "p25Seconds": 93.94,
+            "p75Seconds": 95.198,
+            "slowestSeconds": 101.06
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 92.965,
+              "medianSeconds": 93.618,
+              "p25Seconds": 93.335,
+              "p75Seconds": 94.043,
+              "slowestSeconds": 94.557,
+              "medianGapTierLeaderSeconds": 0.653,
+              "medianGapTierLeaderPct": 0.6975
+            },
+            "2": {
+              "count": 14,
+              "fastestSeconds": 92.9,
+              "medianSeconds": 93.648,
+              "p25Seconds": 93.224,
+              "p75Seconds": 94.011,
+              "slowestSeconds": 94.455,
+              "medianGapTierLeaderSeconds": 0.748,
+              "medianGapTierLeaderPct": 0.7986
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 92.882,
+              "medianSeconds": 94.025,
+              "p25Seconds": 93.814,
+              "p75Seconds": 94.303,
+              "slowestSeconds": 94.809,
+              "medianGapTierLeaderSeconds": 1.143,
+              "medianGapTierLeaderPct": 1.2156
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 93.504,
+              "medianSeconds": 94.112,
+              "p25Seconds": 93.734,
+              "p75Seconds": 94.48,
+              "slowestSeconds": 94.764,
+              "medianGapTierLeaderSeconds": 0.608,
+              "medianGapTierLeaderPct": 0.6459
+            },
+            "5": {
+              "count": 16,
+              "fastestSeconds": 93.92,
+              "medianSeconds": 94.363,
+              "p25Seconds": 94.111,
+              "p75Seconds": 94.589,
+              "slowestSeconds": 95.427,
+              "medianGapTierLeaderSeconds": 0.444,
+              "medianGapTierLeaderPct": 0.47
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 94.32,
+              "medianSeconds": 94.608,
+              "p25Seconds": 94.521,
+              "p75Seconds": 95.024,
+              "slowestSeconds": 96.679,
+              "medianGapTierLeaderSeconds": 0.288,
+              "medianGapTierLeaderPct": 0.3044
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 93.738,
+              "medianSeconds": 94.668,
+              "p25Seconds": 94.444,
+              "p75Seconds": 95.298,
+              "slowestSeconds": 96.527,
+              "medianGapTierLeaderSeconds": 0.93,
+              "medianGapTierLeaderPct": 0.9824
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 94.235,
+              "medianSeconds": 95.117,
+              "p25Seconds": 94.815,
+              "p75Seconds": 95.417,
+              "slowestSeconds": 95.94,
+              "medianGapTierLeaderSeconds": 0.882,
+              "medianGapTierLeaderPct": 0.9273
+            },
+            "9": {
+              "count": 13,
+              "fastestSeconds": 94.28,
+              "medianSeconds": 95.6,
+              "p25Seconds": 95.155,
+              "p75Seconds": 95.95,
+              "slowestSeconds": 97.349,
+              "medianGapTierLeaderSeconds": 1.32,
+              "medianGapTierLeaderPct": 1.3808
+            },
+            "10": {
+              "count": 13,
+              "fastestSeconds": 95.161,
+              "medianSeconds": 96.897,
+              "p25Seconds": 96.209,
+              "p75Seconds": 97.371,
+              "slowestSeconds": 101.06,
+              "medianGapTierLeaderSeconds": 1.736,
+              "medianGapTierLeaderPct": 1.7916
+            }
+          }
+        },
+        "sprintFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 152,
+            "fastestSeconds": 93.577,
+            "medianSeconds": 95.539,
+            "p25Seconds": 94.796,
+            "p75Seconds": 96.176,
+            "slowestSeconds": 100.688
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 93.577,
+              "medianSeconds": 94.081,
+              "p25Seconds": 93.864,
+              "p75Seconds": 95.394,
+              "slowestSeconds": 95.789,
+              "medianGapTierLeaderSeconds": 0.504,
+              "medianGapTierLeaderPct": 0.5357
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 94.053,
+              "medianSeconds": 94.601,
+              "p25Seconds": 94.386,
+              "p75Seconds": 95.153,
+              "slowestSeconds": 96.134,
+              "medianGapTierLeaderSeconds": 0.548,
+              "medianGapTierLeaderPct": 0.5793
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 93.768,
+              "medianSeconds": 95.169,
+              "p25Seconds": 94.464,
+              "p75Seconds": 95.648,
+              "slowestSeconds": 96.273,
+              "medianGapTierLeaderSeconds": 1.401,
+              "medianGapTierLeaderPct": 1.4726
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 94.279,
+              "medianSeconds": 95.189,
+              "p25Seconds": 94.783,
+              "p75Seconds": 95.86,
+              "slowestSeconds": 96.541,
+              "medianGapTierLeaderSeconds": 0.91,
+              "medianGapTierLeaderPct": 0.956
+            },
+            "5": {
+              "count": 16,
+              "fastestSeconds": 94.179,
+              "medianSeconds": 95.678,
+              "p25Seconds": 94.869,
+              "p75Seconds": 95.902,
+              "slowestSeconds": 97.066,
+              "medianGapTierLeaderSeconds": 1.498,
+              "medianGapTierLeaderPct": 1.5661
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 94.677,
+              "medianSeconds": 95.683,
+              "p25Seconds": 95.204,
+              "p75Seconds": 95.971,
+              "slowestSeconds": 98.865,
+              "medianGapTierLeaderSeconds": 1.006,
+              "medianGapTierLeaderPct": 1.0509
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 94.769,
+              "medianSeconds": 96.149,
+              "p25Seconds": 95.423,
+              "p75Seconds": 96.692,
+              "slowestSeconds": 97.703,
+              "medianGapTierLeaderSeconds": 1.38,
+              "medianGapTierLeaderPct": 1.4353
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 94.274,
+              "medianSeconds": 95.961,
+              "p25Seconds": 95.197,
+              "p75Seconds": 96.505,
+              "slowestSeconds": 97.051,
+              "medianGapTierLeaderSeconds": 1.687,
+              "medianGapTierLeaderPct": 1.758
+            },
+            "9": {
+              "count": 14,
+              "fastestSeconds": 94.676,
+              "medianSeconds": 96.138,
+              "p25Seconds": 95.177,
+              "p75Seconds": 96.433,
+              "slowestSeconds": 97.991,
+              "medianGapTierLeaderSeconds": 1.462,
+              "medianGapTierLeaderPct": 1.5201
+            },
+            "10": {
+              "count": 13,
+              "fastestSeconds": 95.974,
+              "medianSeconds": 97.175,
+              "p25Seconds": 96.712,
+              "p75Seconds": 97.924,
+              "slowestSeconds": 100.688,
+              "medianGapTierLeaderSeconds": 1.201,
+              "medianGapTierLeaderPct": 1.2359
+            }
+          }
+        },
+        "sprintTotal": {
+          "available": true,
+          "overall": {
+            "count": 152,
+            "fastestSeconds": 951.867,
+            "medianSeconds": 978.286,
+            "p25Seconds": 970.729,
+            "p75Seconds": 994.39,
+            "slowestSeconds": 1072.45
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 951.867,
+              "medianSeconds": 969.016,
+              "p25Seconds": 961.013,
+              "p75Seconds": 972.87,
+              "slowestSeconds": 1028.177,
+              "medianGapTierLeaderSeconds": 17.149,
+              "medianGapTierLeaderPct": 1.7697
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 952.617,
+              "medianSeconds": 970.541,
+              "p25Seconds": 962.219,
+              "p75Seconds": 974.378,
+              "slowestSeconds": 1014.351,
+              "medianGapTierLeaderSeconds": 17.924,
+              "medianGapTierLeaderPct": 1.8468
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 957.111,
+              "medianSeconds": 973.223,
+              "p25Seconds": 967.577,
+              "p75Seconds": 984.481,
+              "slowestSeconds": 1002.187,
+              "medianGapTierLeaderSeconds": 16.111,
+              "medianGapTierLeaderPct": 1.6554
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 957.493,
+              "medianSeconds": 975.176,
+              "p25Seconds": 967.728,
+              "p75Seconds": 984.082,
+              "slowestSeconds": 1032.12,
+              "medianGapTierLeaderSeconds": 17.683,
+              "medianGapTierLeaderPct": 1.8132
+            },
+            "5": {
+              "count": 16,
+              "fastestSeconds": 958.158,
+              "medianSeconds": 972.521,
+              "p25Seconds": 969.284,
+              "p75Seconds": 988.381,
+              "slowestSeconds": 1045.492,
+              "medianGapTierLeaderSeconds": 14.363,
+              "medianGapTierLeaderPct": 1.4768
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 963.641,
+              "medianSeconds": 977.257,
+              "p25Seconds": 973.234,
+              "p75Seconds": 983.132,
+              "slowestSeconds": 1013.722,
+              "medianGapTierLeaderSeconds": 13.616,
+              "medianGapTierLeaderPct": 1.3933
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 959.368,
+              "medianSeconds": 983.165,
+              "p25Seconds": 979.018,
+              "p75Seconds": 990.552,
+              "slowestSeconds": 1013.147,
+              "medianGapTierLeaderSeconds": 23.797,
+              "medianGapTierLeaderPct": 2.4204
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 968.759,
+              "medianSeconds": 992.259,
+              "p25Seconds": 976.51,
+              "p75Seconds": 1003.424,
+              "slowestSeconds": 1015.685,
+              "medianGapTierLeaderSeconds": 23.5,
+              "medianGapTierLeaderPct": 2.3683
+            },
+            "9": {
+              "count": 14,
+              "fastestSeconds": 972.548,
+              "medianSeconds": 985.957,
+              "p25Seconds": 981.006,
+              "p75Seconds": 993.919,
+              "slowestSeconds": 1019.495,
+              "medianGapTierLeaderSeconds": 13.409,
+              "medianGapTierLeaderPct": 1.36
+            },
+            "10": {
+              "count": 13,
+              "fastestSeconds": 992.931,
+              "medianSeconds": 1016.613,
+              "p25Seconds": 1006.857,
+              "p75Seconds": 1030.58,
+              "slowestSeconds": 1072.45,
+              "medianGapTierLeaderSeconds": 23.682,
+              "medianGapTierLeaderPct": 2.3295
+            }
+          }
+        },
+        "featureFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 145,
+            "fastestSeconds": 92.79,
+            "medianSeconds": 94.814,
+            "p25Seconds": 94.233,
+            "p75Seconds": 95.511,
+            "slowestSeconds": 101.259
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 92.79,
+              "medianSeconds": 94.068,
+              "p25Seconds": 93.808,
+              "p75Seconds": 94.342,
+              "slowestSeconds": 96.046,
+              "medianGapTierLeaderSeconds": 1.278,
+              "medianGapTierLeaderPct": 1.3586
+            },
+            "2": {
+              "count": 15,
+              "fastestSeconds": 92.838,
+              "medianSeconds": 93.792,
+              "p25Seconds": 93.498,
+              "p75Seconds": 94.266,
+              "slowestSeconds": 94.528,
+              "medianGapTierLeaderSeconds": 0.954,
+              "medianGapTierLeaderPct": 1.0171
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 93.433,
+              "medianSeconds": 94.579,
+              "p25Seconds": 94.204,
+              "p75Seconds": 94.787,
+              "slowestSeconds": 95.462,
+              "medianGapTierLeaderSeconds": 1.147,
+              "medianGapTierLeaderPct": 1.2122
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 93.729,
+              "medianSeconds": 94.59,
+              "p25Seconds": 94.181,
+              "p75Seconds": 94.966,
+              "slowestSeconds": 95.8,
+              "medianGapTierLeaderSeconds": 0.861,
+              "medianGapTierLeaderPct": 0.9102
+            },
+            "5": {
+              "count": 11,
+              "fastestSeconds": 93.826,
+              "medianSeconds": 94.419,
+              "p25Seconds": 94.009,
+              "p75Seconds": 94.708,
+              "slowestSeconds": 95.071,
+              "medianGapTierLeaderSeconds": 0.593,
+              "medianGapTierLeaderPct": 0.6281
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 93.862,
+              "medianSeconds": 95.254,
+              "p25Seconds": 94.737,
+              "p75Seconds": 95.789,
+              "slowestSeconds": 97.329,
+              "medianGapTierLeaderSeconds": 1.392,
+              "medianGapTierLeaderPct": 1.4607
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 94.64,
+              "medianSeconds": 95.368,
+              "p25Seconds": 95.216,
+              "p75Seconds": 95.719,
+              "slowestSeconds": 96.703,
+              "medianGapTierLeaderSeconds": 0.728,
+              "medianGapTierLeaderPct": 0.7634
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 94.408,
+              "medianSeconds": 95.35,
+              "p25Seconds": 94.809,
+              "p75Seconds": 96.016,
+              "slowestSeconds": 97.263,
+              "medianGapTierLeaderSeconds": 0.942,
+              "medianGapTierLeaderPct": 0.9879
+            },
+            "9": {
+              "count": 14,
+              "fastestSeconds": 94.419,
+              "medianSeconds": 96.148,
+              "p25Seconds": 95.126,
+              "p75Seconds": 96.624,
+              "slowestSeconds": 98.646,
+              "medianGapTierLeaderSeconds": 1.728,
+              "medianGapTierLeaderPct": 1.7978
+            },
+            "10": {
+              "count": 12,
+              "fastestSeconds": 95.389,
+              "medianSeconds": 96.907,
+              "p25Seconds": 96.056,
+              "p75Seconds": 97.948,
+              "slowestSeconds": 101.259,
+              "medianGapTierLeaderSeconds": 1.518,
+              "medianGapTierLeaderPct": 1.5641
+            }
+          }
+        },
+        "featureTotal": {
+          "available": true,
+          "overall": {
+            "count": 138,
+            "fastestSeconds": 2525.111,
+            "medianSeconds": 2588.685,
+            "p25Seconds": 2569.501,
+            "p75Seconds": 2613.866,
+            "slowestSeconds": 2715.312
+          },
+          "byTier": {
+            "1": {
+              "count": 14,
+              "fastestSeconds": 2525.111,
+              "medianSeconds": 2553.36,
+              "p25Seconds": 2545.435,
+              "p75Seconds": 2567.929,
+              "slowestSeconds": 2588.13,
+              "medianGapTierLeaderSeconds": 28.249,
+              "medianGapTierLeaderPct": 1.1063
+            },
+            "2": {
+              "count": 13,
+              "fastestSeconds": 2545.123,
+              "medianSeconds": 2561.074,
+              "p25Seconds": 2551.598,
+              "p75Seconds": 2586.615,
+              "slowestSeconds": 2606.772,
+              "medianGapTierLeaderSeconds": 15.951,
+              "medianGapTierLeaderPct": 0.6228
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 2557.661,
+              "medianSeconds": 2575.406,
+              "p25Seconds": 2567.888,
+              "p75Seconds": 2587.927,
+              "slowestSeconds": 2613.329,
+              "medianGapTierLeaderSeconds": 17.745,
+              "medianGapTierLeaderPct": 0.689
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 2552.224,
+              "medianSeconds": 2591.381,
+              "p25Seconds": 2572.405,
+              "p75Seconds": 2611.347,
+              "slowestSeconds": 2651.145,
+              "medianGapTierLeaderSeconds": 39.157,
+              "medianGapTierLeaderPct": 1.511
+            },
+            "5": {
+              "count": 11,
+              "fastestSeconds": 2567.196,
+              "medianSeconds": 2571.818,
+              "p25Seconds": 2567.693,
+              "p75Seconds": 2581.333,
+              "slowestSeconds": 2595.076,
+              "medianGapTierLeaderSeconds": 4.622,
+              "medianGapTierLeaderPct": 0.1797
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 2564.456,
+              "medianSeconds": 2581.061,
+              "p25Seconds": 2570.457,
+              "p75Seconds": 2605.57,
+              "slowestSeconds": 2650.597,
+              "medianGapTierLeaderSeconds": 16.605,
+              "medianGapTierLeaderPct": 0.6433
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 2561.011,
+              "medianSeconds": 2600.798,
+              "p25Seconds": 2593.631,
+              "p75Seconds": 2627.34,
+              "slowestSeconds": 2676.089,
+              "medianGapTierLeaderSeconds": 39.787,
+              "medianGapTierLeaderPct": 1.5298
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 2568.926,
+              "medianSeconds": 2615.971,
+              "p25Seconds": 2600.513,
+              "p75Seconds": 2634.722,
+              "slowestSeconds": 2665.245,
+              "medianGapTierLeaderSeconds": 47.045,
+              "medianGapTierLeaderPct": 1.7984
+            },
+            "9": {
+              "count": 13,
+              "fastestSeconds": 2582.985,
+              "medianSeconds": 2621.073,
+              "p25Seconds": 2603.441,
+              "p75Seconds": 2629.291,
+              "slowestSeconds": 2667.944,
+              "medianGapTierLeaderSeconds": 38.088,
+              "medianGapTierLeaderPct": 1.4531
+            },
+            "10": {
+              "count": 10,
+              "fastestSeconds": 2604.852,
+              "medianSeconds": 2652.059,
+              "p25Seconds": 2623.066,
+              "p75Seconds": 2668.137,
+              "slowestSeconds": 2715.312,
+              "medianGapTierLeaderSeconds": 47.206,
+              "medianGapTierLeaderPct": 1.78
+            }
+          }
+        }
+      },
+      "transitions": {
+        "qualifyingToSprintFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.8131,
+              "p25Pct": 0.4454,
+              "p75Pct": 1.1478
+            },
+            "2": {
+              "count": 14,
+              "medianPct": 1.1321,
+              "p25Pct": 0.8727,
+              "p75Pct": 1.7109
+            },
+            "3": {
+              "count": 16,
+              "medianPct": 1.1364,
+              "p25Pct": 0.7625,
+              "p75Pct": 1.5495
+            },
+            "4": {
+              "count": 16,
+              "medianPct": 1.2646,
+              "p25Pct": 0.8876,
+              "p75Pct": 1.8556
+            },
+            "5": {
+              "count": 16,
+              "medianPct": 1.0919,
+              "p25Pct": 0.5718,
+              "p75Pct": 1.6231
+            },
+            "6": {
+              "count": 15,
+              "medianPct": 0.9655,
+              "p25Pct": 0.6642,
+              "p75Pct": 1.2929
+            },
+            "7": {
+              "count": 15,
+              "medianPct": 1.2001,
+              "p25Pct": 0.6046,
+              "p75Pct": 1.7062
+            },
+            "8": {
+              "count": 15,
+              "medianPct": 0.9464,
+              "p25Pct": 0.3413,
+              "p75Pct": 1.2432
+            },
+            "9": {
+              "count": 13,
+              "medianPct": 0.1296,
+              "p25Pct": -0.0462,
+              "p75Pct": 0.7631
+            },
+            "10": {
+              "count": 13,
+              "medianPct": 0.2265,
+              "p25Pct": -0.0843,
+              "p75Pct": 0.56
+            }
+          }
+        },
+        "qualifyingToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.4233,
+              "p25Pct": -0.1425,
+              "p75Pct": 0.8775
+            },
+            "2": {
+              "count": 14,
+              "medianPct": 0.0917,
+              "p25Pct": -0.1422,
+              "p75Pct": 0.5769
+            },
+            "3": {
+              "count": 16,
+              "medianPct": 0.402,
+              "p25Pct": 0.1756,
+              "p75Pct": 0.7534
+            },
+            "4": {
+              "count": 16,
+              "medianPct": 0.5027,
+              "p25Pct": 0.1615,
+              "p75Pct": 1.2334
+            },
+            "5": {
+              "count": 11,
+              "medianPct": 0.019,
+              "p25Pct": -0.214,
+              "p75Pct": 0.2584
+            },
+            "6": {
+              "count": 15,
+              "medianPct": 0.2527,
+              "p25Pct": -0.2307,
+              "p75Pct": 0.9427
+            },
+            "7": {
+              "count": 14,
+              "medianPct": 0.877,
+              "p25Pct": 0.3013,
+              "p75Pct": 1.0681
+            },
+            "8": {
+              "count": 15,
+              "medianPct": 0.2927,
+              "p25Pct": -0.2942,
+              "p75Pct": 1.1982
+            },
+            "9": {
+              "count": 13,
+              "medianPct": 0.2358,
+              "p25Pct": -0.0095,
+              "p75Pct": 0.9935
+            },
+            "10": {
+              "count": 12,
+              "medianPct": 0.188,
+              "p25Pct": -0.1669,
+              "p75Pct": 0.3508
+            }
+          }
+        },
+        "sprintToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": -0.1705,
+              "p25Pct": -1.1731,
+              "p75Pct": 0.1414
+            },
+            "2": {
+              "count": 15,
+              "medianPct": -0.9852,
+              "p25Pct": -1.5961,
+              "p75Pct": -0.3672
+            },
+            "3": {
+              "count": 16,
+              "medianPct": -0.5686,
+              "p25Pct": -1.3508,
+              "p75Pct": -0.1655
+            },
+            "4": {
+              "count": 16,
+              "medianPct": -0.7699,
+              "p25Pct": -1.1119,
+              "p75Pct": -0.287
+            },
+            "5": {
+              "count": 11,
+              "medianPct": -1.1489,
+              "p25Pct": -1.6598,
+              "p75Pct": 0.15
+            },
+            "6": {
+              "count": 16,
+              "medianPct": -0.5078,
+              "p25Pct": -1.6235,
+              "p75Pct": -0.0572
+            },
+            "7": {
+              "count": 15,
+              "medianPct": -0.7389,
+              "p25Pct": -1.3393,
+              "p75Pct": 0.0709
+            },
+            "8": {
+              "count": 15,
+              "medianPct": -0.2755,
+              "p25Pct": -0.9769,
+              "p75Pct": 0.2805
+            },
+            "9": {
+              "count": 14,
+              "medianPct": -0.1366,
+              "p25Pct": -0.2586,
+              "p75Pct": 0.5151
+            },
+            "10": {
+              "count": 12,
+              "medianPct": -0.1058,
+              "p25Pct": -0.9576,
+              "p75Pct": 0.3542
+            }
+          }
+        }
+      },
+      "focusDriver": {
+        "id": "Radiate79",
+        "results": {
+          "qualifying": {
+            "rank": 100,
+            "tier": 8,
+            "tierRank": 5,
+            "time": "01:34.915",
+            "timeSeconds": 94.915,
+            "gapOverallLeaderSeconds": 2.033,
+            "gapTierLeaderSeconds": 0.68
+          },
+          "sprintFastestLap": {
+            "rank": 50,
+            "tier": 8,
+            "tierRank": 3,
+            "time": "01:35.040",
+            "timeSeconds": 95.04,
+            "gapOverallLeaderSeconds": 1.463,
+            "gapTierLeaderSeconds": 0.766
+          },
+          "sprintTotal": {
+            "rank": 42,
+            "tier": 8,
+            "tierRank": 3,
+            "time": "16:11.289",
+            "timeSeconds": 971.289,
+            "gapOverallLeaderSeconds": 19.422,
+            "gapTierLeaderSeconds": 2.53
+          },
+          "featureFastestLap": {
+            "rank": 66,
+            "tier": 8,
+            "tierRank": 4,
+            "time": "01:34.741",
+            "timeSeconds": 94.741,
+            "gapOverallLeaderSeconds": 1.951,
+            "gapTierLeaderSeconds": 0.333
+          },
+          "featureTotal": {
+            "rank": 83,
+            "tier": 8,
+            "tierRank": 4,
+            "time": "43:19.494",
+            "timeSeconds": 2599.494,
+            "gapOverallLeaderSeconds": 74.383,
+            "gapTierLeaderSeconds": 30.568
+          }
+        }
+      }
+    },
+    {
+      "eventId": "ALR-BENCH-C",
+      "trackId": null,
+      "trackName": null,
+      "metrics": {
+        "qualifying": {
+          "available": true,
+          "overall": {
+            "count": 141,
+            "fastestSeconds": 103.479,
+            "medianSeconds": 105.518,
+            "p25Seconds": 104.865,
+            "p75Seconds": 106.364,
+            "slowestSeconds": 112.234
+          },
+          "byTier": {
+            "1": {
+              "count": 12,
+              "fastestSeconds": 103.509,
+              "medianSeconds": 104.369,
+              "p25Seconds": 104.212,
+              "p75Seconds": 104.756,
+              "slowestSeconds": 105.046,
+              "medianGapTierLeaderSeconds": 0.861,
+              "medianGapTierLeaderPct": 0.8245
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 103.479,
+              "medianSeconds": 104.593,
+              "p25Seconds": 104.358,
+              "p75Seconds": 105.061,
+              "slowestSeconds": 105.471,
+              "medianGapTierLeaderSeconds": 1.114,
+              "medianGapTierLeaderPct": 1.0651
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 103.716,
+              "medianSeconds": 104.868,
+              "p25Seconds": 104.636,
+              "p75Seconds": 106.135,
+              "slowestSeconds": 107.193,
+              "medianGapTierLeaderSeconds": 1.151,
+              "medianGapTierLeaderPct": 1.0978
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 104.505,
+              "medianSeconds": 105.295,
+              "p25Seconds": 104.959,
+              "p75Seconds": 105.684,
+              "slowestSeconds": 106.408,
+              "medianGapTierLeaderSeconds": 0.79,
+              "medianGapTierLeaderPct": 0.7503
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 104.926,
+              "medianSeconds": 105.336,
+              "p25Seconds": 105.062,
+              "p75Seconds": 105.505,
+              "slowestSeconds": 106.228,
+              "medianGapTierLeaderSeconds": 0.41,
+              "medianGapTierLeaderPct": 0.3892
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 104.668,
+              "medianSeconds": 105.542,
+              "p25Seconds": 105.149,
+              "p75Seconds": 106.21,
+              "slowestSeconds": 107.191,
+              "medianGapTierLeaderSeconds": 0.874,
+              "medianGapTierLeaderPct": 0.8281
+            },
+            "7": {
+              "count": 14,
+              "fastestSeconds": 105.374,
+              "medianSeconds": 105.986,
+              "p25Seconds": 105.572,
+              "p75Seconds": 106.343,
+              "slowestSeconds": 108.028,
+              "medianGapTierLeaderSeconds": 0.611,
+              "medianGapTierLeaderPct": 0.5769
+            },
+            "8": {
+              "count": 13,
+              "fastestSeconds": 104.286,
+              "medianSeconds": 106.343,
+              "p25Seconds": 105.841,
+              "p75Seconds": 106.842,
+              "slowestSeconds": 108.06,
+              "medianGapTierLeaderSeconds": 2.057,
+              "medianGapTierLeaderPct": 1.9343
+            },
+            "9": {
+              "count": 12,
+              "fastestSeconds": 105.822,
+              "medianSeconds": 106.29,
+              "p25Seconds": 106.153,
+              "p75Seconds": 107.272,
+              "slowestSeconds": 108.31,
+              "medianGapTierLeaderSeconds": 0.468,
+              "medianGapTierLeaderPct": 0.4403
+            },
+            "10": {
+              "count": 14,
+              "fastestSeconds": 106.362,
+              "medianSeconds": 107.678,
+              "p25Seconds": 107.16,
+              "p75Seconds": 108.668,
+              "slowestSeconds": 112.234,
+              "medianGapTierLeaderSeconds": 1.317,
+              "medianGapTierLeaderPct": 1.2226
+            }
+          }
+        },
+        "sprintFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 127,
+            "fastestSeconds": 103.43,
+            "medianSeconds": 105.609,
+            "p25Seconds": 105.209,
+            "p75Seconds": 106.162,
+            "slowestSeconds": 108.19
+          },
+          "byTier": {
+            "1": {
+              "count": 13,
+              "fastestSeconds": 103.43,
+              "medianSeconds": 105.076,
+              "p25Seconds": 104.677,
+              "p75Seconds": 105.48,
+              "slowestSeconds": 105.714,
+              "medianGapTierLeaderSeconds": 1.646,
+              "medianGapTierLeaderPct": 1.5665
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 103.542,
+              "medianSeconds": 104.865,
+              "p25Seconds": 104.729,
+              "p75Seconds": 105.108,
+              "slowestSeconds": 105.494,
+              "medianGapTierLeaderSeconds": 1.324,
+              "medianGapTierLeaderPct": 1.262
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 104.564,
+              "medianSeconds": 105.441,
+              "p25Seconds": 105.234,
+              "p75Seconds": 105.598,
+              "slowestSeconds": 106.183,
+              "medianGapTierLeaderSeconds": 0.877,
+              "medianGapTierLeaderPct": 0.8317
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 104.671,
+              "medianSeconds": 105.513,
+              "p25Seconds": 105.352,
+              "p75Seconds": 105.645,
+              "slowestSeconds": 108.19,
+              "medianGapTierLeaderSeconds": 0.842,
+              "medianGapTierLeaderPct": 0.798
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 105.068,
+              "medianSeconds": 105.492,
+              "p25Seconds": 105.226,
+              "p75Seconds": 105.787,
+              "slowestSeconds": 105.971,
+              "medianGapTierLeaderSeconds": 0.423,
+              "medianGapTierLeaderPct": 0.4015
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 105.245,
+              "medianSeconds": 105.665,
+              "p25Seconds": 105.483,
+              "p75Seconds": 106.003,
+              "slowestSeconds": 106.86,
+              "medianGapTierLeaderSeconds": 0.42,
+              "medianGapTierLeaderPct": 0.3975
+            },
+            "7": {
+              "count": 14,
+              "fastestSeconds": 105.64,
+              "medianSeconds": 106.322,
+              "p25Seconds": 105.983,
+              "p75Seconds": 106.847,
+              "slowestSeconds": 108.185,
+              "medianGapTierLeaderSeconds": 0.682,
+              "medianGapTierLeaderPct": 0.6414
+            },
+            "8": {
+              "count": 13,
+              "fastestSeconds": 105.031,
+              "medianSeconds": 106.494,
+              "p25Seconds": 106.058,
+              "p75Seconds": 106.582,
+              "slowestSeconds": 107.431,
+              "medianGapTierLeaderSeconds": 1.463,
+              "medianGapTierLeaderPct": 1.3738
+            },
+            "9": {
+              "count": 13,
+              "fastestSeconds": 105.743,
+              "medianSeconds": 106.751,
+              "p25Seconds": 106.508,
+              "p75Seconds": 107.053,
+              "slowestSeconds": 107.436,
+              "medianGapTierLeaderSeconds": 1.008,
+              "medianGapTierLeaderPct": 0.9443
+            }
+          }
+        },
+        "sprintTotal": {
+          "available": true,
+          "overall": {
+            "count": 142,
+            "fastestSeconds": 946.241,
+            "medianSeconds": 969.551,
+            "p25Seconds": 963.553,
+            "p75Seconds": 981.847,
+            "slowestSeconds": 1035.034
+          },
+          "byTier": {
+            "1": {
+              "count": 13,
+              "fastestSeconds": 946.241,
+              "medianSeconds": 961.159,
+              "p25Seconds": 960.061,
+              "p75Seconds": 963.951,
+              "slowestSeconds": 965.677,
+              "medianGapTierLeaderSeconds": 14.918,
+              "medianGapTierLeaderPct": 1.5521
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 950.29,
+              "medianSeconds": 960.269,
+              "p25Seconds": 956.731,
+              "p75Seconds": 967.533,
+              "slowestSeconds": 976.998,
+              "medianGapTierLeaderSeconds": 9.979,
+              "medianGapTierLeaderPct": 1.0392
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 953.496,
+              "medianSeconds": 964.838,
+              "p25Seconds": 962.768,
+              "p75Seconds": 968.904,
+              "slowestSeconds": 986.221,
+              "medianGapTierLeaderSeconds": 11.342,
+              "medianGapTierLeaderPct": 1.1755
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 953.049,
+              "medianSeconds": 966.624,
+              "p25Seconds": 962.461,
+              "p75Seconds": 972.678,
+              "slowestSeconds": 998.487,
+              "medianGapTierLeaderSeconds": 13.575,
+              "medianGapTierLeaderPct": 1.4044
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 961.628,
+              "medianSeconds": 966.12,
+              "p25Seconds": 964.558,
+              "p75Seconds": 971.009,
+              "slowestSeconds": 974.415,
+              "medianGapTierLeaderSeconds": 4.492,
+              "medianGapTierLeaderPct": 0.465
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 958.737,
+              "medianSeconds": 968.76,
+              "p25Seconds": 964.192,
+              "p75Seconds": 974.81,
+              "slowestSeconds": 1016.306,
+              "medianGapTierLeaderSeconds": 10.023,
+              "medianGapTierLeaderPct": 1.0346
+            },
+            "7": {
+              "count": 14,
+              "fastestSeconds": 961.085,
+              "medianSeconds": 977.003,
+              "p25Seconds": 969.427,
+              "p75Seconds": 986.164,
+              "slowestSeconds": 1004.366,
+              "medianGapTierLeaderSeconds": 15.918,
+              "medianGapTierLeaderPct": 1.6254
+            },
+            "8": {
+              "count": 13,
+              "fastestSeconds": 966.12,
+              "medianSeconds": 977.371,
+              "p25Seconds": 969.68,
+              "p75Seconds": 982.088,
+              "slowestSeconds": 1001.217,
+              "medianGapTierLeaderSeconds": 11.251,
+              "medianGapTierLeaderPct": 1.1511
+            },
+            "9": {
+              "count": 13,
+              "fastestSeconds": 970.349,
+              "medianSeconds": 981.894,
+              "p25Seconds": 975.547,
+              "p75Seconds": 984.589,
+              "slowestSeconds": 1008.525,
+              "medianGapTierLeaderSeconds": 11.545,
+              "medianGapTierLeaderPct": 1.1758
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 976.464,
+              "medianSeconds": 995.329,
+              "p25Seconds": 984.955,
+              "p75Seconds": 1000.307,
+              "slowestSeconds": 1035.034,
+              "medianGapTierLeaderSeconds": 18.865,
+              "medianGapTierLeaderPct": 1.8954
+            }
+          }
+        },
+        "featureFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 126,
+            "fastestSeconds": 103.872,
+            "medianSeconds": 105.963,
+            "p25Seconds": 105.322,
+            "p75Seconds": 106.812,
+            "slowestSeconds": 109.101
+          },
+          "byTier": {
+            "1": {
+              "count": 13,
+              "fastestSeconds": 103.872,
+              "medianSeconds": 105.766,
+              "p25Seconds": 104.576,
+              "p75Seconds": 106.381,
+              "slowestSeconds": 106.83,
+              "medianGapTierLeaderSeconds": 1.894,
+              "medianGapTierLeaderPct": 1.7907
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 104.128,
+              "medianSeconds": 105.269,
+              "p25Seconds": 104.908,
+              "p75Seconds": 105.802,
+              "slowestSeconds": 107.956,
+              "medianGapTierLeaderSeconds": 1.141,
+              "medianGapTierLeaderPct": 1.0839
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 104.16,
+              "medianSeconds": 105.16,
+              "p25Seconds": 104.725,
+              "p75Seconds": 105.686,
+              "slowestSeconds": 107.535,
+              "medianGapTierLeaderSeconds": 1.001,
+              "medianGapTierLeaderPct": 0.9513
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 105.112,
+              "medianSeconds": 105.795,
+              "p25Seconds": 105.593,
+              "p75Seconds": 106.552,
+              "slowestSeconds": 107.877,
+              "medianGapTierLeaderSeconds": 0.683,
+              "medianGapTierLeaderPct": 0.6456
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 104.911,
+              "medianSeconds": 105.404,
+              "p25Seconds": 105.274,
+              "p75Seconds": 106.221,
+              "slowestSeconds": 106.949,
+              "medianGapTierLeaderSeconds": 0.493,
+              "medianGapTierLeaderPct": 0.4677
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 105.558,
+              "medianSeconds": 106.419,
+              "p25Seconds": 106.038,
+              "p75Seconds": 106.534,
+              "slowestSeconds": 108.227,
+              "medianGapTierLeaderSeconds": 0.861,
+              "medianGapTierLeaderPct": 0.809
+            },
+            "7": {
+              "count": 11,
+              "fastestSeconds": 105.794,
+              "medianSeconds": 106.851,
+              "p25Seconds": 106.221,
+              "p75Seconds": 107.233,
+              "slowestSeconds": 108.613,
+              "medianGapTierLeaderSeconds": 1.057,
+              "medianGapTierLeaderPct": 0.9892
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 105.225,
+              "medianSeconds": 106.411,
+              "p25Seconds": 105.998,
+              "p75Seconds": 107.206,
+              "slowestSeconds": 108.241,
+              "medianGapTierLeaderSeconds": 1.186,
+              "medianGapTierLeaderPct": 1.1143
+            },
+            "9": {
+              "count": 14,
+              "fastestSeconds": 106.157,
+              "medianSeconds": 107.111,
+              "p25Seconds": 106.753,
+              "p75Seconds": 107.627,
+              "slowestSeconds": 109.101,
+              "medianGapTierLeaderSeconds": 0.954,
+              "medianGapTierLeaderPct": 0.8902
+            }
+          }
+        },
+        "featureTotal": {
+          "available": true,
+          "overall": {
+            "count": 136,
+            "fastestSeconds": 2500.267,
+            "medianSeconds": 2558.178,
+            "p25Seconds": 2535.384,
+            "p75Seconds": 2572.712,
+            "slowestSeconds": 2642.784
+          },
+          "byTier": {
+            "1": {
+              "count": 13,
+              "fastestSeconds": 2500.267,
+              "medianSeconds": 2526.601,
+              "p25Seconds": 2514.613,
+              "p75Seconds": 2534.989,
+              "slowestSeconds": 2561.919,
+              "medianGapTierLeaderSeconds": 26.334,
+              "medianGapTierLeaderPct": 1.0423
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 2501.656,
+              "medianSeconds": 2532.809,
+              "p25Seconds": 2512.083,
+              "p75Seconds": 2547.415,
+              "slowestSeconds": 2572.702,
+              "medianGapTierLeaderSeconds": 31.153,
+              "medianGapTierLeaderPct": 1.2299
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 2519.756,
+              "medianSeconds": 2539.044,
+              "p25Seconds": 2527.886,
+              "p75Seconds": 2552.007,
+              "slowestSeconds": 2561.664,
+              "medianGapTierLeaderSeconds": 19.288,
+              "medianGapTierLeaderPct": 0.7596
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 2512.862,
+              "medianSeconds": 2548.388,
+              "p25Seconds": 2535.575,
+              "p75Seconds": 2553.01,
+              "slowestSeconds": 2582.92,
+              "medianGapTierLeaderSeconds": 35.526,
+              "medianGapTierLeaderPct": 1.3941
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 2535.516,
+              "medianSeconds": 2560.33,
+              "p25Seconds": 2554.31,
+              "p75Seconds": 2568.92,
+              "slowestSeconds": 2591.353,
+              "medianGapTierLeaderSeconds": 24.814,
+              "medianGapTierLeaderPct": 0.9692
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 2528.218,
+              "medianSeconds": 2557.945,
+              "p25Seconds": 2545.119,
+              "p75Seconds": 2568.779,
+              "slowestSeconds": 2584.194,
+              "medianGapTierLeaderSeconds": 29.727,
+              "medianGapTierLeaderPct": 1.1621
+            },
+            "7": {
+              "count": 10,
+              "fastestSeconds": 2551.343,
+              "medianSeconds": 2570.181,
+              "p25Seconds": 2565.561,
+              "p75Seconds": 2572.593,
+              "slowestSeconds": 2581.691,
+              "medianGapTierLeaderSeconds": 18.838,
+              "medianGapTierLeaderPct": 0.7329
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 2531.315,
+              "medianSeconds": 2573.323,
+              "p25Seconds": 2558.814,
+              "p75Seconds": 2599.646,
+              "slowestSeconds": 2615.531,
+              "medianGapTierLeaderSeconds": 42.008,
+              "medianGapTierLeaderPct": 1.6323
+            },
+            "9": {
+              "count": 14,
+              "fastestSeconds": 2552.585,
+              "medianSeconds": 2585.018,
+              "p25Seconds": 2571.084,
+              "p75Seconds": 2594.757,
+              "slowestSeconds": 2630.318,
+              "medianGapTierLeaderSeconds": 32.433,
+              "medianGapTierLeaderPct": 1.2545
+            },
+            "10": {
+              "count": 12,
+              "fastestSeconds": 2582.821,
+              "medianSeconds": 2598.817,
+              "p25Seconds": 2589.621,
+              "p75Seconds": 2620.873,
+              "slowestSeconds": 2642.784,
+              "medianGapTierLeaderSeconds": 15.996,
+              "medianGapTierLeaderPct": 0.6154
+            }
+          }
+        }
+      },
+      "transitions": {
+        "qualifyingToSprintFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 12,
+              "medianPct": 0.693,
+              "p25Pct": 0.3946,
+              "p75Pct": 0.7227
+            },
+            "2": {
+              "count": 16,
+              "medianPct": 0.28,
+              "p25Pct": -0.0082,
+              "p75Pct": 0.4263
+            },
+            "3": {
+              "count": 15,
+              "medianPct": 0.3571,
+              "p25Pct": -0.0428,
+              "p75Pct": 0.7075
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.1367,
+              "p25Pct": 0.0266,
+              "p75Pct": 0.4277
+            },
+            "5": {
+              "count": 12,
+              "medianPct": 0.1259,
+              "p25Pct": -0.0771,
+              "p75Pct": 0.341
+            },
+            "6": {
+              "count": 16,
+              "medianPct": 0.1503,
+              "p25Pct": -0.0294,
+              "p75Pct": 0.3233
+            },
+            "7": {
+              "count": 14,
+              "medianPct": 0.3422,
+              "p25Pct": 0.1468,
+              "p75Pct": 0.5702
+            },
+            "8": {
+              "count": 13,
+              "medianPct": 0.1843,
+              "p25Pct": -0.3706,
+              "p75Pct": 0.3122
+            },
+            "9": {
+              "count": 12,
+              "medianPct": 0.0553,
+              "p25Pct": -0.2243,
+              "p75Pct": 0.4981
+            }
+          }
+        },
+        "qualifyingToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 12,
+              "medianPct": 1.1349,
+              "p25Pct": 0.343,
+              "p75Pct": 1.7607
+            },
+            "2": {
+              "count": 16,
+              "medianPct": 0.6877,
+              "p25Pct": 0.4912,
+              "p75Pct": 1.1241
+            },
+            "3": {
+              "count": 16,
+              "medianPct": -0.1229,
+              "p25Pct": -0.2493,
+              "p75Pct": 0.4914
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.5518,
+              "p25Pct": 0.3813,
+              "p75Pct": 1.1218
+            },
+            "5": {
+              "count": 13,
+              "medianPct": 0.1504,
+              "p25Pct": -0.0957,
+              "p75Pct": 0.6309
+            },
+            "6": {
+              "count": 16,
+              "medianPct": 0.619,
+              "p25Pct": 0.398,
+              "p75Pct": 0.9764
+            },
+            "7": {
+              "count": 11,
+              "medianPct": 0.4557,
+              "p25Pct": 0.053,
+              "p75Pct": 1.0806
+            },
+            "8": {
+              "count": 12,
+              "medianPct": -0.0219,
+              "p25Pct": -0.682,
+              "p75Pct": 1.378
+            },
+            "9": {
+              "count": 12,
+              "medianPct": 0.8802,
+              "p25Pct": 0.5681,
+              "p75Pct": 1.1925
+            }
+          }
+        },
+        "sprintToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 13,
+              "medianPct": 0.5983,
+              "p25Pct": 0.1369,
+              "p75Pct": 1.242
+            },
+            "2": {
+              "count": 16,
+              "medianPct": 0.4052,
+              "p25Pct": 0.1386,
+              "p75Pct": 0.8685
+            },
+            "3": {
+              "count": 15,
+              "medianPct": -0.2658,
+              "p25Pct": -0.5982,
+              "p75Pct": 0.0535
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.2085,
+              "p25Pct": 0.1499,
+              "p75Pct": 0.8109
+            },
+            "5": {
+              "count": 12,
+              "medianPct": 0.0723,
+              "p25Pct": -0.1855,
+              "p75Pct": 0.3929
+            },
+            "6": {
+              "count": 16,
+              "medianPct": 0.5508,
+              "p25Pct": 0.2,
+              "p75Pct": 0.835
+            },
+            "7": {
+              "count": 11,
+              "medianPct": 0.1638,
+              "p25Pct": -0.3744,
+              "p75Pct": 0.7253
+            },
+            "8": {
+              "count": 12,
+              "medianPct": -0.1954,
+              "p25Pct": -0.389,
+              "p75Pct": 1.0875
+            },
+            "9": {
+              "count": 13,
+              "medianPct": 0.3859,
+              "p25Pct": 0.2941,
+              "p75Pct": 0.9031
+            }
+          }
+        }
+      },
+      "focusDriver": {
+        "id": "Radiate79",
+        "results": {
+          "qualifying": {
+            "rank": 83,
+            "tier": 8,
+            "tierRank": 4,
+            "time": "01:45.841",
+            "timeSeconds": 105.841,
+            "gapOverallLeaderSeconds": 2.362,
+            "gapTierLeaderSeconds": 1.555
+          },
+          "sprintFastestLap": {
+            "rank": 93,
+            "tier": 8,
+            "tierRank": 4,
+            "time": "01:46.058",
+            "timeSeconds": 106.058,
+            "gapOverallLeaderSeconds": 2.628,
+            "gapTierLeaderSeconds": 1.027
+          },
+          "sprintTotal": {
+            "rank": 108,
+            "tier": 8,
+            "tierRank": 10,
+            "time": "16:22.088",
+            "timeSeconds": 982.088,
+            "gapOverallLeaderSeconds": 35.847,
+            "gapTierLeaderSeconds": 15.968
+          },
+          "featureFastestLap": {
+            "rank": 105,
+            "tier": 8,
+            "tierRank": 9,
+            "time": "01:47.162",
+            "timeSeconds": 107.162,
+            "gapOverallLeaderSeconds": 3.29,
+            "gapTierLeaderSeconds": 1.937
+          },
+          "featureTotal": {
+            "rank": 29,
+            "tier": 8,
+            "tierRank": 1,
+            "time": "42:11.315",
+            "timeSeconds": 2531.315,
+            "gapOverallLeaderSeconds": 31.048,
+            "gapTierLeaderSeconds": 0.0
+          }
+        }
+      }
+    },
+    {
+      "eventId": "ALR-BENCH-D",
+      "trackId": null,
+      "trackName": null,
+      "metrics": {
+        "qualifying": {
+          "available": true,
+          "overall": {
+            "count": 151,
+            "fastestSeconds": 85.58,
+            "medianSeconds": 87.221,
+            "p25Seconds": 86.782,
+            "p75Seconds": 87.82,
+            "slowestSeconds": 91.216
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 85.58,
+              "medianSeconds": 86.254,
+              "p25Seconds": 86.012,
+              "p75Seconds": 86.386,
+              "slowestSeconds": 86.507,
+              "medianGapTierLeaderSeconds": 0.674,
+              "medianGapTierLeaderPct": 0.7814
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 85.767,
+              "medianSeconds": 86.478,
+              "p25Seconds": 86.206,
+              "p75Seconds": 86.824,
+              "slowestSeconds": 87.09,
+              "medianGapTierLeaderSeconds": 0.711,
+              "medianGapTierLeaderPct": 0.8221
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 86.229,
+              "medianSeconds": 87.044,
+              "p25Seconds": 86.788,
+              "p75Seconds": 87.405,
+              "slowestSeconds": 88.094,
+              "medianGapTierLeaderSeconds": 0.816,
+              "medianGapTierLeaderPct": 0.9369
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 86.275,
+              "medianSeconds": 86.987,
+              "p25Seconds": 86.897,
+              "p75Seconds": 87.164,
+              "slowestSeconds": 87.766,
+              "medianGapTierLeaderSeconds": 0.712,
+              "medianGapTierLeaderPct": 0.8179
+            },
+            "5": {
+              "count": 14,
+              "fastestSeconds": 86.569,
+              "medianSeconds": 87.119,
+              "p25Seconds": 86.748,
+              "p75Seconds": 87.364,
+              "slowestSeconds": 88.098,
+              "medianGapTierLeaderSeconds": 0.549,
+              "medianGapTierLeaderPct": 0.6306
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 86.686,
+              "medianSeconds": 87.164,
+              "p25Seconds": 86.989,
+              "p75Seconds": 87.473,
+              "slowestSeconds": 88.716,
+              "medianGapTierLeaderSeconds": 0.478,
+              "medianGapTierLeaderPct": 0.5484
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 86.555,
+              "medianSeconds": 87.514,
+              "p25Seconds": 87.209,
+              "p75Seconds": 87.82,
+              "slowestSeconds": 88.397,
+              "medianGapTierLeaderSeconds": 0.959,
+              "medianGapTierLeaderPct": 1.0958
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 86.874,
+              "medianSeconds": 87.582,
+              "p25Seconds": 87.475,
+              "p75Seconds": 87.974,
+              "slowestSeconds": 88.303,
+              "medianGapTierLeaderSeconds": 0.708,
+              "medianGapTierLeaderPct": 0.8078
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 87.414,
+              "medianSeconds": 87.892,
+              "p25Seconds": 87.629,
+              "p75Seconds": 88.445,
+              "slowestSeconds": 89.018,
+              "medianGapTierLeaderSeconds": 0.478,
+              "medianGapTierLeaderPct": 0.5438
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 87.414,
+              "medianSeconds": 88.782,
+              "p25Seconds": 88.428,
+              "p75Seconds": 89.019,
+              "slowestSeconds": 91.216,
+              "medianGapTierLeaderSeconds": 1.368,
+              "medianGapTierLeaderPct": 1.5409
+            }
+          }
+        },
+        "sprintFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 153,
+            "fastestSeconds": 85.602,
+            "medianSeconds": 87.132,
+            "p25Seconds": 86.589,
+            "p75Seconds": 87.722,
+            "slowestSeconds": 90.544
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 85.602,
+              "medianSeconds": 85.868,
+              "p25Seconds": 85.809,
+              "p75Seconds": 86.228,
+              "slowestSeconds": 86.68,
+              "medianGapTierLeaderSeconds": 0.266,
+              "medianGapTierLeaderPct": 0.3098
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 85.635,
+              "medianSeconds": 86.424,
+              "p25Seconds": 86.178,
+              "p75Seconds": 86.523,
+              "slowestSeconds": 86.882,
+              "medianGapTierLeaderSeconds": 0.789,
+              "medianGapTierLeaderPct": 0.9135
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 86.16,
+              "medianSeconds": 87.019,
+              "p25Seconds": 86.75,
+              "p75Seconds": 87.219,
+              "slowestSeconds": 88.091,
+              "medianGapTierLeaderSeconds": 0.859,
+              "medianGapTierLeaderPct": 0.9865
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 86.28,
+              "medianSeconds": 86.941,
+              "p25Seconds": 86.697,
+              "p75Seconds": 87.124,
+              "slowestSeconds": 87.714,
+              "medianGapTierLeaderSeconds": 0.661,
+              "medianGapTierLeaderPct": 0.7609
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 86.111,
+              "medianSeconds": 86.821,
+              "p25Seconds": 86.574,
+              "p75Seconds": 87.26,
+              "slowestSeconds": 87.659,
+              "medianGapTierLeaderSeconds": 0.71,
+              "medianGapTierLeaderPct": 0.8178
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 86.536,
+              "medianSeconds": 87.136,
+              "p25Seconds": 87.036,
+              "p75Seconds": 87.348,
+              "slowestSeconds": 88.579,
+              "medianGapTierLeaderSeconds": 0.599,
+              "medianGapTierLeaderPct": 0.688
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 86.693,
+              "medianSeconds": 87.662,
+              "p25Seconds": 87.388,
+              "p75Seconds": 87.944,
+              "slowestSeconds": 88.737,
+              "medianGapTierLeaderSeconds": 0.968,
+              "medianGapTierLeaderPct": 1.1048
+            },
+            "8": {
+              "count": 13,
+              "fastestSeconds": 86.57,
+              "medianSeconds": 87.548,
+              "p25Seconds": 87.468,
+              "p75Seconds": 87.722,
+              "slowestSeconds": 88.181,
+              "medianGapTierLeaderSeconds": 0.978,
+              "medianGapTierLeaderPct": 1.1171
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 87.091,
+              "medianSeconds": 87.915,
+              "p25Seconds": 87.635,
+              "p75Seconds": 88.199,
+              "slowestSeconds": 88.737,
+              "medianGapTierLeaderSeconds": 0.824,
+              "medianGapTierLeaderPct": 0.9367
+            },
+            "10": {
+              "count": 16,
+              "fastestSeconds": 87.349,
+              "medianSeconds": 88.736,
+              "p25Seconds": 88.379,
+              "p75Seconds": 89.203,
+              "slowestSeconds": 90.544,
+              "medianGapTierLeaderSeconds": 1.387,
+              "medianGapTierLeaderPct": 1.5625
+            }
+          }
+        },
+        "sprintTotal": {
+          "available": true,
+          "overall": {
+            "count": 152,
+            "fastestSeconds": 951.423,
+            "medianSeconds": 977.554,
+            "p25Seconds": 968.914,
+            "p75Seconds": 988.609,
+            "slowestSeconds": 1038.74
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 951.423,
+              "medianSeconds": 963.071,
+              "p25Seconds": 957.981,
+              "p75Seconds": 964.416,
+              "slowestSeconds": 976.174,
+              "medianGapTierLeaderSeconds": 11.648,
+              "medianGapTierLeaderPct": 1.2095
+            },
+            "2": {
+              "count": 16,
+              "fastestSeconds": 954.466,
+              "medianSeconds": 965.41,
+              "p25Seconds": 963.137,
+              "p75Seconds": 968.582,
+              "slowestSeconds": 1038.74,
+              "medianGapTierLeaderSeconds": 10.944,
+              "medianGapTierLeaderPct": 1.1337
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 956.826,
+              "medianSeconds": 974.839,
+              "p25Seconds": 969.985,
+              "p75Seconds": 978.601,
+              "slowestSeconds": 993.877,
+              "medianGapTierLeaderSeconds": 18.012,
+              "medianGapTierLeaderPct": 1.8475
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 966.897,
+              "medianSeconds": 977.607,
+              "p25Seconds": 971.229,
+              "p75Seconds": 988.192,
+              "slowestSeconds": 1007.84,
+              "medianGapTierLeaderSeconds": 10.71,
+              "medianGapTierLeaderPct": 1.0951
+            },
+            "5": {
+              "count": 13,
+              "fastestSeconds": 964.805,
+              "medianSeconds": 975.788,
+              "p25Seconds": 970.655,
+              "p75Seconds": 980.012,
+              "slowestSeconds": 987.06,
+              "medianGapTierLeaderSeconds": 10.983,
+              "medianGapTierLeaderPct": 1.1256
+            },
+            "6": {
+              "count": 15,
+              "fastestSeconds": 964.157,
+              "medianSeconds": 976.332,
+              "p25Seconds": 973.607,
+              "p75Seconds": 978.627,
+              "slowestSeconds": 990.666,
+              "medianGapTierLeaderSeconds": 12.175,
+              "medianGapTierLeaderPct": 1.247
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 967.36,
+              "medianSeconds": 983.415,
+              "p25Seconds": 978.012,
+              "p75Seconds": 988.576,
+              "slowestSeconds": 1004.448,
+              "medianGapTierLeaderSeconds": 16.055,
+              "medianGapTierLeaderPct": 1.6324
+            },
+            "8": {
+              "count": 13,
+              "fastestSeconds": 973.93,
+              "medianSeconds": 983.454,
+              "p25Seconds": 976.86,
+              "p75Seconds": 991.08,
+              "slowestSeconds": 1009.196,
+              "medianGapTierLeaderSeconds": 9.524,
+              "medianGapTierLeaderPct": 0.9684
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 975.326,
+              "medianSeconds": 988.234,
+              "p25Seconds": 983.564,
+              "p75Seconds": 997.796,
+              "slowestSeconds": 999.399,
+              "medianGapTierLeaderSeconds": 12.908,
+              "medianGapTierLeaderPct": 1.3061
+            },
+            "10": {
+              "count": 16,
+              "fastestSeconds": 975.257,
+              "medianSeconds": 1008.464,
+              "p25Seconds": 995.404,
+              "p75Seconds": 1015.266,
+              "slowestSeconds": 1029.898,
+              "medianGapTierLeaderSeconds": 33.207,
+              "medianGapTierLeaderPct": 3.2928
+            }
+          }
+        },
+        "featureFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 131,
+            "fastestSeconds": 85.709,
+            "medianSeconds": 87.296,
+            "p25Seconds": 86.863,
+            "p75Seconds": 87.931,
+            "slowestSeconds": 91.665
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 85.709,
+              "medianSeconds": 86.507,
+              "p25Seconds": 86.257,
+              "p75Seconds": 86.802,
+              "slowestSeconds": 87.119,
+              "medianGapTierLeaderSeconds": 0.798,
+              "medianGapTierLeaderPct": 0.9225
+            },
+            "2": {
+              "count": 13,
+              "fastestSeconds": 85.989,
+              "medianSeconds": 86.799,
+              "p25Seconds": 86.537,
+              "p75Seconds": 86.915,
+              "slowestSeconds": 87.579,
+              "medianGapTierLeaderSeconds": 0.81,
+              "medianGapTierLeaderPct": 0.9332
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 85.81,
+              "medianSeconds": 87.255,
+              "p25Seconds": 87.019,
+              "p75Seconds": 87.515,
+              "slowestSeconds": 87.876,
+              "medianGapTierLeaderSeconds": 1.445,
+              "medianGapTierLeaderPct": 1.6561
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 86.553,
+              "medianSeconds": 87.121,
+              "p25Seconds": 86.818,
+              "p75Seconds": 87.37,
+              "slowestSeconds": 88.406,
+              "medianGapTierLeaderSeconds": 0.568,
+              "medianGapTierLeaderPct": 0.652
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 86.489,
+              "medianSeconds": 87.166,
+              "p25Seconds": 86.947,
+              "p75Seconds": 87.324,
+              "slowestSeconds": 87.876,
+              "medianGapTierLeaderSeconds": 0.677,
+              "medianGapTierLeaderPct": 0.7767
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 86.799,
+              "medianSeconds": 87.148,
+              "p25Seconds": 86.912,
+              "p75Seconds": 87.546,
+              "slowestSeconds": 88.22,
+              "medianGapTierLeaderSeconds": 0.35,
+              "medianGapTierLeaderPct": 0.401
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 87.189,
+              "medianSeconds": 87.695,
+              "p25Seconds": 87.4,
+              "p75Seconds": 87.871,
+              "slowestSeconds": 88.156,
+              "medianGapTierLeaderSeconds": 0.506,
+              "medianGapTierLeaderPct": 0.577
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 87.431,
+              "medianSeconds": 88.284,
+              "p25Seconds": 87.915,
+              "p75Seconds": 88.652,
+              "slowestSeconds": 89.228,
+              "medianGapTierLeaderSeconds": 0.854,
+              "medianGapTierLeaderPct": 0.9667
+            },
+            "10": {
+              "count": 16,
+              "fastestSeconds": 88.019,
+              "medianSeconds": 89.16,
+              "p25Seconds": 88.516,
+              "p75Seconds": 89.383,
+              "slowestSeconds": 91.665,
+              "medianGapTierLeaderSeconds": 1.142,
+              "medianGapTierLeaderPct": 1.2803
+            }
+          }
+        },
+        "featureTotal": {
+          "available": true,
+          "overall": {
+            "count": 127,
+            "fastestSeconds": 2481.158,
+            "medianSeconds": 2530.325,
+            "p25Seconds": 2517.972,
+            "p75Seconds": 2564.597,
+            "slowestSeconds": 2627.31
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 2481.158,
+              "medianSeconds": 2502.521,
+              "p25Seconds": 2496.575,
+              "p75Seconds": 2503.481,
+              "slowestSeconds": 2511.307,
+              "medianGapTierLeaderSeconds": 21.363,
+              "medianGapTierLeaderPct": 0.8537
+            },
+            "2": {
+              "count": 12,
+              "fastestSeconds": 2496.692,
+              "medianSeconds": 2518.987,
+              "p25Seconds": 2507.548,
+              "p75Seconds": 2526.508,
+              "slowestSeconds": 2538.056,
+              "medianGapTierLeaderSeconds": 22.295,
+              "medianGapTierLeaderPct": 0.8851
+            },
+            "3": {
+              "count": 16,
+              "fastestSeconds": 2501.743,
+              "medianSeconds": 2522.175,
+              "p25Seconds": 2517.696,
+              "p75Seconds": 2526.374,
+              "slowestSeconds": 2571.528,
+              "medianGapTierLeaderSeconds": 20.431,
+              "medianGapTierLeaderPct": 0.8101
+            },
+            "4": {
+              "count": 15,
+              "fastestSeconds": 2516.473,
+              "medianSeconds": 2526.214,
+              "p25Seconds": 2518.367,
+              "p75Seconds": 2531.514,
+              "slowestSeconds": 2561.333,
+              "medianGapTierLeaderSeconds": 9.741,
+              "medianGapTierLeaderPct": 0.3856
+            },
+            "5": {
+              "count": 12,
+              "fastestSeconds": 2508.496,
+              "medianSeconds": 2530.968,
+              "p25Seconds": 2525.713,
+              "p75Seconds": 2538.189,
+              "slowestSeconds": 2555.804,
+              "medianGapTierLeaderSeconds": 22.473,
+              "medianGapTierLeaderPct": 0.8878
+            },
+            "6": {
+              "count": 14,
+              "fastestSeconds": 2509.172,
+              "medianSeconds": 2525.182,
+              "p25Seconds": 2518.248,
+              "p75Seconds": 2531.459,
+              "slowestSeconds": 2563.73,
+              "medianGapTierLeaderSeconds": 16.011,
+              "medianGapTierLeaderPct": 0.634
+            },
+            "8": {
+              "count": 12,
+              "fastestSeconds": 2535.161,
+              "medianSeconds": 2551.636,
+              "p25Seconds": 2543.779,
+              "p75Seconds": 2555.206,
+              "slowestSeconds": 2574.096,
+              "medianGapTierLeaderSeconds": 16.475,
+              "medianGapTierLeaderPct": 0.6456
+            },
+            "9": {
+              "count": 16,
+              "fastestSeconds": 2554.91,
+              "medianSeconds": 2572.956,
+              "p25Seconds": 2567.592,
+              "p75Seconds": 2581.163,
+              "slowestSeconds": 2609.585,
+              "medianGapTierLeaderSeconds": 18.045,
+              "medianGapTierLeaderPct": 0.7014
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 2566.677,
+              "medianSeconds": 2592.011,
+              "p25Seconds": 2580.037,
+              "p75Seconds": 2605.074,
+              "slowestSeconds": 2627.31,
+              "medianGapTierLeaderSeconds": 25.334,
+              "medianGapTierLeaderPct": 0.9774
+            }
+          }
+        }
+      },
+      "transitions": {
+        "qualifyingToSprintFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": -0.161,
+              "p25Pct": -0.3553,
+              "p75Pct": 0.0739
+            },
+            "2": {
+              "count": 16,
+              "medianPct": -0.1602,
+              "p25Pct": -0.3562,
+              "p75Pct": 0.036
+            },
+            "3": {
+              "count": 16,
+              "medianPct": -0.0092,
+              "p25Pct": -0.1392,
+              "p75Pct": 0.1715
+            },
+            "4": {
+              "count": 16,
+              "medianPct": -0.2014,
+              "p25Pct": -0.3401,
+              "p75Pct": 0.0951
+            },
+            "5": {
+              "count": 13,
+              "medianPct": -0.2451,
+              "p25Pct": -0.6086,
+              "p75Pct": 0.0058
+            },
+            "6": {
+              "count": 16,
+              "medianPct": -0.1094,
+              "p25Pct": -0.3941,
+              "p75Pct": 0.0764
+            },
+            "7": {
+              "count": 15,
+              "medianPct": 0.0725,
+              "p25Pct": -0.0879,
+              "p75Pct": 0.2966
+            },
+            "8": {
+              "count": 12,
+              "medianPct": -0.1767,
+              "p25Pct": -0.3714,
+              "p75Pct": 0.0215
+            },
+            "9": {
+              "count": 16,
+              "medianPct": -0.2183,
+              "p25Pct": -0.3951,
+              "p75Pct": 0.2095
+            },
+            "10": {
+              "count": 15,
+              "medianPct": -0.3715,
+              "p25Pct": -0.4705,
+              "p75Pct": 0.2998
+            }
+          }
+        },
+        "qualifyingToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.3742,
+              "p25Pct": 0.1298,
+              "p75Pct": 0.6003
+            },
+            "2": {
+              "count": 13,
+              "medianPct": 0.2588,
+              "p25Pct": 0.1519,
+              "p75Pct": 0.6321
+            },
+            "3": {
+              "count": 16,
+              "medianPct": 0.1594,
+              "p25Pct": -0.2861,
+              "p75Pct": 0.3337
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.1611,
+              "p25Pct": -0.0991,
+              "p75Pct": 0.4991
+            },
+            "5": {
+              "count": 12,
+              "medianPct": -0.1727,
+              "p25Pct": -0.4032,
+              "p75Pct": 0.2398
+            },
+            "6": {
+              "count": 16,
+              "medianPct": -0.073,
+              "p25Pct": -0.2088,
+              "p75Pct": 0.1215
+            },
+            "8": {
+              "count": 11,
+              "medianPct": 0.1168,
+              "p25Pct": -0.2894,
+              "p75Pct": 0.3226
+            },
+            "9": {
+              "count": 16,
+              "medianPct": 0.2759,
+              "p25Pct": -0.1951,
+              "p75Pct": 0.7688
+            },
+            "10": {
+              "count": 15,
+              "medianPct": 0.5446,
+              "p25Pct": 0.0396,
+              "p75Pct": 0.7014
+            }
+          }
+        },
+        "sprintToFeatureFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.5361,
+              "p25Pct": 0.2871,
+              "p75Pct": 0.6789
+            },
+            "2": {
+              "count": 13,
+              "medianPct": 0.5028,
+              "p25Pct": 0.4134,
+              "p75Pct": 0.6657
+            },
+            "3": {
+              "count": 16,
+              "medianPct": 0.1765,
+              "p25Pct": -0.0569,
+              "p75Pct": 0.3072
+            },
+            "4": {
+              "count": 15,
+              "medianPct": 0.4273,
+              "p25Pct": 0.2246,
+              "p75Pct": 0.5593
+            },
+            "5": {
+              "count": 12,
+              "medianPct": 0.2369,
+              "p25Pct": 0.1461,
+              "p75Pct": 0.5549
+            },
+            "6": {
+              "count": 16,
+              "medianPct": 0.0965,
+              "p25Pct": -0.1675,
+              "p75Pct": 0.3448
+            },
+            "8": {
+              "count": 12,
+              "medianPct": 0.1058,
+              "p25Pct": -0.1875,
+              "p75Pct": 0.4892
+            },
+            "9": {
+              "count": 16,
+              "medianPct": 0.4359,
+              "p25Pct": 0.0401,
+              "p75Pct": 0.682
+            },
+            "10": {
+              "count": 16,
+              "medianPct": 0.6618,
+              "p25Pct": -0.2198,
+              "p75Pct": 0.9821
+            }
+          }
+        }
+      },
+      "focusDriver": {
+        "id": "Radiate79",
+        "results": {
+          "qualifying": {
+            "rank": 102,
+            "tier": 8,
+            "tierRank": 6,
+            "time": "01:27.563",
+            "timeSeconds": 87.563,
+            "gapOverallLeaderSeconds": 1.983,
+            "gapTierLeaderSeconds": 0.689
+          },
+          "sprintFastestLap": {
+            "rank": 85,
+            "tier": 8,
+            "tierRank": 2,
+            "time": "01:27.259",
+            "timeSeconds": 87.259,
+            "gapOverallLeaderSeconds": 1.657,
+            "gapTierLeaderSeconds": 0.689
+          },
+          "sprintTotal": {
+            "rank": 66,
+            "tier": 8,
+            "tierRank": 2,
+            "time": "16:15.863",
+            "timeSeconds": 975.863,
+            "gapOverallLeaderSeconds": 24.44,
+            "gapTierLeaderSeconds": 1.933
+          },
+          "featureFastestLap": {
+            "rank": 94,
+            "tier": 8,
+            "tierRank": 9,
+            "time": "01:27.860",
+            "timeSeconds": 87.86,
+            "gapOverallLeaderSeconds": 2.151,
+            "gapTierLeaderSeconds": 0.671
+          },
+          "featureTotal": {
+            "rank": 77,
+            "tier": 8,
+            "tierRank": 3,
+            "time": "42:18.231",
+            "timeSeconds": 2538.231,
+            "gapOverallLeaderSeconds": 57.073,
+            "gapTierLeaderSeconds": 3.07
+          }
+        }
+      }
+    },
+    {
+      "eventId": "ALR-BENCH-E",
+      "trackId": null,
+      "trackName": null,
+      "metrics": {
+        "qualifying": {
+          "available": true,
+          "overall": {
+            "count": 149,
+            "fastestSeconds": 136.258,
+            "medianSeconds": 138.827,
+            "p25Seconds": 137.873,
+            "p75Seconds": 139.472,
+            "slowestSeconds": 143.348
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 136.258,
+              "medianSeconds": 137.579,
+              "p25Seconds": 137.298,
+              "p75Seconds": 138.234,
+              "slowestSeconds": 138.83,
+              "medianGapTierLeaderSeconds": 1.321,
+              "medianGapTierLeaderPct": 0.9602
+            },
+            "2": {
+              "count": 13,
+              "fastestSeconds": 136.49,
+              "medianSeconds": 137.12,
+              "p25Seconds": 136.872,
+              "p75Seconds": 137.405,
+              "slowestSeconds": 139.194,
+              "medianGapTierLeaderSeconds": 0.63,
+              "medianGapTierLeaderPct": 0.4595
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 136.495,
+              "medianSeconds": 137.519,
+              "p25Seconds": 137.407,
+              "p75Seconds": 138.032,
+              "slowestSeconds": 139.011,
+              "medianGapTierLeaderSeconds": 1.024,
+              "medianGapTierLeaderPct": 0.7446
+            },
+            "4": {
+              "count": 14,
+              "fastestSeconds": 137.536,
+              "medianSeconds": 138.399,
+              "p25Seconds": 137.897,
+              "p75Seconds": 138.901,
+              "slowestSeconds": 139.444,
+              "medianGapTierLeaderSeconds": 0.862,
+              "medianGapTierLeaderPct": 0.6227
+            },
+            "5": {
+              "count": 15,
+              "fastestSeconds": 137.855,
+              "medianSeconds": 138.777,
+              "p25Seconds": 138.378,
+              "p75Seconds": 139.247,
+              "slowestSeconds": 140.561,
+              "medianGapTierLeaderSeconds": 0.922,
+              "medianGapTierLeaderPct": 0.6644
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 137.661,
+              "medianSeconds": 138.584,
+              "p25Seconds": 138.273,
+              "p75Seconds": 138.751,
+              "slowestSeconds": 139.89,
+              "medianGapTierLeaderSeconds": 0.923,
+              "medianGapTierLeaderPct": 0.666
+            },
+            "7": {
+              "count": 15,
+              "fastestSeconds": 138.243,
+              "medianSeconds": 139.455,
+              "p25Seconds": 138.974,
+              "p75Seconds": 139.685,
+              "slowestSeconds": 140.96,
+              "medianGapTierLeaderSeconds": 1.212,
+              "medianGapTierLeaderPct": 0.8691
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 137.959,
+              "medianSeconds": 139.213,
+              "p25Seconds": 139.065,
+              "p75Seconds": 139.458,
+              "slowestSeconds": 143.348,
+              "medianGapTierLeaderSeconds": 1.253,
+              "medianGapTierLeaderPct": 0.9004
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 139.103,
+              "medianSeconds": 139.874,
+              "p25Seconds": 139.431,
+              "p75Seconds": 140.202,
+              "slowestSeconds": 141.452,
+              "medianGapTierLeaderSeconds": 0.771,
+              "medianGapTierLeaderPct": 0.5512
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 138.348,
+              "medianSeconds": 140.484,
+              "p25Seconds": 139.976,
+              "p75Seconds": 141.407,
+              "slowestSeconds": 142.452,
+              "medianGapTierLeaderSeconds": 2.136,
+              "medianGapTierLeaderPct": 1.5205
+            }
+          }
+        },
+        "sprintFastestLap": {
+          "available": true,
+          "overall": {
+            "count": 152,
+            "fastestSeconds": 136.372,
+            "medianSeconds": 138.649,
+            "p25Seconds": 138.023,
+            "p75Seconds": 139.42,
+            "slowestSeconds": 142.033
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 136.372,
+              "medianSeconds": 137.747,
+              "p25Seconds": 137.492,
+              "p75Seconds": 138.209,
+              "slowestSeconds": 139.126,
+              "medianGapTierLeaderSeconds": 1.375,
+              "medianGapTierLeaderPct": 0.9982
+            },
+            "2": {
+              "count": 13,
+              "fastestSeconds": 136.59,
+              "medianSeconds": 137.243,
+              "p25Seconds": 137.113,
+              "p75Seconds": 137.332,
+              "slowestSeconds": 138.477,
+              "medianGapTierLeaderSeconds": 0.653,
+              "medianGapTierLeaderPct": 0.4758
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 136.41,
+              "medianSeconds": 137.881,
+              "p25Seconds": 137.39,
+              "p75Seconds": 138.328,
+              "slowestSeconds": 139.261,
+              "medianGapTierLeaderSeconds": 1.471,
+              "medianGapTierLeaderPct": 1.0669
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 136.962,
+              "medianSeconds": 138.147,
+              "p25Seconds": 138.02,
+              "p75Seconds": 138.362,
+              "slowestSeconds": 138.789,
+              "medianGapTierLeaderSeconds": 1.185,
+              "medianGapTierLeaderPct": 0.8581
+            },
+            "5": {
+              "count": 15,
+              "fastestSeconds": 137.66,
+              "medianSeconds": 138.631,
+              "p25Seconds": 138.399,
+              "p75Seconds": 139.082,
+              "slowestSeconds": 139.829,
+              "medianGapTierLeaderSeconds": 0.971,
+              "medianGapTierLeaderPct": 0.7004
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 138.002,
+              "medianSeconds": 138.413,
+              "p25Seconds": 138.173,
+              "p75Seconds": 138.77,
+              "slowestSeconds": 139.419,
+              "medianGapTierLeaderSeconds": 0.411,
+              "medianGapTierLeaderPct": 0.2969
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 138.44,
+              "medianSeconds": 139.341,
+              "p25Seconds": 138.897,
+              "p75Seconds": 139.595,
+              "slowestSeconds": 140.618,
+              "medianGapTierLeaderSeconds": 0.901,
+              "medianGapTierLeaderPct": 0.6463
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 138.231,
+              "medianSeconds": 139.301,
+              "p25Seconds": 139.045,
+              "p75Seconds": 140.065,
+              "slowestSeconds": 141.851,
+              "medianGapTierLeaderSeconds": 1.07,
+              "medianGapTierLeaderPct": 0.7681
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 138.869,
+              "medianSeconds": 140.17,
+              "p25Seconds": 139.627,
+              "p75Seconds": 140.487,
+              "slowestSeconds": 140.943,
+              "medianGapTierLeaderSeconds": 1.301,
+              "medianGapTierLeaderPct": 0.9282
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 138.803,
+              "medianSeconds": 140.625,
+              "p25Seconds": 140.341,
+              "p75Seconds": 141.363,
+              "slowestSeconds": 142.033,
+              "medianGapTierLeaderSeconds": 1.822,
+              "medianGapTierLeaderPct": 1.2956
+            }
+          }
+        },
+        "sprintTotal": {
+          "available": true,
+          "overall": {
+            "count": 153,
+            "fastestSeconds": 946.04,
+            "medianSeconds": 971.718,
+            "p25Seconds": 963.072,
+            "p75Seconds": 984.158,
+            "slowestSeconds": 1129.679
+          },
+          "byTier": {
+            "1": {
+              "count": 15,
+              "fastestSeconds": 946.04,
+              "medianSeconds": 959.273,
+              "p25Seconds": 957.168,
+              "p75Seconds": 964.21,
+              "slowestSeconds": 970.831,
+              "medianGapTierLeaderSeconds": 13.233,
+              "medianGapTierLeaderPct": 1.3795
+            },
+            "2": {
+              "count": 13,
+              "fastestSeconds": 950.658,
+              "medianSeconds": 958.4,
+              "p25Seconds": 954.207,
+              "p75Seconds": 966.275,
+              "slowestSeconds": 996.816,
+              "medianGapTierLeaderSeconds": 7.742,
+              "medianGapTierLeaderPct": 0.8078
+            },
+            "3": {
+              "count": 15,
+              "fastestSeconds": 946.267,
+              "medianSeconds": 964.618,
+              "p25Seconds": 959.12,
+              "p75Seconds": 970.18,
+              "slowestSeconds": 973.321,
+              "medianGapTierLeaderSeconds": 18.351,
+              "medianGapTierLeaderPct": 1.9024
+            },
+            "4": {
+              "count": 16,
+              "fastestSeconds": 958.659,
+              "medianSeconds": 967.15,
+              "p25Seconds": 961.224,
+              "p75Seconds": 983.232,
+              "slowestSeconds": 1033.221,
+              "medianGapTierLeaderSeconds": 8.492,
+              "medianGapTierLeaderPct": 0.8778
+            },
+            "5": {
+              "count": 15,
+              "fastestSeconds": 958.202,
+              "medianSeconds": 971.715,
+              "p25Seconds": 963.987,
+              "p75Seconds": 976.409,
+              "slowestSeconds": 990.745,
+              "medianGapTierLeaderSeconds": 13.513,
+              "medianGapTierLeaderPct": 1.3906
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 958.753,
+              "medianSeconds": 969.275,
+              "p25Seconds": 964.071,
+              "p75Seconds": 975.02,
+              "slowestSeconds": 1032.278,
+              "medianGapTierLeaderSeconds": 10.523,
+              "medianGapTierLeaderPct": 1.0856
+            },
+            "7": {
+              "count": 16,
+              "fastestSeconds": 962.212,
+              "medianSeconds": 974.571,
+              "p25Seconds": 971.576,
+              "p75Seconds": 979.856,
+              "slowestSeconds": 991.903,
+              "medianGapTierLeaderSeconds": 12.359,
+              "medianGapTierLeaderPct": 1.2681
+            },
+            "8": {
+              "count": 16,
+              "fastestSeconds": 963.556,
+              "medianSeconds": 979.162,
+              "p25Seconds": 971.486,
+              "p75Seconds": 996.154,
+              "slowestSeconds": 1129.679,
+              "medianGapTierLeaderSeconds": 15.606,
+              "medianGapTierLeaderPct": 1.5936
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 968.74,
+              "medianSeconds": 985.991,
+              "p25Seconds": 977.705,
+              "p75Seconds": 987.665,
+              "slowestSeconds": 999.088,
+              "medianGapTierLeaderSeconds": 17.251,
+              "medianGapTierLeaderPct": 1.7496
+            },
+            "10": {
+              "count": 16,
+              "fastestSeconds": 968.861,
+              "medianSeconds": 992.48,
+              "p25Seconds": 986.348,
+              "p75Seconds": 1007.158,
+              "slowestSeconds": 1079.397,
+              "medianGapTierLeaderSeconds": 23.619,
+              "medianGapTierLeaderPct": 2.3793
+            }
+          }
+        },
+        "featureFastestLap": {
+          "available": false
+        },
+        "featureTotal": {
+          "available": true,
+          "overall": {
+            "count": 128,
+            "fastestSeconds": 2558.155,
+            "medianSeconds": 2612.183,
+            "p25Seconds": 2594.365,
+            "p75Seconds": 2650.28,
+            "slowestSeconds": 2729.45
+          },
+          "byTier": {
+            "2": {
+              "count": 11,
+              "fastestSeconds": 2558.155,
+              "medianSeconds": 2574.365,
+              "p25Seconds": 2561.847,
+              "p75Seconds": 2585.157,
+              "slowestSeconds": 2625.636,
+              "medianGapTierLeaderSeconds": 16.21,
+              "medianGapTierLeaderPct": 0.6297
+            },
+            "3": {
+              "count": 14,
+              "fastestSeconds": 2574.838,
+              "medianSeconds": 2593.302,
+              "p25Seconds": 2588.073,
+              "p75Seconds": 2606.285,
+              "slowestSeconds": 2658.609,
+              "medianGapTierLeaderSeconds": 18.464,
+              "medianGapTierLeaderPct": 0.7119
+            },
+            "4": {
+              "count": 13,
+              "fastestSeconds": 2571.251,
+              "medianSeconds": 2596.373,
+              "p25Seconds": 2588.547,
+              "p75Seconds": 2600.772,
+              "slowestSeconds": 2620.594,
+              "medianGapTierLeaderSeconds": 25.122,
+              "medianGapTierLeaderPct": 0.9676
+            },
+            "5": {
+              "count": 15,
+              "fastestSeconds": 2593.463,
+              "medianSeconds": 2617.672,
+              "p25Seconds": 2600.448,
+              "p75Seconds": 2634.146,
+              "slowestSeconds": 2665.555,
+              "medianGapTierLeaderSeconds": 24.209,
+              "medianGapTierLeaderPct": 0.9248
+            },
+            "6": {
+              "count": 16,
+              "fastestSeconds": 2573.538,
+              "medianSeconds": 2595.06,
+              "p25Seconds": 2584.121,
+              "p75Seconds": 2611.75,
+              "slowestSeconds": 2705.115,
+              "medianGapTierLeaderSeconds": 21.523,
+              "medianGapTierLeaderPct": 0.8291
+            },
+            "7": {
+              "count": 14,
+              "fastestSeconds": 2602.086,
+              "medianSeconds": 2626.213,
+              "p25Seconds": 2613.658,
+              "p75Seconds": 2642.848,
+              "slowestSeconds": 2687.739,
+              "medianGapTierLeaderSeconds": 24.127,
+              "medianGapTierLeaderPct": 0.9187
+            },
+            "8": {
+              "count": 15,
+              "fastestSeconds": 2586.327,
+              "medianSeconds": 2629.535,
+              "p25Seconds": 2608.172,
+              "p75Seconds": 2653.714,
+              "slowestSeconds": 2694.636,
+              "medianGapTierLeaderSeconds": 43.208,
+              "medianGapTierLeaderPct": 1.6432
+            },
+            "9": {
+              "count": 15,
+              "fastestSeconds": 2609.576,
+              "medianSeconds": 2659.108,
+              "p25Seconds": 2620.837,
+              "p75Seconds": 2668.818,
+              "slowestSeconds": 2683.51,
+              "medianGapTierLeaderSeconds": 49.532,
+              "medianGapTierLeaderPct": 1.8627
+            },
+            "10": {
+              "count": 15,
+              "fastestSeconds": 2628.023,
+              "medianSeconds": 2662.591,
+              "p25Seconds": 2647.003,
+              "p75Seconds": 2684.959,
+              "slowestSeconds": 2729.45,
+              "medianGapTierLeaderSeconds": 34.568,
+              "medianGapTierLeaderPct": 1.2983
+            }
+          }
+        }
+      },
+      "transitions": {
+        "qualifyingToSprintFastestLap": {
+          "available": true,
+          "byTier": {
+            "1": {
+              "count": 15,
+              "medianPct": 0.0837,
+              "p25Pct": 0.0047,
+              "p75Pct": 0.2529
+            },
+            "2": {
+              "count": 13,
+              "medianPct": 0.1549,
+              "p25Pct": 0.0733,
+              "p75Pct": 0.2559
+            },
+            "3": {
+              "count": 15,
+              "medianPct": 0.1365,
+              "p25Pct": -0.0429,
+              "p75Pct": 0.1937
+            },
+            "4": {
+              "count": 14,
+              "medianPct": -0.0367,
+              "p25Pct": -0.3697,
+              "p75Pct": 0.0397
+            },
+            "5": {
+              "count": 15,
+              "medianPct": -0.0325,
+              "p25Pct": -0.2011,
+              "p75Pct": 0.0885
+            },
+            "6": {
+              "count": 16,
+              "medianPct": 0.0399,
+              "p25Pct": -0.1854,
+              "p75Pct": 0.1977
+            },
+            "7": {
+              "count": 15,
+              "medianPct": -0.0344,
+              "p25Pct": -0.2575,
+              "p75Pct": 0.078
+            },
+            "8": {
+              "count": 16,
+              "medianPct": 0.0417,
+              "p25Pct": -0.1191,
+              "p75Pct": 0.2812
+            },
+            "9": {
+              "count": 15,
+              "medianPct": 0.1115,
+              "p25Pct": -0.2343,
+              "p75Pct": 0.2242
+            },
+            "10": {
+              "count": 15,
+              "medianPct": 0.1149,
+              "p25Pct": -0.4071,
+              "p75Pct": 0.5244
+            }
+          }
+        },
+        "qualifyingToFeatureFastestLap": {
+          "available": false
+        },
+        "sprintToFeatureFastestLap": {
+          "available": false
+        }
+      },
+      "focusDriver": {
+        "id": "Radiate79",
+        "results": {
+          "qualifying": {
+            "rank": 94,
+            "tier": 8,
+            "tierRank": 7,
+            "time": "02:19.167",
+            "timeSeconds": 139.167,
+            "gapOverallLeaderSeconds": 2.909,
+            "gapTierLeaderSeconds": 1.208
+          },
+          "sprintFastestLap": {
+            "rank": 101,
+            "tier": 8,
+            "tierRank": 6,
+            "time": "02:19.156",
+            "timeSeconds": 139.156,
+            "gapOverallLeaderSeconds": 2.784,
+            "gapTierLeaderSeconds": 0.925
+          },
+          "sprintTotal": {
+            "rank": 79,
+            "tier": 8,
+            "tierRank": 5,
+            "time": "16:11.752",
+            "timeSeconds": 971.752,
+            "gapOverallLeaderSeconds": 25.712,
+            "gapTierLeaderSeconds": 8.196
+          },
+          "featureTotal": {
+            "rank": 33,
+            "tier": 8,
+            "tierRank": 2,
+            "time": "43:14.666",
+            "timeSeconds": 2594.666,
+            "gapOverallLeaderSeconds": 36.511,
+            "gapTierLeaderSeconds": 8.339
+          }
+        }
+      }
+    }
+  ]
+}
