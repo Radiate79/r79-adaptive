@@ -903,6 +903,13 @@ export const cars = [
     stability: 7,
   },
   {
+    id: "mazda_rx_vision_gt3_evo_26",
+    name: "Mazda RX-Vision GT3 Evo '26",
+    class: "Gr.3",
+    drivetrain: "FR",
+    // Performance attributes are unknown. Do not copy the Concept profile.
+  },
+  {
     id: "mclaren_f1_gtr_bmw_95",
     name: "McLaren F1 GTR - BMW '95",
     class: "Gr.3",

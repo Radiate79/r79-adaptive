@@ -25,15 +25,18 @@ const gt7Cars = gt7CarsRaw.map((car) => {
   const profile = GR3_PROFILE_MAP.get(car.id);
   if (!profile) return car;
 
+  const finiteOr = (value, fallback) =>
+    Number.isFinite(Number(value)) ? Number(value) : fallback;
+
   return {
     ...car,
-    // Core scoring attributes — use profile values
-    topSpeed: profile.topSpeed,
-    traction: profile.traction,
-    fuel: profile.fuel,
-    tyres: profile.tyres,
-    stability: profile.stability,
-    rotation: profile.rotation,
+    // Core scoring attributes — profile overrides only when a real number exists.
+    topSpeed: finiteOr(profile.topSpeed, car.topSpeed),
+    traction: finiteOr(profile.traction, car.traction),
+    fuel: finiteOr(profile.fuel, car.fuel),
+    tyres: finiteOr(profile.tyres, car.tyres),
+    stability: finiteOr(profile.stability, car.stability),
+    rotation: finiteOr(profile.rotation, car.rotation),
     // Metadata
     communityConfidence: profile.communityConfidence ?? car.communityConfidence ?? null,
     competitiveUse: profile.competitiveUse ?? car.competitiveUse ?? null,

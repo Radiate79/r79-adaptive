@@ -1,4 +1,4 @@
-/** @typedef {'t598' | 'logitech_g923' | 'logitech_g_pro' | 'logitech_rs50' | 'fanatec' | 'moza' | 'other'} WheelTemplateFamily */
+/** @typedef {'t598' | 'logitech_g923' | 'logitech_g_pro' | 'logitech_rs50' | 'fanatec' | 'moza' | 'awaiting_calibration' | 'other'} WheelTemplateFamily */
 
 function buildPercentRange(step) {
   const values = [];
@@ -51,6 +51,11 @@ export const WHEEL_BASE_OPTIONS = [
   },
   { id: "moza_r3", label: "Moza R3", templateFamily: "moza" },
   { id: "moza_r5", label: "Moza R5", templateFamily: "moza" },
+  {
+    id: "moza_r5s_pro",
+    label: "Moza R5S Pro",
+    templateFamily: "awaiting_calibration",
+  },
   { id: "moza_r9", label: "Moza R9", templateFamily: "moza" },
   { id: "other_custom", label: "Other / Custom", templateFamily: "other" },
 ];
@@ -128,6 +133,9 @@ export const WHEEL_TEMPLATE_FIELDS = {
     { key: "ful", label: "FUL" },
     { key: "brf", label: "BRF" },
     { key: "brakeBalance", label: "Brake Balance suggestion" },
+    { key: "notes", label: "Notes" },
+  ],
+  awaiting_calibration: [
     { key: "notes", label: "Notes" },
   ],
   moza: [

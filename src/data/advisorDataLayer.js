@@ -13,13 +13,13 @@ import { CHAMPIONSHIP_ADVISOR_VERSION } from "./championshipAdvisor171.js";
 import {
   GR3_DATA_VERSION,
   GR3_PICKER_ENGINE_VERSION,
-} from "./gr3Measurable171.js";
+} from "./gr3MediumBop172.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
-export const ADVISOR_ENGINE_VERSION = "3.0.0";
+export const ADVISOR_ENGINE_VERSION = "3.1.0";
 export const STRATEGY_ENGINE_VERSION = "2.0.0";
-export const ADVISOR_DATA_LAYER_VERSION = "3.0.0"; // Gr.3 measurable GT ENG!NE picker — 2026-09-10
+export const ADVISOR_DATA_LAYER_VERSION = "3.1.0"; // GT7 1.72 medium BoP + version stamp — 2026-10-15
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,

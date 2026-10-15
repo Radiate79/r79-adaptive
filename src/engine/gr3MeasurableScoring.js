@@ -12,12 +12,13 @@
  */
 
 import { getTrackRacingProfile } from "../data/championshipAdvisor171.js";
+import { verificationConfidenceBand } from "../data/dataVerificationStatus.js";
 import {
   GR3_DATA_VERSION,
-  GR3_MEASURABLE_171,
   GR3_PICKER_ENGINE_VERSION,
-  getGr3Measurable,
-} from "../data/gr3Measurable171.js";
+  listResolvedGr3BopEntries,
+  resolveGr3Measurable,
+} from "../data/gr3MediumBop172.js";
 
 const ACCEL_WEIGHTS = {
   accel400: 0.35,
@@ -92,6 +93,9 @@ function clippedZScore(values, value, options = {}) {
  * @param {{ invert?: boolean, compressStdBelow?: number, compressFactor?: number }} [options]
  */
 function robustNormalize(values, value, options = {}) {
+  if (!Number.isFinite(value)) {
+    return null;
+  }
   const rank = percentileRank(values, value, options);
   const z = clippedZScore(values, value, options);
   let score = rank * 0.55 + z * 0.45;
@@ -147,11 +151,21 @@ function convertStabilityScore(raw) {
 /**
  * @param {Gr3BopCategory} bopCategory
  */
-function collectFieldValues(bopCategory = "high") {
-  const table = GR3_MEASURABLE_171.bop?.[bopCategory];
-  if (!table) return null;
+function weightedOrNull(pairs) {
+  let sum = 0;
+  let weight = 0;
+  for (const [value, partWeight] of pairs) {
+    if (!Number.isFinite(value)) continue;
+    sum += value * partWeight;
+    weight += partWeight;
+  }
+  if (weight <= 0) return null;
+  return Number((sum / weight).toFixed(2));
+}
 
-  const entries = Object.values(table);
+function collectFieldValues(bopCategory = "high") {
+  const entries = listResolvedGr3BopEntries(bopCategory);
+  if (!entries.length) return null;
   const stabilityConverted = entries.map((entry) => convertStabilityScore(entry));
 
   return {
@@ -187,7 +201,7 @@ function getFieldValues(bopCategory = "high") {
  * @param {Gr3BopCategory} [bopCategory='high']
  */
 export function hasGr3MeasurableData(carId, bopCategory = "high") {
-  return getGr3Measurable(carId, bopCategory) != null;
+  return resolveGr3Measurable(carId, bopCategory) != null;
 }
 
 /**
@@ -215,7 +229,7 @@ export function resolveGr3BopCategory(track, options = {}) {
  */
 export function resolveGr3PerformanceProfile(carId, options = {}) {
   const bopCategory = options.bopCategory ?? "high";
-  const raw = getGr3Measurable(carId, bopCategory);
+  const raw = resolveGr3Measurable(carId, bopCategory);
   const fields = getFieldValues(bopCategory);
 
   if (!raw || !fields) {
@@ -230,29 +244,26 @@ export function resolveGr3PerformanceProfile(carId, options = {}) {
     invert: true,
   });
 
-  const acceleration = Number(
-    (
-      accel400 * ACCEL_WEIGHTS.accel400 +
-      accel1000 * ACCEL_WEIGHTS.accel1000 +
-      accel100_150 * ACCEL_WEIGHTS.accel100_150
-    ).toFixed(2),
-  );
+  const acceleration = weightedOrNull([
+    [accel400, ACCEL_WEIGHTS.accel400],
+    [accel1000, ACCEL_WEIGHTS.accel1000],
+    [accel100_150, ACCEL_WEIGHTS.accel100_150],
+  ]);
 
-  const sustainedAccel = Number(
-    (accel1000 * 0.6 + accel100_150 * 0.4).toFixed(2),
-  );
+  const sustainedAccel = weightedOrNull([
+    [accel1000, 0.6],
+    [accel100_150, 0.4],
+  ]);
 
   const lowSpeedCornering = robustNormalize(fields.rotation60, raw.rotation60);
   const mediumSpeedCornering = robustNormalize(fields.rotation120, raw.rotation120);
   const highSpeedCornering = robustNormalize(fields.rotation240, raw.rotation240);
 
-  const rotationAgility = Number(
-    (
-      lowSpeedCornering * ROTATION_AGILITY_WEIGHTS.rotation60 +
-      mediumSpeedCornering * ROTATION_AGILITY_WEIGHTS.rotation120 +
-      highSpeedCornering * ROTATION_AGILITY_WEIGHTS.rotation240
-    ).toFixed(2),
-  );
+  const rotationAgility = weightedOrNull([
+    [lowSpeedCornering, ROTATION_AGILITY_WEIGHTS.rotation60],
+    [mediumSpeedCornering, ROTATION_AGILITY_WEIGHTS.rotation120],
+    [highSpeedCornering, ROTATION_AGILITY_WEIGHTS.rotation240],
+  ]);
 
   const lowSpeedStability = robustNormalize(
     fields.lowSpeedStability,
@@ -360,12 +371,15 @@ export function computeGr3TechnicalFit(carProfile, track) {
     totalWeight += weight;
   }
 
-  const score = totalWeight > 0 ? weightedSum / totalWeight : 50;
+  if (totalWeight <= 0) {
+    return { score: null, racingProfile, weights, knownWeight: 0 };
+  }
 
   return {
-    score: Number(score.toFixed(2)),
+    score: Number((weightedSum / totalWeight).toFixed(2)),
     racingProfile,
     weights,
+    knownWeight: totalWeight,
   };
 }
 
@@ -400,25 +414,29 @@ export function applyGr3RaceConditionModifier(
 
   const low = carProfile.normalized.lowSpeedStability;
   const high = carProfile.normalized.highSpeedStability;
-  const stabilityProxy =
-    Number.isFinite(low) && Number.isFinite(high)
+  const hasStability =
+    Number.isFinite(low) || Number.isFinite(high);
+  const stabilityProxy = !hasStability
+    ? null
+    : Number.isFinite(low) && Number.isFinite(high)
       ? (low + high) / 2
       : Number.isFinite(low)
         ? low
-        : Number.isFinite(high)
-          ? high
-          : 50;
+        : high;
 
   // Scale: at tyre x5, ± up to ~4.5 pts from midfield stability.
+  // Unknown stability contributes nothing.
   const tyreScale = tyreActive ? Math.min(1.2, Math.sqrt(tyreMult) * 0.55) : 0;
-  const tyreModifier = tyreActive
-    ? ((stabilityProxy - 50) / 50) * 4.5 * tyreScale
-    : 0;
+  const tyreModifier =
+    tyreActive && stabilityProxy != null
+      ? ((stabilityProxy - 50) / 50) * 4.5 * tyreScale
+      : 0;
 
   // No measured fuel economy — do not invent a fuel ranking.
   const fuelModifier = 0;
   const notes = [];
-  if (tyreActive) notes.push("tyre_modifier_from_stability_proxy");
+  if (tyreActive && stabilityProxy != null) notes.push("tyre_modifier_from_stability_proxy");
+  if (tyreActive && stabilityProxy == null) notes.push("stability_unknown_no_tyre_proxy");
   if (fuelActive) notes.push("fuel_unknown_neutral");
 
   return {
@@ -450,6 +468,22 @@ export function scoreGr3CarForRace(carId, track, options = {}) {
   }
 
   const fit = computeGr3TechnicalFit(carProfile, track);
+  if (!Number.isFinite(fit.score)) {
+    return {
+      score: null,
+      confidence: "missing",
+      dataConfidence: {
+        band: "none",
+        status: carProfile.raw?.provenance?.status ?? "UNKNOWN",
+        appliedToScore: false,
+      },
+      bopCategory,
+      dataVersion: GR3_DATA_VERSION,
+      profile: carProfile,
+      fit,
+    };
+  }
+
   const raceAdjusted = applyGr3RaceConditionModifier(
     fit.score,
     carProfile,
@@ -457,10 +491,16 @@ export function scoreGr3CarForRace(carId, track, options = {}) {
   );
   const confidenceScale = options.confidenceScale ?? 1;
   const score = Number((raceAdjusted.score * confidenceScale).toFixed(2));
+  const verificationStatus = carProfile.raw?.provenance?.status ?? "UNKNOWN";
 
   return {
     score: Math.max(0, Math.min(100, score)),
     confidence: "full",
+    dataConfidence: {
+      band: verificationConfidenceBand(verificationStatus),
+      status: verificationStatus,
+      appliedToScore: false,
+    },
     bopCategory,
     dataVersion: GR3_DATA_VERSION,
     profile: carProfile,

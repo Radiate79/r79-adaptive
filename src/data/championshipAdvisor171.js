@@ -6,8 +6,11 @@ export const CHAMPIONSHIP_ADVISOR_VERSION = {
   GT7_VERSION: ACTIVE_GT7_GAME_VERSION,
   BOP_VERSION: "1.71",
   PHYSICS_GENERATION: ACTIVE_PHYSICS_GENERATION,
-  UPDATED: "2026-09-10",
+  UPDATED: "2026-10-15",
   GR3_PROFILES_VERSION: "3-measurable",
+  // Subjective attribute deltas below remain last verified under 1.71.
+  // They are not confirmed 1.72 handling and are not ranking bonuses.
+  SUBJECTIVE_DELTA_STATUS: "AWAITING_1_72_VERIFICATION",
 };
 
 const SCORE_FIELDS = [

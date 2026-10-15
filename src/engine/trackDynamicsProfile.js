@@ -7,7 +7,10 @@ import { computeCarTrackInteraction } from "./carTrackInteraction.js";
  * @param {number | undefined} value
  */
 function normalizeTrait(value) {
-  const numeric = Number(value ?? 5);
+  if (value == null || value === "") {
+    return null;
+  }
+  const numeric = Number(value);
   if (!Number.isFinite(numeric)) {
     return null;
   }

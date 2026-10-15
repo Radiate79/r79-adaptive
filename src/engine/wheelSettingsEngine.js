@@ -23,6 +23,7 @@ import {
 } from "../utils/physicsData.js";
 import {
   formatWheelPlatformStatus,
+  getWheelPlatformProfile,
   normalizeWheelPlatformMeta,
   resolveDualValidationState,
 } from "../data/wheelPlatformVersion.js";
@@ -493,6 +494,8 @@ function calculateWheelSettingsUncached(input) {
   });
 
   const templateFamily = getTemplateFamilyForWheelBase(wheelBase);
+  const platformProfile = getWheelPlatformProfile(wheelBase);
+  const awaitingCalibration = platformProfile.setupGeneration === "awaiting_calibration";
   const anchorValues = lookup.setup?.values ?? {};
   let anchorWeight = SETUP_ANCHOR_WEIGHTS[lookup.matchType] ?? 0;
   if (lookup.setup?.isClassAnchor) {
@@ -517,7 +520,21 @@ function calculateWheelSettingsUncached(input) {
   /** @type {ReturnType<typeof calculateT598WheelSettings> | null} */
   let calculationBreakdown = null;
 
-  if (templateFamily === "t598") {
+  if (awaitingCalibration) {
+    modelValues = { notes: platformProfile.notes };
+    calculationBreakdown = {
+      values: modelValues,
+      continuous: null,
+      signals: stageA.signals,
+      raceContext: stageA.race,
+      desiredBehaviour: balanced.desired,
+      balanceCorrections: balanced.corrections,
+      balanceDiagnostics: balanced.diagnostics,
+      fieldReasons: {
+        notes: "Recognised. Awaiting calibration. No recommended settings are generated.",
+      },
+    };
+  } else if (templateFamily === "t598") {
     calculationBreakdown = calculateT598WheelSettings(anchorValues, {
       carProfile,
       trackProfile,
@@ -586,7 +603,7 @@ function calculateWheelSettingsUncached(input) {
   const modelFieldReasons = calculationBreakdown?.fieldReasons ?? {};
   let fieldReasons = { ...modelFieldReasons };
 
-  if (isPodiumInputComplete(podiumInput)) {
+  if (!awaitingCalibration && isPodiumInputComplete(podiumInput)) {
     podium = buildPodiumRecommendation({
       ...podiumInput,
       physicsGeneration:
@@ -671,6 +688,8 @@ function calculateWheelSettingsUncached(input) {
       anchorWeight,
       engineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
       gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
+      gt7FfbGameVersion: platformProfile.gt7FfbGameVersion ?? null,
+      ffbValidationStatus: platformProfile.ffbValidationStatus ?? null,
       t598Firmware: ACTIVE_T598_FIRMWARE,
       carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
       trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
@@ -689,6 +708,7 @@ function calculateWheelSettingsUncached(input) {
     cacheKey: buildRecommendationCacheKey("wheelSettings", {
       wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
       gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
+      gt7FfbGameVersion: platformProfile.gt7FfbGameVersion ?? null,
       physicsGeneration: WHEEL_SETTINGS_PLATFORM_BASELINE.physicsGeneration,
       carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
       trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,

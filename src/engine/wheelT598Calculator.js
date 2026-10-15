@@ -91,7 +91,7 @@ function buildFieldReasons(
 
   /** @type {Record<string, string>} */
   const reasons = {
-    ffb: `FFB level set for ${carName}'s force demand and ${trackName} steering load under GT7 1.71.`,
+    ffb: `FFB level set for ${carName}'s force demand and ${trackName} steering load. GT7 1.72 T598 FFB is not yet revalidated; values remain calibration evidence.`,
     master: `Master scaled for controllable peak force — grip ${race.tyreCompound}, fatigue softener ${Math.round(race.raceFatigue * 100)}%.`,
     mode: contributors.rotation?.length
       ? `Mode favours ${desired.rotationSpeedTarget >= 0.55 ? "response/rotation" : "stability"} for ${carName} at ${trackName}.`
@@ -173,7 +173,7 @@ function describeChannel(label, target, contrib, carName, trackName, balanceNote
     .join(" and ");
 
   const base = why
-    ? `${label} set ${level} for ${why} under GT7 1.71.`
+    ? `${label} set ${level} for ${why}. Existing calibration is not marked fully validated for GT7 1.72 T598 FFB.`
     : `${label} set ${level} from the desired steering behaviour target.`;
 
   return balanceNote ? `${base} ${balanceNote}` : base;

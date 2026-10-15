@@ -41,6 +41,38 @@ const SINGLE_LAYOUT_TRACKS = [
     notes: ["Nail exits onto back straight", "Watch downhill braking zones"],
   }),
   t({
+    id: "sugo",
+    trackFamily: "SUGO International Racing Course",
+    layoutName: "Full Circuit",
+    displayName: "SUGO International Racing Course",
+    alternateNames: ["SUGO", "Sugo", "Sportsland SUGO"],
+    drivingStyle: "balanced",
+    // Demand ratings are interpreted from the official geometry below.
+    // They are current observed track demands, not a telemetry pass.
+    topSpeed: 7,
+    traction: 7.5,
+    fuel: 6,
+    tyres: 7,
+    stability: 8,
+    kerbs: null,
+    overtaking: 6,
+    dataStatus: "CURRENT_1_72_OBSERVED",
+    officialFacts: {
+      lengthM: 3586,
+      corners: 13,
+      elevationDifferenceM: 69.8,
+      longestStraightM: 704.5,
+      finalCornerGradientPct: 10,
+    },
+    demandProvenance:
+      "CURRENT_1_72_OBSERVED. topSpeed 7 reflects a 704.5 m straight on a 3586 m lap (moderate, not a power circuit). traction 7.5 and stability 8 reflect 13 direction changes, 69.8 m of elevation, and an approximately 10% final-corner gradient. Kerbs are unknown.",
+    notes: [
+      "3586 m, 13 corners, 69.8 m elevation",
+      "Longest straight 704.5 m — moderate straight-line demand",
+      "Final corner gradient about 10% — braking, rotation, and exit traction",
+    ],
+  }),
+  t({
     id: "suzuka",
     trackFamily: "Suzuka Circuit",
     layoutName: "Full Circuit",

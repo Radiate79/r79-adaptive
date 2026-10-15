@@ -848,6 +848,17 @@ export const GR3_CAR_PROFILES = [
   },
 
   {
+    carId: "mazda_rx_vision_gt3_evo_26",
+    dataConfidence: "unknown",
+    competitiveUse: null,
+    communityConfidence: null,
+    strengths: [],
+    weaknesses: ["handling, rotation, tyre, fuel, and stability are unknown"],
+    provenance:
+      "Separate GT7 1.72 car. Medium-speed BoP observed at 439 PS / 1260 kg. Handling was not copied from RX-Vision GT3 Concept.",
+  },
+
+  {
     carId: "mercedes_amg_gt3_16",
     dataConfidence: "historical",
     competitiveUse: "low",

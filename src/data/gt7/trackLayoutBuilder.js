@@ -78,6 +78,9 @@ export function buildTrackLayout(input) {
     kerbs: input.kerbs,
     overtaking: input.overtaking,
     notes: input.notes ?? [],
+    officialFacts: input.officialFacts ?? null,
+    dataStatus: input.dataStatus ?? null,
+    demandProvenance: input.demandProvenance ?? null,
   };
 }
 
