@@ -1,8 +1,15 @@
 import { isSupportedCarClass } from "../data/carClasses.js";
+import {
+  filterCarsByCanonicalGt7Class,
+  getCanonicalGt7RacingClass,
+  isCarInCanonicalGt7RacingClass,
+} from "../data/gt7/gt7CanonicalClasses.js";
 
 /**
  * Shared car class and eligibility filtering for all recommendation engines.
- * Uses the canonical `class` field only — never car names or ids for class matching.
+ *
+ * Canonical `class` / `gt7RacingClass` metadata only.
+ * NEVER match class from car names or ids (e.g. "GT3", "GT4", "Gr.3" in the title).
  */
 
 /** @param {string} value */
@@ -13,7 +20,14 @@ export function normalizeCarClass(value) {
 }
 
 /**
- * @param {{ class?: string, carClass?: string, category?: string, group?: string, id?: string }} car
+ * @param {{
+ *   class?: string,
+ *   carClass?: string,
+ *   gt7RacingClass?: string | null,
+ *   availableInGT7?: boolean,
+ *   id?: string,
+ *   name?: string,
+ * }} car
  * @param {string} carClass
  */
 export function isCarInClass(car, carClass) {
@@ -21,11 +35,14 @@ export function isCarInClass(car, carClass) {
     return true;
   }
 
-  const requested = normalizeCarClass(carClass);
-  const actual = normalizeCarClass(
-    car.class ?? car.carClass ?? car.category ?? car.group,
-  );
+  // Prefer canonical GT7 racing-class gate when availability metadata is present.
+  if (car && (car.availableInGT7 != null || car.gt7RacingClass !== undefined)) {
+    return isCarInCanonicalGt7RacingClass(car, carClass);
+  }
 
+  const requested = normalizeCarClass(carClass);
+  // Canonical class field only — do not fall back to category/group/name.
+  const actual = normalizeCarClass(car?.class ?? car?.carClass);
   return actual === requested;
 }
 
@@ -87,12 +104,14 @@ export function filterCarsByClass(cars, carClass) {
  */
 export function filterRecommendationPool(cars, carClass) {
   const pool = Array.isArray(cars) ? cars : [];
-  const classFiltered = carClass ? filterCarsByClass(pool, carClass) : pool;
+  const classFiltered = carClass
+    ? filterCarsByCanonicalGt7Class(pool, carClass)
+    : pool.filter((car) => getCanonicalGt7RacingClass(car) != null);
 
   return classFiltered.filter(
     (car) =>
       isCarEligibleForRecommendations(car) &&
-      isSupportedCarClass(car.class ?? car.carClass ?? car.category ?? car.group),
+      isSupportedCarClass(getCanonicalGt7RacingClass(car) ?? car.class),
   );
 }
 
@@ -114,4 +133,3 @@ export function filterEligibleRecommendationResults(cars) {
 export function pickEligibleRecommendation(car) {
   return car && isCarEligibleForRecommendations(car) ? car : null;
 }
-

@@ -21,6 +21,11 @@ import {
   MAZDA_RX_VISION_GT3_EVO_26_ID,
 } from "../gr3MediumBop172.js";
 import { cars as gt7Cars } from "./cars.js";
+import {
+  GT7_OFFICIAL_CATALOGUE_VERSION,
+  OFFICIAL_GT7_CATALOGUE_META,
+  isInvalidGt7R79CarId,
+} from "./officialCarCatalogue.js";
 
 /** @typedef {'CONFIRMED_CURRENT' | 'MEASURED_CURRENT' | 'EMPIRICAL_CURRENT' | 'HISTORICAL' | 'AWAITING_VERIFICATION' | 'UNKNOWN'} DatasetStatus */
 
@@ -117,6 +122,7 @@ export function countCarsByClass() {
   /** @type {Record<string, number>} */
   const counts = { "Gr.1": 0, "Gr.2": 0, "Gr.3": 0, "Gr.4": 0 };
   for (const car of gt7Cars) {
+    if (isInvalidGt7R79CarId(car.id)) continue;
     if (counts[car.class] != null) {
       counts[car.class] += 1;
     }
@@ -158,6 +164,8 @@ export function getGt7SnapshotCacheStamp() {
     gameVersion: ACTIVE_GT7_GAME_VERSION,
     physicsGeneration: ACTIVE_PHYSICS_GENERATION,
     gr3DataVersion: GR3_DATA_VERSION,
+    officialCatalogueVersion: GT7_OFFICIAL_CATALOGUE_VERSION,
+    officialCatalogueCount: OFFICIAL_GT7_CATALOGUE_META.carCount,
     verification: DATA_VERIFICATION_STATUS.CURRENT_1_72_OBSERVED,
   };
 }

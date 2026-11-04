@@ -27,7 +27,7 @@ import {
 
 export const ADVISOR_ENGINE_VERSION = "3.2.1";
 export const STRATEGY_ENGINE_VERSION = "2.2.0";
-export const ADVISOR_DATA_LAYER_VERSION = "3.2.2"; // Independent authority stamp — no external assistant targeting
+export const ADVISOR_DATA_LAYER_VERSION = "3.2.3"; // Official GT7 catalogue availability gate
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,

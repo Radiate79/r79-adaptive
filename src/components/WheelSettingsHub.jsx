@@ -16,7 +16,7 @@ import {
   DEFAULT_CAR_CLASS,
 } from "../data/carClasses.js";
 import {
-  getCarsForGame,
+  getSelectableCarsForClass,
   getSelectableTracksForClass,
   getTrackDisplayName,
   getTracksForGame,
@@ -342,10 +342,7 @@ export default function WheelSettingsHub({
   const [trackSearchQuery, setTrackSearchQuery] = useState("");
 
   const cars = useMemo(
-    () =>
-      (getCarsForGame(filterGame) ?? []).filter(
-        (car) => car?.class === carClass,
-      ),
+    () => getSelectableCarsForClass(filterGame, carClass),
     [filterGame, carClass],
   );
   const allTracks = useMemo(() => getTracksForGame(filterGame), [filterGame]);

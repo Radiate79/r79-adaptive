@@ -51,7 +51,7 @@ export const ACTIVE_GT7_PHYSICS_LABEL = "1.72";
 export const R79_GT7_DATA_SNAPSHOT_DATE = "2026-11-04";
 
 /** Version stamp for recommendation caches / diagnostics. */
-export const R79_GT7_DATA_SNAPSHOT_VERSION = "gt7-1.72-2026-11-04";
+export const R79_GT7_DATA_SNAPSHOT_VERSION = "gt7-1.72-2026-11-04-catalogue";
 
 /** Last R79 validation of the measurable 1.71 physics baseline tables. */
 export const R79_PHYSICS_LAST_VALIDATION = "2026-08-20";

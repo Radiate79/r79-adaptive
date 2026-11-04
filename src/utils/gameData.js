@@ -12,24 +12,59 @@ import { tracks as gt7Tracks } from "../data/gt7/tracks.js";
 import { cars as gt8Cars } from "../data/gt8/cars.js";
 import { tracks as gt8Tracks } from "../data/gt8/tracks.js";
 import { GR3_CAR_PROFILES } from "../data/gr3CarProfiles.js";
+import {
+  GT7_OFFICIAL_CATALOGUE_VERSION,
+  isInvalidGt7R79CarId,
+} from "../data/gt7/officialCarCatalogue.js";
+import {
+  filterCarsByCanonicalGt7Class,
+  getCanonicalGt7RacingClass,
+} from "../data/gt7/gt7CanonicalClasses.js";
+import { isSupportedCarClass } from "../data/carClasses.js";
 
 /**
  * Merge authoritative Gr.3 v2 profiles into the raw car list.
  * Profile attributes override base car attributes for Gr.3 cars only.
  * Non-Gr.3 cars are unaffected.
+ *
+ * GT7 availability is stamped from the official catalogue authority.
+ * Invalid GT7 ids remain in the raw index for historical/ALR lookups but are
+ * excluded from selectable GT7 lists.
  */
-const GR3_PROFILE_MAP = new Map(GR3_CAR_PROFILES.map((p) => [p.carId, p]));
+const GR3_PROFILE_MAP = new Map(
+  GR3_CAR_PROFILES.filter((p) => !isInvalidGt7R79CarId(p.carId)).map((p) => [
+    p.carId,
+    p,
+  ]),
+);
 
 const gt7Cars = gt7CarsRaw.map((car) => {
-  if (car.class !== "Gr.3") return car;
+  const availableInGT7 = !isInvalidGt7R79CarId(car.id);
+  // Canonical racing class for selectors — null when not a selectable GT7 race car.
+  // Invalid / non-GT7 cars must not retain active GT7 racing-class eligibility.
+  const gt7RacingClass =
+    availableInGT7 && isSupportedCarClass(car.class) ? car.class : null;
+  const catalogueStamp = {
+    availableInGT7,
+    gt7RacingClass,
+    performanceDataStatus: availableInGT7 ? "AVAILABLE" : "NOT_IN_GT7",
+    gt7CatalogueVersion: GT7_OFFICIAL_CATALOGUE_VERSION,
+  };
+
+  if (car.class !== "Gr.3" || !availableInGT7) {
+    return { ...car, ...catalogueStamp };
+  }
   const profile = GR3_PROFILE_MAP.get(car.id);
-  if (!profile) return car;
+  if (!profile) {
+    return { ...car, ...catalogueStamp };
+  }
 
   const finiteOr = (value, fallback) =>
     Number.isFinite(Number(value)) ? Number(value) : fallback;
 
   return {
     ...car,
+    ...catalogueStamp,
     // Core scoring attributes — profile overrides only when a real number exists.
     topSpeed: finiteOr(profile.topSpeed, car.topSpeed),
     traction: finiteOr(profile.traction, car.traction),
@@ -115,9 +150,11 @@ export function getTrackById(trackId, gameVersion = DEFAULT_GAME_VERSION) {
 }
 
 /**
+ * All car records for a game, including GT7-unavailable historical rows.
+ * Prefer getSelectableCarsForGame() for UI selectors.
  * @param {GameVersion | string} [gameVersion]
  */
-export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
+export function getAllCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
   const cars =
     GAME_DATA[/** @type {GameVersion} */ (gameVersion)]?.cars ??
     GAME_DATA[DEFAULT_GAME_VERSION]?.cars;
@@ -128,6 +165,50 @@ export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
       )
     : [];
 }
+
+/**
+ * Selectable cars for GT7 / GT8 UI surfaces.
+ * For GT7, only cars validated against the official catalogue are returned.
+ * @param {GameVersion | string} [gameVersion]
+ */
+export function getCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
+  const key = /** @type {GameVersion} */ (gameVersion) || DEFAULT_GAME_VERSION;
+  const cars = getAllCarsForGame(key);
+  if (key === "gt7") {
+    return cars.filter((car) => car.availableInGT7 !== false);
+  }
+  return cars;
+}
+
+/**
+ * Alias for clarity — GT7 selectors must use catalogue-validated cars only.
+ * @param {GameVersion | string} [gameVersion]
+ */
+export function getSelectableCarsForGame(gameVersion = DEFAULT_GAME_VERSION) {
+  return getCarsForGame(gameVersion);
+}
+
+/**
+ * Cars for a GT7/GT8 racing-class selector.
+ * Class membership uses canonical class metadata only (never name matching).
+ * Road cars and non-GT7 cars are excluded from racing-class buckets.
+ *
+ * @param {GameVersion | string} [gameVersion]
+ * @param {string} carClass
+ */
+export function getSelectableCarsForClass(
+  gameVersion = DEFAULT_GAME_VERSION,
+  carClass,
+) {
+  const cars = getSelectableCarsForGame(gameVersion);
+  const key = /** @type {GameVersion} */ (gameVersion) || DEFAULT_GAME_VERSION;
+  if (key === "gt7") {
+    return filterCarsByCanonicalGt7Class(cars, carClass);
+  }
+  return cars.filter((car) => (car.class ?? car.carClass) === carClass);
+}
+
+export { getCanonicalGt7RacingClass };
 
 /**
  * Cars eligible for all R79 recommendation surfaces (advisors, engineer, shortlists).
