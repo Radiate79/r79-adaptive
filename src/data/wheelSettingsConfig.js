@@ -7,6 +7,12 @@ import {
 /** Authoritative Wheel Settings engine generation — bump when calculation logic changes. */
 export const WHEEL_SETTINGS_ENGINE_VERSION = "5";
 
+/**
+ * Independence note (authoritative):
+ * Wheel recommendations are calculated from R79 physics/car/track/device evidence only.
+ * External assistants are not targets. Numerical disagreement with them is acceptable.
+ */
+
 /** Car / track / device profile data stamps — invalidate cache when these change. */
 export const WHEEL_CAR_PROFILE_VERSION = "5";
 export const WHEEL_TRACK_PROFILE_VERSION = "5";

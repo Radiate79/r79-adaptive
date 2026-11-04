@@ -58,8 +58,8 @@ export function translateDesiredToT598(desired, anchorValues = {}, anchorWeight 
   };
 
   // Continuous field targets — MINIMUM EFFECTIVE INTERVENTION.
-  // Root cause of prior high-value bias: master floor 0.55 alone mapped to ≥55%
-  // before force terms, then Stage A + podium stacked more resistance.
+  // R79 derives these from desired steering behaviour + current GT7/T598 physics.
+  // Do NOT tune toward any external assistant's numbers (Jucis/ChatGPT/etc.).
   // Heavier is NOT better. Prefer the lowest resistance that meets the objective.
   const continuous = {
     // Prefer FFB 2–3 for performance cars; D/1 reserved for very low force demand

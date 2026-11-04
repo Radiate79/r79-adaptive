@@ -17,12 +17,17 @@ import {
   GR3_PICKER_ENGINE_VERSION,
 } from "./gr3MediumBop172.js";
 import { getGt7SnapshotCacheStamp } from "./gt7/snapshotMetadata.js";
+import {
+  R79_RECOMMENDATION_AUTHORITY_ID,
+  R79_RECOMMENDATION_AUTHORITY_VERSION,
+  getR79RecommendationAuthorityStamp,
+} from "./r79RecommendationAuthority.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
 export const ADVISOR_ENGINE_VERSION = "3.2.1";
 export const STRATEGY_ENGINE_VERSION = "2.2.0";
-export const ADVISOR_DATA_LAYER_VERSION = "3.2.1"; // Tyre feasibility + wheel min-intervention — 2026-11-04
+export const ADVISOR_DATA_LAYER_VERSION = "3.2.2"; // Independent authority stamp — no external assistant targeting
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,
@@ -82,5 +87,9 @@ export function getAdvisorCacheVersionStamp() {
     bopVersion: R79_ACTIVE_GT7_BASELINE.bopVersion,
     updatedAt: R79_ACTIVE_GT7_BASELINE.updatedAt,
     snapshot: getGt7SnapshotCacheStamp(),
+    recommendationAuthority: R79_RECOMMENDATION_AUTHORITY_ID,
+    recommendationAuthorityVersion: R79_RECOMMENDATION_AUTHORITY_VERSION,
   };
 }
+
+export { getR79RecommendationAuthorityStamp };

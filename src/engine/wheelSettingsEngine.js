@@ -46,6 +46,11 @@ import {
   WHEEL_SETTINGS_PLATFORM_BASELINE,
   WHEEL_TRACK_PROFILE_VERSION,
 } from "../data/wheelSettingsConfig.js";
+import {
+  assertR79RecommendationIndependence,
+  getR79RecommendationAuthorityStamp,
+  stripExternalAssistantTargets,
+} from "../data/r79RecommendationAuthority.js";
 import { resolveCarDynamicsProfile } from "./carDynamicsProfile.js";
 import { resolveTrackDynamicsProfile } from "./trackDynamicsProfile.js";
 import { calculateDesiredSteeringBehaviour } from "./wheelDesiredBehaviour.js";
@@ -433,6 +438,12 @@ export function findWheelSetupForRaceEngineer(filters) {
  * @param {WheelSettingsInput} input
  */
 export function calculateWheelSettings(input) {
+  // Independence: never accept external-assistant target bags (Jucis/ChatGPT/etc.).
+  const independence = assertR79RecommendationIndependence(input);
+  const safeInput = independence.independent
+    ? input
+    : stripExternalAssistantTargets(input);
+
   const cacheKey = buildRecommendationCacheKey("wheelSettings", {
     wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
     gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
@@ -443,18 +454,21 @@ export function calculateWheelSettings(input) {
     trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
     deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
     t598Firmware: ACTIVE_T598_FIRMWARE,
-    gameVersion: input.gameVersion,
-    wheelBase: input.wheelBase,
-    carId: input.carId,
-    trackId: input.trackId,
-    tyreCompound: input.tyreCompound,
-    bopOn: input.bopOn,
-    fuelMultiplier: input.fuelMultiplier,
-    tyreMultiplier: input.tyreMultiplier,
-    lapCount: input.lapCount,
+    recommendationAuthority: getR79RecommendationAuthorityStamp().recommendationAuthority,
+    gameVersion: safeInput.gameVersion,
+    wheelBase: safeInput.wheelBase,
+    carId: safeInput.carId,
+    trackId: safeInput.trackId,
+    tyreCompound: safeInput.tyreCompound,
+    bopOn: safeInput.bopOn,
+    fuelMultiplier: safeInput.fuelMultiplier,
+    tyreMultiplier: safeInput.tyreMultiplier,
+    lapCount: safeInput.lapCount,
   });
 
-  return getCachedRecommendation(cacheKey, () => calculateWheelSettingsUncached(input));
+  return getCachedRecommendation(cacheKey, () =>
+    calculateWheelSettingsUncached(safeInput),
+  );
 }
 
 /**
@@ -717,6 +731,7 @@ function calculateWheelSettingsUncached(input) {
       carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
       trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
       deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
+      ...getR79RecommendationAuthorityStamp(),
     },
     calculationBreakdown,
     diagnostics: {
@@ -727,6 +742,7 @@ function calculateWheelSettingsUncached(input) {
         templateFamily === "t598"
           ? estimateT598CombinedResistance(podium?.adjustedValues ?? modelValues)
           : null,
+      recommendationAuthority: getR79RecommendationAuthorityStamp(),
     },
     cacheKey: buildRecommendationCacheKey("wheelSettings", {
       wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
@@ -739,6 +755,7 @@ function calculateWheelSettingsUncached(input) {
       trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
       deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
       t598Firmware: ACTIVE_T598_FIRMWARE,
+      recommendationAuthority: getR79RecommendationAuthorityStamp().recommendationAuthority,
       gameVersion: input.gameVersion,
       wheelBase: input.wheelBase,
       carId: input.carId,
