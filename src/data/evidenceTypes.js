@@ -1,6 +1,8 @@
 import {
   ACTIVE_GT7_GAME_VERSION,
   ACTIVE_PHYSICS_GENERATION,
+  getPhysicsEvidenceWeight,
+  isCurrentPhysicsGeneration,
   PRE_1_71_PHYSICS_GENERATION,
   UNKNOWN_PHYSICS_GENERATION,
 } from "./gt7PhysicsVersion.js";
@@ -51,7 +53,7 @@ export function getEvidencePriorityRank(evidence) {
   const kind = evidence.evidenceKind ?? "GENERAL";
   const physics =
     evidence.physicsGeneration ?? UNKNOWN_PHYSICS_GENERATION;
-  const isCurrent = physics === ACTIVE_PHYSICS_GENERATION;
+  const isCurrent = isCurrentPhysicsGeneration(physics);
   const validated =
     evidence.validatedAfterUpdate === true || kind === "CONFIRMED";
 
@@ -72,6 +74,15 @@ export function getEvidencePriorityRank(evidence) {
   }
 
   return EVIDENCE_PRIORITY.GENERIC_FALLBACK;
+}
+
+/**
+ * Physics-sensitive weight for tyre / stint evidence (0–1).
+ * @param {Partial<R79EvidenceRecord> | null | undefined} evidence
+ * @returns {number}
+ */
+export function getTyreEvidencePhysicsWeight(evidence) {
+  return getPhysicsEvidenceWeight(evidence?.physicsGeneration);
 }
 
 /**

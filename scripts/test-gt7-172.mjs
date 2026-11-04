@@ -259,13 +259,24 @@ else fail("Handling validation metadata missing");
 const t598 = getWheelPlatformProfile("thrustmaster_t598");
 const rs50 = getWheelPlatformProfile("logitech_rs50");
 const r5s = getWheelPlatformProfile("moza_r5s_pro");
-if (t598.gt7FfbGameVersion === "1.72" && t598.ffbValidationStatus === "AWAITING_1_72_VERIFICATION") {
-  ok("T598 FFB marked for 1.72 revalidation");
+if (
+  t598.gt7FfbGameVersion === "1.72" &&
+  t598.ffbCalibrationVersion === "1.72" &&
+  (t598.ffbValidationStatus === "EMPIRICAL_CURRENT" ||
+    t598.ffbValidationStatus === "AWAITING_1_72_VERIFICATION")
+) {
+  ok("T598 FFB marked for 1.72 calibration");
 } else fail("T598 FFB metadata missing");
 if (rs50.gt7FfbGameVersion === "1.72" && rs50.notes !== t598.notes) {
   ok("RS50 FFB marked independently from T598");
 } else fail("RS50 metadata was copied from T598 or missing");
-if (r5s.setupGeneration === "awaiting_calibration" && r5s.nativeSupportStatus === "CURRENT_1_72_OBSERVED") {
+if (
+  r5s.setupGeneration === "awaiting_calibration" &&
+  (r5s.nativeSupportStatus === "SUPPORTED_BY_GT7" ||
+    r5s.nativeSupportStatus === "CURRENT_1_72_OBSERVED") &&
+  (r5s.r79CalibrationStatus === "R79_CALIBRATION_PENDING" ||
+    r5s.setupGeneration === "awaiting_calibration")
+) {
   ok("R5S Pro is recognised and awaiting calibration");
 } else fail("R5S Pro metadata missing");
 

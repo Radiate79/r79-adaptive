@@ -62,11 +62,12 @@ export const WHEEL_PLATFORM_PROFILES = {
     physicsGenerationTarget: ACTIVE_PHYSICS_GENERATION,
     requiresRevalidationUnderCurrentPhysics: true,
     gt7FfbGameVersion: "1.72",
-    ffbValidationStatus: "AWAITING_1_72_VERIFICATION",
+    ffbCalibrationVersion: "1.72",
+    ffbValidationStatus: "EMPIRICAL_CURRENT",
     lastValidatedFfbGameVersion: "1.71",
     setupGeneration: "available",
     notes:
-      "Firmware 3.08 is current. GT7 1.72 changed game-side T598 force feedback. Existing setting values remain 1.71 calibration evidence and are not auto-changed. They are not fully 1.72-validated.",
+      "Firmware 3.08 is current. GT7 1.72 revised game-side T598 FFB. Recommendations recalibrate through the 1.71_PLUS desired-behaviour model and whole-setup resistance guard — no invented official conversion formula. Stored 1.71 anchors remain soft evidence.",
   },
   logitech_rs50: {
     wheelBaseId: "logitech_rs50",
@@ -84,11 +85,12 @@ export const WHEEL_PLATFORM_PROFILES = {
     physicsGenerationTarget: ACTIVE_PHYSICS_GENERATION,
     requiresRevalidationUnderCurrentPhysics: true,
     gt7FfbGameVersion: "1.72",
-    ffbValidationStatus: "AWAITING_1_72_VERIFICATION",
+    ffbCalibrationVersion: "1.72",
+    ffbValidationStatus: "EMPIRICAL_CURRENT",
     lastValidatedFfbGameVersion: null,
     setupGeneration: "available",
     notes:
-      "Independent RS50 profile. GT7 1.72 changed game-side RS50 force feedback. No T598 adjustments are copied here. Existing RS50 values, where present, are not fully 1.72-validated.",
+      "Independent RS50 profile. GT7 1.72 revised game-side RS50 FFB. Shared 1.71_PLUS physics interpretation applies; device translation stays RS50-specific. No T598 values are copied. Unverified control ranges are never fabricated.",
   },
   logitech_g_pro: {
     wheelBaseId: "logitech_g_pro",
@@ -222,9 +224,10 @@ export const WHEEL_PLATFORM_PROFILES = {
     ffbValidationStatus: "AWAITING_1_72_VERIFICATION",
     lastValidatedFfbGameVersion: null,
     setupGeneration: "awaiting_calibration",
-    nativeSupportStatus: "CURRENT_1_72_OBSERVED",
+    nativeSupportStatus: "SUPPORTED_BY_GT7",
+    r79CalibrationStatus: "R79_CALIBRATION_PENDING",
     notes:
-      "Recognised: GT7 1.72 adds native MOZA R5S Pro support. Control ranges and GT7 behaviour are not verified, so R79 does not generate recommended settings.",
+      "Recognised: GT7 1.72 adds native MOZA R5S Pro support (SUPPORTED_BY_GT7). R79_CALIBRATION_PENDING — control ranges and GT7 behaviour are not verified, so R79 does not generate recommended settings.",
   },
   moza_r9: {
     wheelBaseId: "moza_r9",

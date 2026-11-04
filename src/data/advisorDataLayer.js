@@ -7,6 +7,8 @@
 import {
   ACTIVE_GT7_GAME_VERSION,
   ACTIVE_PHYSICS_GENERATION,
+  R79_GT7_DATA_SNAPSHOT_DATE,
+  R79_GT7_DATA_SNAPSHOT_VERSION,
   R79_PHYSICS_LAST_VALIDATION,
 } from "./gt7PhysicsVersion.js";
 import { CHAMPIONSHIP_ADVISOR_VERSION } from "./championshipAdvisor171.js";
@@ -14,17 +16,20 @@ import {
   GR3_DATA_VERSION,
   GR3_PICKER_ENGINE_VERSION,
 } from "./gr3MediumBop172.js";
+import { getGt7SnapshotCacheStamp } from "./gt7/snapshotMetadata.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
-export const ADVISOR_ENGINE_VERSION = "3.1.0";
-export const STRATEGY_ENGINE_VERSION = "2.0.0";
-export const ADVISOR_DATA_LAYER_VERSION = "3.1.0"; // GT7 1.72 medium BoP + version stamp — 2026-10-15
+export const ADVISOR_ENGINE_VERSION = "3.2.0";
+export const STRATEGY_ENGINE_VERSION = "2.1.0";
+export const ADVISOR_DATA_LAYER_VERSION = "3.2.0"; // GT7 1.72 / 1.71_PLUS intelligence recalibration — 2026-11-04
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,
   physicsGeneration: ACTIVE_PHYSICS_GENERATION,
-  updatedAt: R79_PHYSICS_LAST_VALIDATION,
+  updatedAt: R79_GT7_DATA_SNAPSHOT_DATE,
+  measurableBaselineValidatedAt: R79_PHYSICS_LAST_VALIDATION,
+  snapshotVersion: R79_GT7_DATA_SNAPSHOT_VERSION,
   bopVersion: CHAMPIONSHIP_ADVISOR_VERSION.BOP_VERSION,
   sourceType: /** @type {EvidenceSourceType} */ ("CURRENT"),
 };
@@ -73,7 +78,9 @@ export function getAdvisorCacheVersionStamp() {
     gr3PickerEngineVersion: GR3_PICKER_ENGINE_VERSION,
     gr3DataVersion: GR3_DATA_VERSION,
     gt7Version: R79_ACTIVE_GT7_BASELINE.gt7Version,
+    physicsGeneration: R79_ACTIVE_GT7_BASELINE.physicsGeneration,
     bopVersion: R79_ACTIVE_GT7_BASELINE.bopVersion,
     updatedAt: R79_ACTIVE_GT7_BASELINE.updatedAt,
+    snapshot: getGt7SnapshotCacheStamp(),
   };
 }

@@ -11,8 +11,10 @@ import {
 } from "./gr3Measurable171.js";
 
 export const GR3_DATA_VERSION = "GT7-1.72";
-export const GR3_PICKER_ENGINE_VERSION = "3.1.0";
+export const GR3_PICKER_ENGINE_VERSION = "3.2.0";
 export const GT7_DATA_VERSION = "1.72";
+/** Absolute mid BoP overlays are current; high/low remain separate awaiting 1.72 re-observation. */
+export const GR3_BOP_PROFILE_MODE = "separate";
 
 export const MAZDA_RX_VISION_GT3_EVO_26_ID = "mazda_rx_vision_gt3_evo_26";
 

@@ -3,7 +3,12 @@
  *
  * Populate `PITSTOP_STRATEGY_EVIDENCE` and `PITSTOP_PROVEN_STRATEGIES` with real
  * race imports to refine pit windows, compound choices and stop counts.
+ *
+ * Empirical stints must carry physicsGeneration. Pre-1.71 tyre evidence is kept
+ * but must not be treated as equal to 1.71_PLUS evidence.
  */
+
+import { getPhysicsEvidenceWeight } from "./gt7PhysicsVersion.js";
 
 /**
  * @typedef {Object} PitstopStrategyEvidenceEntry
@@ -39,6 +44,9 @@
  * @property {number} [confidenceBonus]
  * @property {number} [fuelMultiplier]
  * @property {number} [tyreMultiplier]
+ * @property {string} [gameVersion]
+ * @property {string} [physicsGeneration]
+ * @property {string} [compound]
  */
 
 /** @type {PitstopStrategyEvidenceEntry[]} */
@@ -60,6 +68,9 @@ export const PITSTOP_PROVEN_STRATEGIES = [
     confidence: "Tested",
     source: "Radiate79 test race",
     confidenceBonus: 14,
+    // Pre-1.71 empirical tyre evidence — keep, but weight down for current stints.
+    gameVersion: "1.70",
+    physicsGeneration: "PRE_1_71",
   },
 ];
 
@@ -125,7 +136,11 @@ export function resolvePitstopStrategyEvidence(context = {}) {
       tyreStrategyOverride = entry.tyreStrategy;
     }
 
-    confidenceBonus = Math.max(confidenceBonus, entry.confidenceBonus ?? 8);
+    const physicsWeight = getPhysicsEvidenceWeight(entry.physicsGeneration);
+    confidenceBonus = Math.max(
+      confidenceBonus,
+      Math.round((entry.confidenceBonus ?? 8) * physicsWeight),
+    );
     matchedEntryId = entry.id;
   }
 
@@ -204,16 +219,19 @@ export function resolvePitstopStrategySignals(context = {}) {
   }
 
   const primary = provenStrategies[0];
+  const physicsWeight = getPhysicsEvidenceWeight(primary.physicsGeneration);
   return {
     pitLapAdjustments: [primary.pitLap],
     stopAdjustment: primary.recommendedStops,
     tyreStrategyOverride: primary.tyreStrategy,
     confidenceBonus: Math.max(
       evidence.confidenceBonus,
-      primary.confidenceBonus ?? 12,
+      Math.round((primary.confidenceBonus ?? 12) * physicsWeight),
     ),
     matchedEntryId: primary.id,
     provenStrategies,
+    physicsGeneration: primary.physicsGeneration ?? null,
+    physicsEvidenceWeight: physicsWeight,
   };
 }
 

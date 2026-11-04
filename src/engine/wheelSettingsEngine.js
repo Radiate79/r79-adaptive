@@ -437,6 +437,8 @@ export function calculateWheelSettings(input) {
     wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
     gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
     physicsGeneration: WHEEL_SETTINGS_PLATFORM_BASELINE.physicsGeneration,
+    t598FfbCalibrationVersion:
+      WHEEL_SETTINGS_PLATFORM_BASELINE.t598FfbCalibrationVersion,
     carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
     trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,
     deviceProfileVersion: WHEEL_DEVICE_PROFILE_VERSION,
@@ -709,6 +711,8 @@ function calculateWheelSettingsUncached(input) {
       wheelSettingsEngineVersion: WHEEL_SETTINGS_ENGINE_VERSION,
       gt7Version: WHEEL_SETTINGS_PLATFORM_BASELINE.gameVersion,
       gt7FfbGameVersion: platformProfile.gt7FfbGameVersion ?? null,
+      t598FfbCalibrationVersion:
+        WHEEL_SETTINGS_PLATFORM_BASELINE.t598FfbCalibrationVersion,
       physicsGeneration: WHEEL_SETTINGS_PLATFORM_BASELINE.physicsGeneration,
       carProfileVersion: WHEEL_CAR_PROFILE_VERSION,
       trackProfileVersion: WHEEL_TRACK_PROFILE_VERSION,

@@ -204,14 +204,16 @@ export function calculateDesiredSteeringBehaviour(input) {
       (trackTechnical - 0.5) * 0.12,
   );
 
-  // Friction: micro-resistance — bias toward Low, not Mid/High
+  // Friction: micro-resistance — bias toward Low, not Mid/High.
+  // resistanceDiscipline (1.71_PLUS) reduces stacking after 1.72 FFB revisions.
   const frictionTarget = n(
-    0.28 +
+    (0.28 +
       (stability - 0.5) * 0.18 +
       (trackKerb - 0.5) * 0.14 +
       race.raceConsistency * 0.08 -
       (rotation - 0.5) * 0.2 -
-      (trackTechnical - 0.5) * 0.1,
+      (trackTechnical - 0.5) * 0.1) /
+      (phys.resistanceDiscipline ?? 1),
   );
 
   // Damping: primary oscillation / kerb channel
@@ -222,7 +224,8 @@ export function calculateDesiredSteeringBehaviour(input) {
       (trackLoad - 0.5) * 0.14 +
       race.raceTyreWear * 0.08 -
       (rotation - 0.5) * 0.16) *
-      phys.suspensionDamping,
+      phys.suspensionDamping /
+      (phys.resistanceDiscipline ?? 1),
   );
 
   const lowForceDetailTarget = n(

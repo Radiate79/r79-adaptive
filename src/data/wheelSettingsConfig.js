@@ -5,39 +5,52 @@ import {
 } from "./gt7PhysicsVersion.js";
 
 /** Authoritative Wheel Settings engine generation — bump when calculation logic changes. */
-export const WHEEL_SETTINGS_ENGINE_VERSION = "3";
+export const WHEEL_SETTINGS_ENGINE_VERSION = "4";
 
 /** Car / track / device profile data stamps — invalidate cache when these change. */
-export const WHEEL_CAR_PROFILE_VERSION = "3";
-export const WHEEL_TRACK_PROFILE_VERSION = "3";
-export const WHEEL_DEVICE_PROFILE_VERSION = "3";
+export const WHEEL_CAR_PROFILE_VERSION = "4";
+export const WHEEL_TRACK_PROFILE_VERSION = "4";
+export const WHEEL_DEVICE_PROFILE_VERSION = "4";
 
 /** Active T598 firmware baseline for R79 wheel recommendations. */
 export const ACTIVE_T598_FIRMWARE = "3.08";
 
-/** @type {{ gameVersion: string, physicsGeneration: string, updateDate: string }} */
+/**
+ * Game-side T598 FFB calibration stamp after GT7 1.72 official FFB revision.
+ * Recalibration goes through the desired-behaviour model — not a fake numeric conversion.
+ */
+export const T598_FFB_CALIBRATION_VERSION = "1.72";
+
+/** @type {{ gameVersion: string, physicsGeneration: string, updateDate: string, t598FfbCalibrationVersion: string }} */
 export const WHEEL_SETTINGS_PLATFORM_BASELINE = {
   gameVersion: ACTIVE_GT7_GAME_VERSION,
   physicsGeneration: ACTIVE_PHYSICS_GENERATION,
   updateDate: R79_PHYSICS_LAST_VALIDATION,
+  t598FfbCalibrationVersion: T598_FFB_CALIBRATION_VERSION,
 };
 
 /**
- * GT7 1.71 physics emphasis factors for wheel-settings weighting.
- * These adjust model sensitivity — they do not replace car/track data.
+ * GT7 1.71_PLUS physics emphasis factors for wheel-settings weighting.
+ * These adjust model sensitivity — they do not replace car/track data
+ * and do not invent official FFB conversion coefficients.
  */
-export const GT7_171_PHYSICS_EMPHASIS = {
+export const GT7_171_PLUS_PHYSICS_EMPHASIS = {
   /** Revised slip simulation — slightly higher detail/readability weight. */
-  tyreSlipDetail: 1.06,
+  tyreSlipDetail: 1.07,
   /** Revised wear/heating — long-stint tyre preservation weight. */
   tyreWearStint: 1.08,
   /** Revised kerb/off-track behaviour — kerb-load damping weight. */
-  kerbLoad: 1.05,
+  kerbLoad: 1.06,
   /** Revised damper/suspension — stability damping weight. */
-  suspensionDamping: 1.04,
+  suspensionDamping: 1.05,
   /** Steering geometry per car — car rotation/trait weight unchanged in source data. */
   steeringGeometry: 1.0,
+  /** Prefer useful feedback over artificial resistance after 1.72 FFB revisions. */
+  resistanceDiscipline: 1.04,
 };
+
+/** @deprecated Use GT7_171_PLUS_PHYSICS_EMPHASIS */
+export const GT7_171_PHYSICS_EMPHASIS = GT7_171_PLUS_PHYSICS_EMPHASIS;
 
 /**
  * Relative grip index for tyre compounds (0–1). Used only where grip affects FFB load.
