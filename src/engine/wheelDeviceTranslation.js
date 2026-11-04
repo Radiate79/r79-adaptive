@@ -57,39 +57,46 @@ export function translateDesiredToT598(desired, anchorValues = {}, anchorWeight 
     endStop: getT598OptionsForField("endStop"),
   };
 
-  // Continuous field targets derived from desired behaviour
+  // Continuous field targets — MINIMUM EFFECTIVE INTERVENTION.
+  // Root cause of prior high-value bias: master floor 0.55 alone mapped to ≥55%
+  // before force terms, then Stage A + podium stacked more resistance.
+  // Heavier is NOT better. Prefer the lowest resistance that meets the objective.
   const continuous = {
     // Prefer FFB 2–3 for performance cars; D/1 reserved for very low force demand
-    ffb: clamp(0.45 + desired.steeringForceTarget * 0.45 + desired.responseTarget * 0.1),
+    ffb: clamp(0.42 + desired.steeringForceTarget * 0.4 + desired.responseTarget * 0.08),
+    // MASTER is force amplitude — not a performance score and not a filter budget item.
     master: clamp(
-      0.55 +
-        desired.steeringForceTarget * 0.35 +
-        desired.highForceControlTarget * 0.15 -
-        (1 - desired.responseTarget) * 0.08,
+      0.38 +
+        desired.steeringForceTarget * 0.28 +
+        desired.highForceControlTarget * 0.1 -
+        (1 - desired.responseTarget) * 0.1 -
+        desired.frictionTarget * 0.06 -
+        desired.dampingTarget * 0.05,
     ),
     // Mode: more E when rotation/response high; more P/S when stability dominates
     mode: clamp(
-      0.35 +
+      0.32 +
         desired.rotationSpeedTarget * 0.4 +
         desired.responseTarget * 0.25 -
-        desired.stabilityTarget * 0.2,
+        desired.stabilityTarget * 0.22,
     ),
-    inertia: clamp(desired.inertiaTarget),
-    friction: clamp(desired.frictionTarget),
+    // Cap resistance channels so stacking cannot casually land High/Extreme.
+    inertia: clamp(desired.inertiaTarget * 0.92),
+    friction: clamp(desired.frictionTarget * 0.88),
     boostLow: clamp(0.45 + (desired.lowForceDetailTarget - 0.5) * 0.9),
-    boostHigh: clamp(0.45 + (desired.highForceControlTarget - 0.5) * 0.8),
+    boostHigh: clamp(0.42 + (desired.highForceControlTarget - 0.5) * 0.75),
     speed: clamp(
       0.35 + desired.rotationSpeedTarget * 0.45 + desired.directionChangeSpeed * 0.25,
     ),
-    damper: clamp(desired.dampingTarget),
+    damper: clamp(desired.dampingTarget * 0.9),
     damperGain: clamp(
-      0.4 + desired.oscillationControlTarget * 0.35 - desired.dampingTarget * 0.15,
+      0.32 + desired.oscillationControlTarget * 0.28 - desired.dampingTarget * 0.18,
     ),
-    spring: clamp(Math.min(0.12, desired.returnToCentreTarget * 0.35)),
+    spring: clamp(Math.min(0.1, desired.returnToCentreTarget * 0.3)),
     endStop: clamp(
-      0.35 + desired.stabilityTarget * 0.25 + desired.oscillationControlTarget * 0.2,
+      0.32 + desired.stabilityTarget * 0.22 + desired.oscillationControlTarget * 0.18,
     ),
-    gearJolt: 0.55,
+    gearJolt: 0.5,
   };
 
   /** @type {Record<string, string | number>} */

@@ -313,7 +313,7 @@ if (
 ) {
   ok("MOZA R5S Pro SUPPORTED_BY_GT7 / R79_CALIBRATION_PENDING");
 } else fail("R5S Pro status incorrect");
-if (WHEEL_SETTINGS_ENGINE_VERSION === "4") ok("wheel engine v4");
+if (WHEEL_SETTINGS_ENGINE_VERSION === "5") ok("wheel engine v5");
 else fail(`wheel engine ${WHEEL_SETTINGS_ENGINE_VERSION}`);
 
 console.log("\n═══ Cache / async guards ═══");

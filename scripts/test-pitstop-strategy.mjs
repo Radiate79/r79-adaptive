@@ -66,7 +66,9 @@ const sequencesEvaluated = compared.map((c) =>
 );
 console.log(`\nSequences evaluated: ${[...new Set(sequencesEvaluated)].sort().join(", ")}`);
 
-const requiredSequences = ["M/H", "H/M", "M/S", "S/M"];
+// Feasible Hard/Medium one-stops must remain; Soft-heavy one-stops that cannot
+// complete a stint must be rejected by the feasibility layer.
+const requiredSequences = ["M/H", "H/M"];
 for (const seq of requiredSequences) {
   if (sequencesEvaluated.includes(seq)) {
     ok(`${seq} was evaluated`);
@@ -75,7 +77,6 @@ for (const seq of requiredSequences) {
   }
 }
 
-// Verify M/H and H/M are not artificially identical
 const mhEntry = compared.find((c) => c.stints.map((s) => s.compoundCode).join("/") === "M/H");
 const hmEntry = compared.find((c) => c.stints.map((s) => s.compoundCode).join("/") === "H/M");
 const msEntry = compared.find((c) => c.stints.map((s) => s.compoundCode).join("/") === "M/S");
@@ -87,24 +88,27 @@ if (mhEntry && hmEntry) {
   fail("M/H or H/M missing from evaluation");
 }
 
-if (msEntry && smEntry) {
-  ok(`M/S and S/M evaluated independently (M/S=${msEntry.estimatedRaceTimeIndex.toFixed(3)}, S/M=${smEntry.estimatedRaceTimeIndex.toFixed(3)})`);
+if (!msEntry && !smEntry) {
+  ok("Infeasible Soft one-stops (M/S, S/M) correctly rejected by stint feasibility");
 } else {
-  fail("M/S or S/M missing from evaluation");
+  fail("Soft-heavy one-stops should be infeasible at this wear/distance");
 }
 
-// Winner must be the lowest time index
+if (sequencesEvaluated.some((seq) => seq.split("/").length >= 3 && seq.includes("S"))) {
+  ok("Feasible Soft two-stop strategies remain available");
+} else {
+  fail("Soft two-stop strategies missing");
+}
+
+// Winner must be the lowest time index among feasible candidates
 const winner = compared[0];
 ok(`Ranked first: "${winner.label}" (time index ${winner.estimatedRaceTimeIndex.toFixed(3)})`);
-
-// Explain mathematically if M/H wins or something else does
-const mhTime = mhEntry?.estimatedRaceTimeIndex ?? Infinity;
-const msTime = msEntry?.estimatedRaceTimeIndex ?? Infinity;
-if (msTime < mhTime) {
-  ok(`M/S (${msTime.toFixed(3)}) is faster than M/H (${mhTime.toFixed(3)}) at Laguna 29-lap — correct ranking`);
-} else {
-  ok(`M/H (${mhTime.toFixed(3)}) mathematically faster than M/S (${msTime.toFixed(3)}) at Laguna 29-lap — no artificial bias`);
+if (winner.stops >= 1) {
+  ok(`Winner uses ${winner.stops} stop(s) after feasibility filtering`);
 }
+
+const mhTime = mhEntry?.estimatedRaceTimeIndex ?? Infinity;
+ok(`M/H feasible time index ${mhTime.toFixed(3)}`);
 
 // Detailed diagnostic table
 header("Diagnostic comparison: M/H vs H/M vs M/S vs S/M");

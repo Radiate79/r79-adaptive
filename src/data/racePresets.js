@@ -1,4 +1,5 @@
 import { normalizeRaceMultiplier } from "../utils/raceConditions.js";
+import { ALR_CURRENT_TYRE_WEAR_MULTIPLIER } from "./alr/leagueRules.js";
 
 export const RACE_CONDITION_PRESET_CUSTOM_ID = "custom";
 
@@ -9,11 +10,13 @@ export const RACE_CONDITION_PRESET_CUSTOM_ID = "custom";
  * @property {number} tyreMultiplier
  * @property {number} [defaultLaps]
  * @property {string} [description]
+ * @property {boolean} [alrLeagueRule]
  */
 
 /** @type {Record<string, string>} */
 const LEGACY_FORMAT_ALIASES = {
-  alr_full_race: "full_race",
+  // Historical alias pointed at x5 Full Race. Current ALR uses x4 league rule.
+  alr_full_race: "alr_full_race",
 };
 
 /** @type {RaceConditionPreset[]} */
@@ -40,6 +43,15 @@ export const RACE_FORMATS = [
     tyreMultiplier: 2,
     defaultLaps: 10,
     description: "Short race — moderate wear",
+  },
+  {
+    id: "alr_full_race",
+    label: "ALR Full Race",
+    fuelMultiplier: 3,
+    tyreMultiplier: ALR_CURRENT_TYRE_WEAR_MULTIPLIER,
+    defaultLaps: 20,
+    alrLeagueRule: true,
+    description: `ALR current league rule — Tyre x${ALR_CURRENT_TYRE_WEAR_MULTIPLIER}, Fuel x3 (not global GT7 default)`,
   },
   {
     id: "full_race",

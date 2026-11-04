@@ -18,6 +18,13 @@ import {
   hasCachedRecommendation,
 } from "./recommendationCache.js";
 import { getAdvisorCacheVersionStamp, STRATEGY_ENGINE_VERSION } from "../data/advisorDataLayer.js";
+import {
+  estimateHeuristicTyreLife,
+  evaluateStint,
+  evaluateStrategyFeasibility,
+} from "./stintFeasibility.js";
+import { ACTIVE_PHYSICS_GENERATION } from "../data/gt7PhysicsVersion.js";
+import { getPitstopTyreEvidencePool } from "../data/pitstopStrategyEvidence.js";
 
 /** GT7 compound codes → display labels. */
 export const COMPOUND_LABELS = {
@@ -153,15 +160,12 @@ function compoundPaceIndex(code) {
 }
 
 /**
- * Estimated tyre life in laps for a compound under wear stress.
+ * Estimated tyre life in laps — low-authority heuristic only.
  *
- * Calibrated against real-world GT7 ALR race evidence:
- *   Ferrari 296 GT3 / Laguna Seca / 29 laps / tyreMultiplier x5 / tyreStress ≈ 5
- *   → Soft ≈ 10-11 laps, Medium ≈ 19-20 laps (observed by experienced drivers)
+ * FORBIDDEN: linearly converting pre-1.71 ALR x5 life into post-1.71 x4 life
+ * (e.g. 7 laps at x5 → 8.75 at x4). Physics changed nonlinearly.
  *
- * Base values represent estimated laps at tyreMultiplier x1 and neutral stress (5).
- * The wear divisor uses a square-root scaling on the multiplier so that higher
- * multipliers erode life more gently than a direct ratio — matching observed data.
+ * Prefer evaluateStint() evidence priority when empirical data exists.
  *
  * @param {string} code
  * @param {number} tyreMultiplier
@@ -173,27 +177,8 @@ function estimateTyreLife(code, tyreMultiplier, tyreStress, totalLaps) {
     return totalLaps;
   }
 
-  // Base laps at x1 / neutral stress (stress=5).
-  // Calibrated against ALR evidence:
-  //   Ferrari 296 GT3 / Laguna Seca / x5 wear / stress≈5 → S≈10-11L, M≈19-20L
-  // At x5/stress=5: divisor = sqrt(5) × 1.0 ≈ 2.236
-  //   S: 24 / 2.236 ≈ 10.7 ✓   M: 44 / 2.236 ≈ 19.7 ✓   H: 72 / 2.236 ≈ 32 (realistic)
-  const base =
-    normalizeCompoundCode(code) === "S"
-      ? 24
-      : normalizeCompoundCode(code) === "H"
-        ? 72
-        : 44;
-
-  // Stress factor: neutral stress is 5 (mid-range).  Below 5 → longer life, above → shorter.
-  const stressFactor = Math.max(0.5, tyreStress / 5);
-
-  // Multiplier scaling: sqrt gives a gentler curve than linear.
-  // At x1: sqrt(1/1)=1.  At x5: sqrt(5/1)≈2.24.  At x10: sqrt(10)≈3.16.
-  const multFactor = Math.sqrt(Math.max(1, tyreMultiplier));
-
-  const life = base / (stressFactor * multFactor);
-  return Math.max(3, Math.round(life));
+  const heuristic = estimateHeuristicTyreLife(code, tyreMultiplier, tyreStress);
+  return heuristic.estimate ?? Math.max(3, Math.round(totalLaps / 2));
 }
 
 /**
@@ -523,33 +508,51 @@ function optimisePitLaps(compounds, stops, totalLaps, tyreMultiplier, fuelMultip
 
 /**
  * Whether a compound sequence is feasible given tyre life and race distance.
- * Tyre life is a constraint not a ranking criterion.
+ * Stint feasibility is evaluated FIRST — theoretical speed ranking comes later.
  *
  * @param {string[]} compounds
  * @param {number[]} pitLaps
  * @param {number} totalLaps
  * @param {number} tyreMultiplier
  * @param {number} tyreStress
+ * @param {{ carId?: string, trackId?: string, carClass?: string, fuelMultiplier?: number }} [meta]
  */
-function isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress) {
+function isCompoundSequenceFeasible(
+  compounds,
+  pitLaps,
+  totalLaps,
+  tyreMultiplier,
+  tyreStress,
+  meta = {},
+) {
   if (tyreMultiplier === 0) {
-    return true; // no degradation constraint
+    return true;
   }
 
   const stints = buildStintsFromPlan(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress);
-  for (const stint of stints) {
-    const life = stint.estimatedTyreLife ?? totalLaps;
-    // Allow up to 40% over estimated life — model is approximate
-    if (stint.stintLength > life * 1.4) {
-      return false;
-    }
-  }
-  return true;
+  const assessment = evaluateStrategyFeasibility(
+    stints.map((stint) => ({
+      compound: stint.compoundCode,
+      stintLength: stint.stintLength,
+    })),
+    {
+      carId: meta.carId,
+      trackId: meta.trackId,
+      carClass: meta.carClass,
+      tyreWearMultiplier: tyreMultiplier,
+      fuelMultiplier: meta.fuelMultiplier,
+      physicsGeneration: ACTIVE_PHYSICS_GENERATION,
+      tyreStress,
+      evidence: getPitstopTyreEvidencePool(),
+    },
+  );
+  return assessment.feasible;
 }
 
 /**
  * Compare all viable compound combinations across feasible stop counts.
- * Tyre life is a feasibility constraint. Total estimated race time determines ranking.
+ * Stint feasibility is checked first. Total estimated race time ranks only feasible options.
+ * Two-stop strategies are not penalized merely because older engines expected one-stop.
  *
  * @param {{
  *   totalLaps: number,
@@ -557,6 +560,9 @@ function isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplie
  *   fuelMultiplier: number,
  *   tyreStress: number,
  *   combinedStress: number,
+ *   carId?: string,
+ *   trackId?: string,
+ *   carClass?: string,
  * }} context
  * @returns {StrategyCandidate[]}
  */
@@ -567,6 +573,9 @@ export function compareStrategyCandidates(context) {
     fuelMultiplier,
     tyreStress,
     combinedStress,
+    carId,
+    trackId,
+    carClass,
   } = context;
 
   /** @type {number[]} */
@@ -607,8 +616,15 @@ export function compareStrategyCandidates(context) {
         tyreStress,
       );
 
-      // Skip infeasible sequences (tyre life constraint)
-      if (!isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress)) {
+      // Skip infeasible sequences — including one-stops that cannot complete a stint
+      if (
+        !isCompoundSequenceFeasible(compounds, pitLaps, totalLaps, tyreMultiplier, tyreStress, {
+          carId,
+          trackId,
+          carClass,
+          fuelMultiplier,
+        })
+      ) {
         continue;
       }
 
@@ -946,6 +962,9 @@ function computePitstopStrategy(input = {}) {
     fuelMultiplier,
     tyreStress: wear.tyreStress,
     combinedStress: wear.combinedStress,
+    carId,
+    trackId,
+    carClass: car.class,
   });
 
   let recommendedStops = estimateStopCount(

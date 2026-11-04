@@ -5,12 +5,12 @@ import {
 } from "./gt7PhysicsVersion.js";
 
 /** Authoritative Wheel Settings engine generation — bump when calculation logic changes. */
-export const WHEEL_SETTINGS_ENGINE_VERSION = "4";
+export const WHEEL_SETTINGS_ENGINE_VERSION = "5";
 
 /** Car / track / device profile data stamps — invalidate cache when these change. */
-export const WHEEL_CAR_PROFILE_VERSION = "4";
-export const WHEEL_TRACK_PROFILE_VERSION = "4";
-export const WHEEL_DEVICE_PROFILE_VERSION = "4";
+export const WHEEL_CAR_PROFILE_VERSION = "5";
+export const WHEEL_TRACK_PROFILE_VERSION = "5";
+export const WHEEL_DEVICE_PROFILE_VERSION = "5";
 
 /** Active T598 firmware baseline for R79 wheel recommendations. */
 export const ACTIVE_T598_FIRMWARE = "3.08";

@@ -622,22 +622,43 @@ function calculateWheelSettingsUncached(input) {
 
   const finalValues = podium?.adjustedValues ?? modelValues;
 
-  // Post-podium resistance sanity for T598 — if podium re-stacked resistance, soften friction.
+  // Post-podium resistance sanity — minimum effective intervention.
+  // Prefer cutting friction first, then inertia, then damper gain — never leave
+  // High/Extreme inertia + High friction + high damper casually stacked.
   if (templateFamily === "t598") {
-    const resistance = estimateT598CombinedResistance(finalValues);
-    if (resistance > 0.72 && finalValues.friction && finalValues.friction !== "Off") {
-      const softened = { ...finalValues };
-      if (String(softened.friction) === "High") softened.friction = "Mid";
-      else if (String(softened.friction) === "Mid") softened.friction = "Low";
-      else if (String(softened.friction) === "Low") softened.friction = "Off";
-      fieldReasons.friction =
-        (fieldReasons.friction ? `${fieldReasons.friction} ` : "") +
-        "Friction lowered after whole-setup balance: combined resistance exceeded the target envelope.";
-      if (podium?.adjustedValues) {
-        podium.adjustedValues = softened;
-      } else {
-        Object.assign(finalValues, softened);
+    const softened = { ...finalValues };
+    let resistance = estimateT598CombinedResistance(softened);
+    if (resistance > 0.58) {
+      if (String(softened.friction) === "High") {
+        softened.friction = "Mid";
+        fieldReasons.friction =
+          "Friction Mid: combined resistance was too high for clear tyre information.";
+      } else if (String(softened.friction) === "Mid") {
+        softened.friction = "Low";
+        fieldReasons.friction =
+          "Friction Low: reduced artificial resistance while damper covers catchability.";
+      } else if (String(softened.friction) === "Low") {
+        softened.friction = "Off";
+        fieldReasons.friction =
+          "Friction Off: tyre detail preserved; damper already supplies stability.";
       }
+      resistance = estimateT598CombinedResistance(softened);
+    }
+    if (resistance > 0.58 && ["High", "Extreme"].includes(String(softened.inertia))) {
+      softened.inertia = "Mid";
+      fieldReasons.inertia =
+        "Inertia Mid: high mass was stacking with damper/friction and slowing corrections.";
+      resistance = estimateT598CombinedResistance(softened);
+    }
+    if (resistance > 0.58 && ["High", "Extreme"].includes(String(softened.damperGain))) {
+      softened.damperGain = "Mid";
+      fieldReasons.damperGain =
+        "Damper Gain Mid: extreme gain was masking grip transitions.";
+    }
+    if (podium?.adjustedValues) {
+      podium.adjustedValues = softened;
+    } else {
+      Object.assign(finalValues, softened);
     }
   }
 

@@ -192,38 +192,40 @@ export function calculateDesiredSteeringBehaviour(input) {
       (rotation - 0.5) * 0.1,
   );
 
-  // Resistance channels are SEPARATED — not all driven by the same stability signal.
-  // Inertia: high-speed / mass feel
+  // Resistance channels are SEPARATED — minimum effective intervention.
+  // Race-distance / wear must NOT blindly raise every resistance channel.
+  // Inertia: high-speed / mass feel only when needed
   const inertiaTarget = n(
-    0.38 +
-      (trackHighSpeed - 0.5) * 0.36 +
-      (stability - 0.5) * 0.2 +
-      (topSpeed - 0.5) * 0.16 +
-      race.raceConsistency * 0.04 -
-      (rotation - 0.5) * 0.22 -
-      (trackTechnical - 0.5) * 0.12,
+    0.28 +
+      (trackHighSpeed - 0.5) * 0.28 +
+      (stability - 0.5) * 0.12 +
+      (topSpeed - 0.5) * 0.1 +
+      race.raceConsistency * 0.02 -
+      (rotation - 0.5) * 0.26 -
+      (trackTechnical - 0.5) * 0.14 -
+      race.raceSprint * 0.04,
   );
 
-  // Friction: micro-resistance — bias toward Low, not Mid/High.
-  // resistanceDiscipline (1.71_PLUS) reduces stacking after 1.72 FFB revisions.
+  // Friction: micro-resistance — bias toward Off/Low, not Mid/High.
   const frictionTarget = n(
-    (0.28 +
-      (stability - 0.5) * 0.18 +
-      (trackKerb - 0.5) * 0.14 +
-      race.raceConsistency * 0.08 -
-      (rotation - 0.5) * 0.2 -
-      (trackTechnical - 0.5) * 0.1) /
+    (0.18 +
+      (stability - 0.5) * 0.1 +
+      (trackKerb - 0.5) * 0.08 +
+      race.raceConsistency * 0.03 -
+      (rotation - 0.5) * 0.22 -
+      (trackTechnical - 0.5) * 0.12) /
       (phys.resistanceDiscipline ?? 1),
   );
 
-  // Damping: primary oscillation / kerb channel
+  // Damping: primary oscillation / kerb channel — do not solve instability with mass alone
   const dampingTarget = n(
-    (0.36 +
-      (stability - 0.5) * 0.2 +
-      (trackKerb - 0.5) * 0.28 * phys.kerbLoad +
-      (trackLoad - 0.5) * 0.14 +
-      race.raceTyreWear * 0.08 -
-      (rotation - 0.5) * 0.16) *
+    (0.26 +
+      (stability - 0.5) * 0.14 +
+      (trackKerb - 0.5) * 0.22 * phys.kerbLoad +
+      (trackLoad - 0.5) * 0.1 +
+      race.raceTyreWear * 0.04 -
+      (rotation - 0.5) * 0.18 -
+      race.raceSprint * 0.03) *
       phys.suspensionDamping /
       (phys.resistanceDiscipline ?? 1),
   );
@@ -260,12 +262,12 @@ export function calculateDesiredSteeringBehaviour(input) {
   );
 
   const steeringForceTarget = n(
-    0.55 +
-      (race.gripIndex - 0.5) * 0.22 +
-      (trackLoad - 0.5) * 0.2 +
-      (detail - 0.5) * 0.12 +
-      (rotation - 0.5) * 0.08 -
-      race.raceFatigue * 0.06,
+    0.48 +
+      (race.gripIndex - 0.5) * 0.18 +
+      (trackLoad - 0.5) * 0.16 +
+      (detail - 0.5) * 0.1 +
+      (rotation - 0.5) * 0.06 -
+      race.raceFatigue * 0.08,
   );
 
   // Phase objectives

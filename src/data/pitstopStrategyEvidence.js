@@ -52,6 +52,38 @@ import { getPhysicsEvidenceWeight } from "./gt7PhysicsVersion.js";
 /** @type {PitstopStrategyEvidenceEntry[]} */
 export const PITSTOP_STRATEGY_EVIDENCE = [];
 
+/**
+ * Empirical tyre-stint evidence pool for feasibility.
+ * Historical ALR x5 entries remain labelled PRE_1_71 — never linearly remapped to x4.
+ *
+ * @type {import("../engine/stintFeasibility.js").TyreStintEvidence[]}
+ */
+export const PITSTOP_TYRE_STINT_EVIDENCE = [
+  {
+    carId: "ferrari_296_gt3_23",
+    trackId: "laguna_seca",
+    carClass: "Gr.3",
+    compound: "S",
+    tyreWearMultiplier: 5,
+    physicsGeneration: "PRE_1_71",
+    gameVersion: "1.70",
+    observedLifeLaps: 7,
+    lifeMin: 6,
+    lifeMax: 8,
+    endWearState: "critical",
+    limitingTyre: "RR",
+    source: "Historical ALR-era soft stint observation",
+    confidence: 0.7,
+  },
+];
+
+/**
+ * @returns {import("../engine/stintFeasibility.js").TyreStintEvidence[]}
+ */
+export function getPitstopTyreEvidencePool() {
+  return PITSTOP_TYRE_STINT_EVIDENCE;
+}
+
 /** Known / proven race strategies — update as ALR rounds are completed. */
 export const PITSTOP_PROVEN_STRATEGIES = [
   {
@@ -71,6 +103,7 @@ export const PITSTOP_PROVEN_STRATEGIES = [
     // Pre-1.71 empirical tyre evidence — keep, but weight down for current stints.
     gameVersion: "1.70",
     physicsGeneration: "PRE_1_71",
+    tyreMultiplier: 5,
   },
 ];
 

@@ -15,11 +15,12 @@
  * Soft envelope for combined resistance channels.
  * resistanceBudget ≈ 0.35·inertia + 0.30·friction + 0.35·damping
  */
-const RESISTANCE_MAX = 0.62;
-const RESISTANCE_MIN = 0.22;
-const RESPONSE_MIN = 0.38;
-const STABILITY_MIN = 0.32;
-const DIRECTION_CHANGE_MIN = 0.34;
+/** Tighter envelope — high inertia+friction+damper must be unusual. */
+const RESISTANCE_MAX = 0.52;
+const RESISTANCE_MIN = 0.16;
+const RESPONSE_MIN = 0.4;
+const STABILITY_MIN = 0.3;
+const DIRECTION_CHANGE_MIN = 0.36;
 
 /**
  * Apply whole-setup balance corrections to desired behaviour targets.
@@ -113,16 +114,16 @@ export function applyWholeSetupBalance(desired) {
 
   if (resistanceAfterStack < RESISTANCE_MIN && out.stabilityTarget >= STABILITY_MIN) {
     const deficit = RESISTANCE_MIN - resistanceAfterStack;
-    // Prefer damper as primary catchability channel
-    const damperBoost = Math.min(0.18, deficit * 1.3);
-    const afterDamper = Math.min(0.72, out.dampingTarget + damperBoost);
+    // Minimum effective intervention — small damper nudge only
+    const damperBoost = Math.min(0.1, deficit * 0.9);
+    const afterDamper = Math.min(0.55, out.dampingTarget + damperBoost);
     if (afterDamper !== out.dampingTarget) {
       corrections.push({
         channel: "dampingTarget",
         from: out.dampingTarget,
         to: afterDamper,
         reason:
-          "Raised damper to prevent an overly light / nervous setup while keeping friction low.",
+          "Small damper increase for minimum catchability — friction and inertia left low to preserve detail.",
       });
       out.dampingTarget = afterDamper;
     }
@@ -158,14 +159,15 @@ export function applyWholeSetupBalance(desired) {
 
   // ── Stability floor (high-speed / high stability demand) ────────────────
   if (out.stabilityTarget < STABILITY_MIN && desired.stabilityTarget >= 0.45) {
-    // Original desire was high but balance may have eroded it — restore softly via damper
-    const afterDamper = Math.min(0.7, Math.max(out.dampingTarget, 0.28));
+    // Soft restore — do not solve instability by stacking resistance
+    const afterDamper = Math.min(0.52, Math.max(out.dampingTarget, 0.22));
     if (afterDamper > out.dampingTarget) {
       corrections.push({
         channel: "dampingTarget",
         from: out.dampingTarget,
         to: afterDamper,
-        reason: "Restored minimum damping for high-speed stability without stacking all resistance channels.",
+        reason:
+          "Restored minimum damping for high-speed confidence without raising friction or inertia.",
       });
       out.dampingTarget = afterDamper;
     }

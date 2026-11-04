@@ -20,9 +20,9 @@ import { getGt7SnapshotCacheStamp } from "./gt7/snapshotMetadata.js";
 
 /** @typedef {'CURRENT' | 'HISTORICAL' | 'COMMUNITY' | 'MODELLED' | 'UNKNOWN'} EvidenceSourceType */
 
-export const ADVISOR_ENGINE_VERSION = "3.2.0";
-export const STRATEGY_ENGINE_VERSION = "2.1.0";
-export const ADVISOR_DATA_LAYER_VERSION = "3.2.0"; // GT7 1.72 / 1.71_PLUS intelligence recalibration — 2026-11-04
+export const ADVISOR_ENGINE_VERSION = "3.2.1";
+export const STRATEGY_ENGINE_VERSION = "2.2.0";
+export const ADVISOR_DATA_LAYER_VERSION = "3.2.1"; // Tyre feasibility + wheel min-intervention — 2026-11-04
 
 export const R79_ACTIVE_GT7_BASELINE = {
   gt7Version: ACTIVE_GT7_GAME_VERSION,
